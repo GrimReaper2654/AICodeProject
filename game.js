@@ -1015,8 +1015,6 @@ const data = {
     }
 };
 
-
-
 var projectiles = [];
 var particles = [];
 var entities = [];
