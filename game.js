@@ -478,16 +478,8 @@ function raySegmentIntersection(pointIn, segmentIn) {
     let segment = {start: vMath(segmentIn.start, 1.1, 'multiply'), end: vMath(segmentIn.end, 1.1, 'multiply')};
     let A1 = adjustAngle(correctAngle(aim(point, segment.start)));
     let A2 = adjustAngle(correctAngle(aim(point, segment.end)));
-    if ((A1 >= 0 && A2 <= 0 || A2 >= 0 && A1 <= 0) && Math.abs(A1) + Math.abs(A2) < Math.PI) { //
-        console.log('y');
-        console.log(point,segment);
-        console.log(A1/Math.PI*180, A2/Math.PI*180);
+    if ((A1 >= 0 && A2 <= 0 || A2 >= 0 && A1 <= 0) && Math.abs(A1) + Math.abs(A2) < Math.PI) {
         return true;
-    }
-    if ((segment.start.x < point.x && point.x < segment.end.x || segment.start.x > point.x && point.x > segment.end.x) ) { //&& point.y < segment.start.y && point.y < segment.end.y
-        console.log('n');
-        console.log(point,segment);
-        console.log(A1/Math.PI*180, A2/Math.PI*180);
     }
     return false;
 };
@@ -538,9 +530,10 @@ const data = {
         vr: 180 / 60 / 180 * Math.PI, // rotation of tracks (feet)
         tr: 360 / 60 / 180 * Math.PI, // rotation of turret (main body)
         keyboard: [],
-        aimPos: {x: 0, y: 1},
+        aimPos: {x: 69, y: 69},
         collisionR: 150,
         directControl: false,
+        type: 'mech',
         parts: [
             {
                 id: 'LowerBodyContainer',
@@ -917,6 +910,191 @@ const data = {
             },
         ],
     },
+    tank: {
+        x: 0,
+        y: 0,
+        r: 0, // direction of motion
+        vx: 0,
+        vy: 0,
+        mouseR: 0, // current Aim
+        v: 1.5, // normal walking speed
+        vr: 90 / 60 / 180 * Math.PI, // rotation of tracks (feet)
+        tr: 180 / 60 / 180 * Math.PI, // rotation of turret (main body)
+        keyboard: [],
+        aimPos: {x: 69, y: 69},
+        collisionR: 140,
+        directControl: false,
+        type: 'tank',
+        parts: [
+            {
+                id: 'mainBodyContainer',
+                facing: 'body',
+                type: 'polygon', 
+                rOffset: 0,
+                size: [
+                    {x: -90, y: -100},
+                    {x: 90, y: -100},
+                    {x: 90, y: 100},
+                    {x: -90, y: 100},
+                ],
+                offset: {x: 0, y: 0},
+                style: {
+                    fill: 'rgba(210, 210, 210, 1)',
+                    stroke: {colour: '#696969', width: 10},
+                },
+                collision: true,
+                hp: 20000,
+                isHit: 0,
+                connected: [
+                    {
+                        id: 'tracks1',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -15, y: 130},
+                            {x: 15, y: 130},
+                            {x: 25, y: 120},
+                            {x: 25, y: -120},
+                            {x: 15, y: -130},
+                            {x: -15, y: -130},
+                            {x: -25, y: -120},
+                            {x: -25, y: 120},
+                        ],
+                        offset: {x: -90, y: 0},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 10},
+                        },
+                        collision: false,
+                        hp: Infinity,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: true,
+                    },
+                    {
+                        id: 'tracks2',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -15, y: 130},
+                            {x: 15, y: 130},
+                            {x: 25, y: 120},
+                            {x: 25, y: -120},
+                            {x: 15, y: -130},
+                            {x: -15, y: -130},
+                            {x: -25, y: -120},
+                            {x: -25, y: 120},
+                        ],
+                        offset: {x: 90, y: 0},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 10},
+                        },
+                        collision: false,
+                        hp: Infinity,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: true,
+                    },
+                ],
+            },
+            {
+                id: 'turretBody',
+                facing: 'turret',
+                type: 'polygon', 
+                rOffset: 0,
+                size: [
+                    {x: -50, y: 60},
+                    {x: 50, y: 60},
+                    {x: 50, y: -45},
+                    {x: 25, y: -70},
+                    {x: -25, y: -70},
+                    {x: -50, y: -45},
+                ],
+                offset: {x: 0, y: 0},
+                style: {
+                    fill: 'rgba(210, 210, 210, 1)',
+                    stroke: {colour: '#696969', width: 10},
+                },
+                collision: false,
+                hp: Infinity,
+                isHit: 0,
+                connected: [
+                    {
+                        id: 'turretBarrel',
+                        facing: 'turret',
+                        type: 'polygon', 
+                        rOffset: 0,
+                        size: [
+                            {x: -12, y: 100},
+                            {x: -12, y: 0},
+                            {x: 12, y: 0},
+                            {x: 12, y: 100},
+                        ],
+                        offset: {x: 0, y: -170},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 10},
+                        },
+                        collision: false,
+                        hp: Infinity,
+                        isHit: 0,
+                        connected: [],
+                    },
+                    {
+                        id: 'tankCannon',
+                        facing: 'turret',
+                        type: 'polygon', 
+                        rOffset: 0,
+                        size: [
+                            {x: -15, y: 30},
+                            {x: -15, y: 0},
+                            {x: 15, y: 0},
+                            {x: 15, y: 30},
+                        ],
+                        offset: {x: 0, y: -200},
+                        style: {
+                            fill: 'rgba(150, 150, 150, 1)',
+                            stroke: {colour: '#696969', width: 10},
+                        },
+                        cannon: {
+                            keybind: 'click',
+                            x: 0,
+                            y: 0,
+                            reload: {c: 0, t: 90},
+                            spread: Math.PI/96,
+                            bullet: {
+                                type: 'circle', 
+                                size: 12,
+                                style: {
+                                    fill: {r: 100, g: 100, b: 100, a: 1},
+                                    stroke: {colour: {r: 69, g: 69, b: 69, a: 1}, width: 3},
+                                },
+                                decay: {
+                                    life: 150, 
+                                    fillStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                                    strokeStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                                    size: 1
+                                },
+                                dmg: 1000,
+                                v: 30,
+                                vDrag: 0.99,
+                                vr: 0,
+                                rDrag: 0,
+                                friendly: true,
+                            },
+                        },
+                        collision: false,
+                        hp: Infinity,
+                        isHit: 0,
+                        connected: [],
+                    },
+                ],
+            }
+        ],
+    },
     template: {
         physics: {
             x: 0,     // x coordinate
@@ -1290,6 +1468,54 @@ const data = {
                 isHit: 0,
                 connected: [],
             },
+            tankCannon: {
+                id: 'tankCannon',
+                facing: 'turret',
+                type: 'polygon', 
+                rOffset: 0,
+                size: [
+                    {x: -15, y: 30},
+                    {x: -15, y: 0},
+                    {x: 15, y: 0},
+                    {x: 15, y: 30},
+                ],
+                offset: {x: 0, y: -200},
+                style: {
+                    fill: 'rgba(150, 150, 150, 1)',
+                    stroke: {colour: '#696969', width: 10},
+                },
+                cannon: {
+                    keybind: 'click',
+                    x: 0,
+                    y: 0,
+                    reload: {c: 0, t: 90},
+                    spread: Math.PI/96,
+                    bullet: {
+                        type: 'circle', 
+                        size: 12,
+                        style: {
+                            fill: {r: 100, g: 100, b: 100, a: 1},
+                            stroke: {colour: {r: 69, g: 69, b: 69, a: 1}, width: 3},
+                        },
+                        decay: {
+                            life: 150, 
+                            fillStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                            strokeStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                            size: 1
+                        },
+                        dmg: 1000,
+                        v: 30,
+                        vDrag: 0.99,
+                        vr: 0,
+                        rDrag: 0,
+                        friendly: true,
+                    },
+                },
+                collision: false,
+                hp: Infinity,
+                isHit: 0,
+                connected: [],
+            },
         },
     }
 };
@@ -1310,7 +1536,7 @@ if (savedPlayer !== null) {
     console.log('no save found, creating new player');
     player = JSON.parse(JSON.stringify(data.mech));
     player.x += 500;
-    entities.push(JSON.parse(JSON.stringify(player)));
+    entities.push(JSON.parse(JSON.stringify(data.tank)));
     player.x += 500;
     entities.push(JSON.parse(JSON.stringify(player)));
     player.x += 500;
