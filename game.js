@@ -131,6 +131,13 @@ function correctAngle(a) {
     return a;
 };
 
+function adjustAngle(a) {
+    if (a > Math.PI) {
+        a -= 2*Math.PI;
+    }
+    return a;
+};
+
 function rotateAngle(r, rTarget, increment) {
     if (Math.abs(r) > Math.PI*4 || Math.abs(rTarget) > Math.PI*4) {
         throw "Error: You f*cked up the angle thing again...";
@@ -466,40 +473,39 @@ function normalDistribution(mean, sDiv) {
     return mean + z * sDiv;
 };
 
-function raySegmentIntersection(ray, segment) {
-    console.log(ray, segment);
-    if (segment.start.x > segment.end.x) {
-        console.log('invert');
-        let s = JSON.parse(JSON.stringify(segment.start));
-        let e = JSON.parse(JSON.stringify(segment.end));
-        segment.start = e;
-        segment.end = s;
-    }
-    console.log(segment);
-    if (ray.x < segment.start.x || ray.x > segment.end.x || ray.y > segment.end.y) {
-        console.log('no');
-        return false;
-    }
-    let diff = {x: segment.start.x - segment.end.x, y: segment.start.y - segment.end.y};
-    if (((ray.x - segment.start.x) / diff.x ) * diff.y + segment.start.y > ray.y) {
-        console.log('yes');
+function raySegmentIntersection(pointIn, segmentIn) {
+    let point = vMath(pointIn, 1.1, 'multiply');
+    let segment = {start: vMath(segmentIn.start, 1.1, 'multiply'), end: vMath(segmentIn.end, 1.1, 'multiply')};
+    let A1 = adjustAngle(correctAngle(aim(point, segment.start)));
+    let A2 = adjustAngle(correctAngle(aim(point, segment.end)));
+    if ((A1 >= 0 && A2 <= 0 || A2 >= 0 && A1 <= 0) && Math.abs(A1) + Math.abs(A2) < Math.PI) { //
+        console.log('y');
+        console.log(point,segment);
+        console.log(A1/Math.PI*180, A2/Math.PI*180);
         return true;
     }
-    console.log('no');
+    if ((segment.start.x < point.x && point.x < segment.end.x || segment.start.x > point.x && point.x > segment.end.x) ) { //&& point.y < segment.start.y && point.y < segment.end.y
+        console.log('n');
+        console.log(point,segment);
+        console.log(A1/Math.PI*180, A2/Math.PI*180);
+    }
     return false;
 };
 
 function pointInPolygon(point, polygon) {
     let inside = false;
+    let cnt = 0;
     if (raySegmentIntersection(point, {start: polygon[0], end: polygon[polygon.length-1]})) {
         inside = !inside;
+        cnt++;
     }
-    for (let i = 1; i < polygon.length-1; i++) {
+    for (let i = 0; i < polygon.length-1; i++) {
         if (raySegmentIntersection(point, {start: polygon[i], end: polygon[i+1]})) {
             inside = !inside;
+            cnt++;
         }
     }
-    //console.log(inside);
+    console.log(cnt);
     return inside;
 };
 
@@ -520,7 +526,7 @@ function vMath(v1, v2, mode) {
 
 // The return of the excessively overcomplicated data storage system
 const data = {
-   mech: {
+    mech: {
         x: 0,
         y: 0,
         r: 0, // direction of motion
@@ -532,8 +538,8 @@ const data = {
         vr: 180 / 60 / 180 * Math.PI, // rotation of tracks (feet)
         tr: 360 / 60 / 180 * Math.PI, // rotation of turret (main body)
         keyboard: [],
-        aimPos: {x: 69, y: 69},
-        collisionR: 0,
+        aimPos: {x: 0, y: 1},
+        collisionR: 150,
         directControl: false,
         parts: [
             {
@@ -671,60 +677,138 @@ const data = {
                         isHit: 0,
                         connected: [
                             {
-                                id: 'gunLeft',
+                                id: 'GattlingGunContainer',
                                 facing: 'turret',
                                 type: 'polygon', 
                                 rOffset: 0,
                                 size: [
-                                    {x: -30, y: -30},
-                                    {x: 30, y: -30},
-                                    {x: 10, y: 0},
-                                    {x: -10, y: 0},
+                                    {x: -30, y: 0},
+                                    {x: 30, y: 0},
+                                    {x: 30, y: 20},
+                                    {x: -30, y: 20},
                                 ],
-                                offset: {x: -100, y: -70},
+                                offset: {x: -100, y: -90},
                                 style: {
                                     fill: 'rgba(150, 150, 150, 1)',
                                     stroke: {colour: '#696969', width: 5},
                                 },
-                                cannon: {
-                                    keybind: '1',
-                                    x: 0,
-                                    y: -40,
-                                    reload: {c: 0, t: 5},
-                                    spread: Math.PI/24,
-                                    bullet: {
-                                        type: 'polygon', 
-                                        size: [
-                                            {x: 0, y: 5*4},
-                                            {x: -1.299*4, y: 0.75*4},
-                                            {x: -4.330*4, y: -2.5*4},
-                                            {x: 0, y: -1.5*4},
-                                            {x: 4.330*4, y: -2.5*4},
-                                            {x: 1.299*4, y: 0.75*4}
-                                        ],
-                                        style: {
-                                            fill: {r: 255, g: 100, b: 50, a: 1},
-                                            stroke: {colour: {r: 255, g: 0, b: 0, a: 1}, width: 3},
-                                        },
-                                        decay: {
-                                            life: 600, 
-                                            fillStyle: {r: -0.1, g: 0, b: 0, a: 0}, 
-                                            strokeStyle: {r: -0.1, g: 0, b: 0, a: 0}, 
-                                            size: 1.0005
-                                        },
-                                        dmg: 100,
-                                        v: 20,
-                                        vDrag: 0.97,
-                                        vr: Math.PI/20,
-                                        rDrag: 0.98,
-                                    },
-                                },
                                 collision: false,
                                 hp: Infinity,
                                 isHit: 0,
-                                connected: [],
+                                connected: [
+                                    {
+                                        id: 'GattlingGunBarrel1',
+                                        facing: 'turret',
+                                        type: 'polygon', 
+                                        rOffset: 0,
+                                        size: [
+                                            {x: -10, y: 0},
+                                            {x: 10, y: 0},
+                                            {x: 10, y: 100},
+                                            {x: -10, y: 100},
+                                        ],
+                                        offset: {x: -85, y: -190},
+                                        style: {
+                                            fill: 'rgba(150, 150, 150, 1)',
+                                            stroke: {colour: '#696969', width: 5},
+                                        },
+                                        collision: false,
+                                        hp: Infinity,
+                                        isHit: 0,
+                                        connected: [],
+                                    },
+                                    {
+                                        id: 'GattlingGunBarrel2',
+                                        facing: 'turret',
+                                        type: 'polygon', 
+                                        rOffset: 0,
+                                        size: [
+                                            {x: -10, y: 0},
+                                            {x: 10, y: 0},
+                                            {x: 10, y: 100},
+                                            {x: -10, y: 100},
+                                        ],
+                                        offset: {x: -115, y: -190},
+                                        style: {
+                                            fill: 'rgba(150, 150, 150, 1)',
+                                            stroke: {colour: '#696969', width: 5},
+                                        },
+                                        collision: false,
+                                        hp: Infinity,
+                                        isHit: 0,
+                                        connected: [],
+                                    },
+                                    {
+                                        id: 'GattlingGunMainBarrel',
+                                        facing: 'turret',
+                                        type: 'polygon', 
+                                        rOffset: 0,
+                                        size: [
+                                            {x: -10, y: 0},
+                                            {x: 10, y: 0},
+                                            {x: 10, y: 110},
+                                            {x: -10, y: 110},
+                                        ],
+                                        offset: {x: -100, y: -200},
+                                        style: {
+                                            fill: 'rgba(150, 150, 150, 1)',
+                                            stroke: {colour: '#696969', width: 5},
+                                        },
+                                        cannon: {
+                                            keybind: 'click',
+                                            x: 0,
+                                            y: 0,
+                                            reload: {c: 0, t: 1},
+                                            spread: Math.PI/24,
+                                            bullet: {
+                                                type: 'circle', 
+                                                size: 5,
+                                                style: {
+                                                    fill: {r: 100, g: 100, b: 100, a: 1},
+                                                    stroke: {colour: {r: 69, g: 69, b: 69, a: 1}, width: 2},
+                                                },
+                                                decay: {
+                                                    life: 100, 
+                                                    fillStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                                                    strokeStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                                                    size: 1
+                                                },
+                                                dmg: 20,
+                                                v: 25,
+                                                vDrag: 0.99,
+                                                vr: 0,
+                                                rDrag: 0,
+                                                friendly: true,
+                                            },
+                                        },
+                                        collision: false,
+                                        hp: Infinity,
+                                        isHit: 0,
+                                        connected: [],
+                                    },
+                                    {
+                                        id: 'GattlingGunPart',
+                                        facing: 'turret',
+                                        type: 'polygon', 
+                                        rOffset: 0,
+                                        size: [
+                                            {x: -30, y: 0},
+                                            {x: 30, y: 0},
+                                            {x: 30, y: 10},
+                                            {x: -30, y: 10},
+                                        ],
+                                        offset: {x: -100, y: -150},
+                                        style: {
+                                            fill: 'rgba(150, 150, 150, 1)',
+                                            stroke: {colour: '#696969', width: 5},
+                                        },
+                                        collision: false,
+                                        hp: Infinity,
+                                        isHit: 0,
+                                        connected: [],
+                                    },
+                                ],
                             },
-                            
                         ],
                     },
                     {
@@ -863,93 +947,187 @@ const data = {
                 size: 1 // multiply size by this
             }
         },
-        parts: {
-            mechFoot: {
-                id: 'defaultFoot',
-                type: 'polygon', 
-                facing: 'body',
-                rOffset: 0,
-                size: [
-                    {x: -10, y: 60},
-                    {x: 10, y: 60},
-                    {x: 15, y: 50},
-                    {x: 15, y: -50},
-                    {x: 10, y: -60},
-                    {x: -10, y: -60},
-                    {x: -15, y: -50},
-                    {x: -15, y: 50},
-                ],
-                offset: {x: 0, y: -5},
-                style: {
-                    fill: 'rgba(130, 130, 130, 1)',
-                    stroke: {colour: '#696969', width: 5},
-                },
-                collision: false,
-                hp: Infinity,
-                connected: [],
-            },
-            MechLowerBody: {
-                id: 'lowerBody',
-                facing: 'body',
-                type: 'circle', 
-                rOffset: 0,
-                size: 35,
-                offset: {x: 0, y: 0},
-                style: {
-                    fill: 'rgba(140, 140, 140, 1)',
-                    stroke: {colour: '#696969', width: 5},
-                },
-                collision: false,
-                hp: Infinity,
-                connected: [],
-            },
-            defaultMechMainBody: {
-                id: 'mainBody',
+        weapons: {
+            debugWeapon: {
+                id: 'debugWeapon',
                 facing: 'turret',
                 type: 'polygon', 
                 rOffset: 0,
                 size: [
-                    {x: -60, y: 40},
-                    {x: 60, y: 40},
-                    {x: 70, y: 30},
-                    {x: 70, y: -30},
-                    {x: 60, y: -40},
-                    {x: -60, y: -40},
-                    {x: -70, y: -30},
-                    {x: -70, y: 30},
+                    {x: -10, y: 0},
+                    {x: 10, y: 0},
+                    {x: 10, y: 30},
+                    {x: -10, y: 30},
                 ],
-                offset: {x: 0, y: 0},
+                offset: {x: 0, y: -100},
                 style: {
-                    fill: 'rgba(210, 210, 210, 1)',
-                    stroke: {colour: '#696969', width: 10},
+                    fill: 'rgba(150, 150, 150, 1)',
+                    stroke: {colour: '#696969', width: 5},
                 },
-                collision: true,
-                hp: 5000,
+                cannon: {
+                    keybind: 'click',
+                    x: 0,
+                    y: 0,
+                    reload: {c: 0, t: 6},
+                    spread: 0,
+                    bullet: {
+                        type: 'circle', 
+                        size: 8,
+                        style: {
+                            fill: {r: 100, g: 100, b: 100, a: 1},
+                            stroke: {colour: {r: 69, g: 69, b: 69, a: 1}, width: 3},
+                        },
+                        decay: {
+                            life: 999999999, 
+                            fillStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                            strokeStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                            size: 1
+                        },
+                        dmg: 1,
+                        v: 0,
+                        vr: 0,
+                        vDrag: 0.99,
+                        rDrag: 0,
+                        friendly: true,
+                    },
+                },
+                collision: false,
+                hp: Infinity,
+                isHit: 0,
                 connected: [],
             },
-            defaultMechArm: {
-                id: 'defaultArm',
+            mechGattlingGun: {
+                id: 'GattlingGunContainer',
                 facing: 'turret',
                 type: 'polygon', 
                 rOffset: 0,
                 size: [
-                    {x: -20, y: 50},
-                    {x: 20, y: 50},
-                    {x: 25, y: 40},
-                    {x: 25, y: -60},
-                    {x: 20, y: -70},
-                    {x: -20, y: -70},
-                    {x: -25, y: -60},
-                    {x: -25, y: 40},
+                    {x: -30, y: 0},
+                    {x: 30, y: 0},
+                    {x: 30, y: 20},
+                    {x: -30, y: 20},
                 ],
-                offset: {x: 0, y: 0},
+                offset: {x: 0, y: -90},
                 style: {
-                    fill: 'rgba(200, 200, 200, 1)',
-                    stroke: {colour: '#696969', width: 10},
+                    fill: 'rgba(150, 150, 150, 1)',
+                    stroke: {colour: '#696969', width: 5},
                 },
-                collision: true,
-                hp: 3000,
-                connected: [],
+                collision: false,
+                hp: Infinity,
+                isHit: 0,
+                connected: [
+                    {
+                        id: 'GattlingGunBarrel1',
+                        facing: 'turret',
+                        type: 'polygon', 
+                        rOffset: 0,
+                        size: [
+                            {x: -10, y: 0},
+                            {x: 10, y: 0},
+                            {x: 10, y: 100},
+                            {x: -10, y: 100},
+                        ],
+                        offset: {x: 15, y: -190},
+                        style: {
+                            fill: 'rgba(150, 150, 150, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: false,
+                        hp: Infinity,
+                        isHit: 0,
+                        connected: [],
+                    },
+                    {
+                        id: 'GattlingGunBarrel2',
+                        facing: 'turret',
+                        type: 'polygon', 
+                        rOffset: 0,
+                        size: [
+                            {x: -10, y: 0},
+                            {x: 10, y: 0},
+                            {x: 10, y: 100},
+                            {x: -10, y: 100},
+                        ],
+                        offset: {x: -15, y: -190},
+                        style: {
+                            fill: 'rgba(150, 150, 150, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: false,
+                        hp: Infinity,
+                        isHit: 0,
+                        connected: [],
+                    },
+                    {
+                        id: 'GattlingGunMainBarrel',
+                        facing: 'turret',
+                        type: 'polygon', 
+                        rOffset: 0,
+                        size: [
+                            {x: -10, y: 0},
+                            {x: 10, y: 0},
+                            {x: 10, y: 110},
+                            {x: -10, y: 110},
+                        ],
+                        offset: {x: 0, y: -200},
+                        style: {
+                            fill: 'rgba(150, 150, 150, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        cannon: {
+                            keybind: 'click',
+                            x: 0,
+                            y: 0,
+                            reload: {c: 0, t: 1},
+                            spread: Math.PI/24,
+                            bullet: {
+                                type: 'circle', 
+                                size: 5,
+                                style: {
+                                    fill: {r: 100, g: 100, b: 100, a: 1},
+                                    stroke: {colour: {r: 69, g: 69, b: 69, a: 1}, width: 2},
+                                },
+                                decay: {
+                                    life: 100, 
+                                    fillStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                                    strokeStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                                    size: 1
+                                },
+                                dmg: 20,
+                                v: 25,
+                                vDrag: 0.99,
+                                vr: 0,
+                                rDrag: 0,
+                                friendly: true,
+                            },
+                        },
+                        collision: false,
+                        hp: Infinity,
+                        isHit: 0,
+                        connected: [],
+                    },
+                    {
+                        id: 'GattlingGunPart',
+                        facing: 'turret',
+                        type: 'polygon', 
+                        rOffset: 0,
+                        size: [
+                            {x: -30, y: 0},
+                            {x: 30, y: 0},
+                            {x: 30, y: 10},
+                            {x: -30, y: 10},
+                        ],
+                        offset: {x: 0, y: -150},
+                        style: {
+                            fill: 'rgba(150, 150, 150, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: false,
+                        hp: Infinity,
+                        isHit: 0,
+                        connected: [],
+                    },
+                ],
             },
             mechMachineGun: {
                 id: 'defaultMachineGun',
@@ -988,27 +1166,128 @@ const data = {
                         },
                         dmg: 100,
                         v: 20,
-                        rDrag: 0.99,
+                        vDrag: 0.99,
+                        vr: 0,
+                        rDrag: 0,
                         friendly: true,
                     },
                 },
                 collision: false,
                 hp: Infinity,
+                isHit: 0,
                 connected: [],
             },
-            defaultHead: {
-                id: 'defaultHead',
+            mechSpikeLauncher: {
+                id: 'spikeLauncher',
                 facing: 'turret',
-                type: 'circle', 
+                type: 'polygon', 
                 rOffset: 0,
-                size: 25,
-                offset: {x: 0, y: 0},
+                size: [
+                    {x: -30, y: -30},
+                    {x: 30, y: -30},
+                    {x: 10, y: 0},
+                    {x: -10, y: 0},
+                ],
+                offset: {x: -100, y: -70},
                 style: {
-                    fill: 'rgba(69, 69, 69, 1)',
+                    fill: 'rgba(150, 150, 150, 1)',
                     stroke: {colour: '#696969', width: 5},
+                },
+                cannon: {
+                    keybind: '1',
+                    x: 0,
+                    y: -40,
+                    reload: {c: 0, t: 5},
+                    spread: Math.PI/24,
+                    bullet: {
+                        type: 'polygon', 
+                        size: [
+                            {x: 0, y: 5*4},
+                            {x: -1.299*4, y: 0.75*4},
+                            {x: -4.330*4, y: -2.5*4},
+                            {x: 0, y: -1.5*4},
+                            {x: 4.330*4, y: -2.5*4},
+                            {x: 1.299*4, y: 0.75*4}
+                        ],
+                        style: {
+                            fill: {r: 255, g: 100, b: 50, a: 1},
+                            stroke: {colour: {r: 255, g: 0, b: 0, a: 1}, width: 3},
+                        },
+                        decay: {
+                            life: 600, 
+                            fillStyle: {r: -0.1, g: 0, b: 0, a: 0}, 
+                            strokeStyle: {r: -0.1, g: 0, b: 0, a: 0}, 
+                            size: 1.0005
+                        },
+                        dmg: 100,
+                        v: 20,
+                        vDrag: 0.97,
+                        vr: Math.PI/20,
+                        rDrag: 0.98,
+                    },
                 },
                 collision: false,
                 hp: Infinity,
+                isHit: 0,
+                connected: [],
+            },
+            mechEnergySword: {
+                id: 'energySword',
+                facing: 'turret',
+                type: 'polygon', 
+                rOffset: Math.PI,
+                size: [
+                    {x: -25, y: 25},
+                    {x: 25, y: 25},
+                    {x: 20, y: 0},
+                    {x: -20, y: 0},
+                ],
+                offset: {x: 100, y: -70},
+                style: {
+                    fill: 'rgba(150, 150, 150, 1)',
+                    stroke: {colour: '#696969', width: 5},
+                },
+                cannon: {
+                    keybind: 'click',
+                    x: 0,
+                    y: 25,
+                    reload: {c: 0, t: 0},
+                    spread: 0,
+                    bullet: {
+                        type: 'polygon', 
+                        size: [
+                            {x: -25, y: 0},
+                            {x: -15, y: 15},
+                            {x: -15, y: 30},
+                            {x: -20, y: 35},
+                            {x: -25, y: 200},
+                            {x: 0, y: 250},
+                            {x: 25, y: 200},
+                            {x: 20, y: 35},
+                            {x: 15, y: 30},
+                            {x: 15, y: 15},
+                            {x: 25, y: 0},
+                        ],
+                        style: {
+                            fill: {r: 50, g: 200, b: 255, a: 0.3},
+                            stroke: {colour: {r: 50, g: 200, b: 255, a: 0.3}, width: 5},
+                        },
+                        decay: {
+                            life: 5, 
+                            fillStyle: {r: 0, g: 0, b: 0, a: -0.05}, 
+                            strokeStyle: {r: 0, g: 0, b: 0, a: -0.05}, 
+                            size: 1
+                        },
+                        dmg: 1000,
+                        v: -1,
+                        vDrag: 1,
+                        vr: 0,
+                        rDrag: 1,
+                    },
+                },
+                collision: false,
+                hp: Infinity,
+                isHit: 0,
                 connected: [],
             },
         },
@@ -1162,14 +1441,17 @@ function handlePlayerMotion(unit) {
 };
 
 function polygonCollision(polygon1, polygon2) {
-    let collided = false;
     for (let i = 0; i < polygon1.length; i++) {
         if (pointInPolygon(polygon1[i], polygon2)) {
-            collided = true;
-            break;
+            return true;
         }
     }
-    return collided;
+    for (let i = 0; i < polygon2.length; i++) {
+        if (pointInPolygon(polygon2[i], polygon1)) {
+            return true;
+        }
+    }
+    return false;
 };
 
 function simulatePhysics(objects) {
@@ -1260,8 +1542,6 @@ function shoot(unit, part) {
                 bullet.r = facing + part.rOffset;
                 bullet.vr = part.cannon.bullet.vr;
                 bullet.rDrag = part.cannon.bullet.rDrag;
-                console.log(bullet);
-                console.log(part.cannon);
                 projectiles.push(bullet);
             }
         }
@@ -1310,8 +1590,11 @@ function recursiveColision(unit, pts, proj) {
         if (parts[i].collision) {
             let collide = false;
             if (parts[i].type == 'polygon') {
-                let points = offsetPoints(offsetPoints(JSON.parse(JSON.stringify(parts[i].size)), parts[i].offset), unit);
-                //console.log(points);
+                let facing = unit.r;
+                if (parts[i].facing == 'turret') {
+                    facing = unit.mouseR;
+                }
+                let points = offsetPoints(rotatePolygon(offsetPoints(JSON.parse(JSON.stringify(parts[i].size)), parts[i].offset), facing), unit);
                 if (pointInPolygon(projectile, points)) {
                     collide = true;
                 }
@@ -1359,7 +1642,6 @@ function main() {
     clearCanvas('main');
     clearCanvas('canvasOverlay');
     grid(200);
-    /*
     const points = [
         {x: 100, y: 100},
         {x: 200, y: 50},
@@ -1378,7 +1660,6 @@ function main() {
     ];
     drawPolygon(points2, {x: 0, y: 0}, Math.PI/4, 'rgba(255, 0, 0, 0.75)', {colour: '#696969', width: 10}, false);
     drawPolygon(points2, {x: 0, y: 0}, false, 'rgba(0, 255, 0, 0.5)', {colour: '#696969', width: 10}, false);
-    */
     const square = [
         {x: 0, y: 0},
         {x: 100, y: 0},
@@ -1386,9 +1667,6 @@ function main() {
         {x: 0, y: 100}
     ];
     drawPolygon(square, {x: 0, y: 0}, false, 'rgba(0, 0, 255, 0.5)', {colour: '#696969', width: 10}, false);
-    drawPolygon(square, {x: 100, y: 100}, Math.PI/4, 'rgba(255, 0, 0, 0.75)', {colour: '#696969', width: 10}, false);
-    drawPolygon(square, {x: 100, y: 100}, false, 'rgba(0, 255, 0, 0.5)', {colour: '#696969', width: 10}, false);
-    
 
     let res = handleColisions(entities, projectiles);
     entities = res[0];
