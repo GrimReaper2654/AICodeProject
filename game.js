@@ -1096,6 +1096,98 @@ const data = {
             }
         ],
     },
+    drone: {
+        x: 0,
+        y: 0,
+        r: 0, // direction of motion
+        vx: 0,
+        vy: 0,
+        mouseR: 0, // current Aim
+        v: 15, // top speed
+        tr: 360 / 60 / 180 * Math.PI, // rotation of turret (main body)
+        keyboard: [],
+        aimPos: {x: 69, y: 69},
+        collisionR: 120,
+        isMoving: false,
+        directControl: false,
+        type: 'drone',
+        parts: [
+            {
+                id: 'mainBodyContainer',
+                facing: 'turret',
+                type: 'polygon', 
+                rOffset: 0,
+                size: [
+                    {x: -75, y: -75},
+                    {x: 75, y: -75},
+                    {x: 75, y: 75},
+                    {x: -75, y: 75},
+                ],
+                offset: {x: 0, y: 0},
+                style: {
+                    fill: 'rgba(210, 210, 210, 1)',
+                    stroke: {colour: '#696969', width: 10},
+                },
+                collision: true,
+                hp: 1000,
+                isHit: 0,
+                connected: [
+                    {
+                        id: 'defaultSniper',
+                        facing: 'turret',
+                        type: 'polygon', 
+                        rOffset: 0,
+                        size: [
+                            {x: -10, y: 0},
+                            {x: 10, y: 0},
+                            {x: 10, y: 120},
+                            {x: -10, y: 120},
+                        ],
+                        offset: {x: 0, y: -200},
+                        style: {
+                            fill: 'rgba(150, 150, 150, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        cannon: {
+                            keybind: 'click',
+                            x: 0,
+                            y: 0,
+                            reload: {c: 0, t: 30},
+                            spread: Math.PI/480,
+                            bullet: {
+                                type: 'polygon', 
+                                size: [
+                                    {x: -8, y: 5},
+                                    {x: 0, y: -20},
+                                    {x: 8, y: 5},
+                                ],
+                                style: {
+                                    fill: {r: 255, g: 100, b: 100, a: 1},
+                                    stroke: {colour: {r: 255, g: 69, b: 69, a: 1}, width: 3},
+                                },
+                                decay: {
+                                    life: 180, 
+                                    fillStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                                    strokeStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                                    size: 1
+                                },
+                                dmg: 750,
+                                v: 60,
+                                vDrag: 1,
+                                vr: 0,
+                                rDrag: 0,
+                                friendly: true,
+                            },
+                        },
+                        collision: false,
+                        hp: Infinity,
+                        isHit: 0,
+                        connected: [],
+                    },
+                ],
+            },
+        ],
+    },
     template: {
         physics: {
             x: 0,     // x coordinate
@@ -1175,7 +1267,7 @@ const data = {
                 isHit: 0,
                 connected: [],
             },
-            mechGattlingGun: {
+            GattlingGun: {
                 id: 'GattlingGunContainer',
                 facing: 'turret',
                 type: 'polygon', 
@@ -1308,7 +1400,7 @@ const data = {
                     },
                 ],
             },
-            mechMachineGun: {
+            MachineGun: {
                 id: 'defaultMachineGun',
                 facing: 'turret',
                 type: 'polygon', 
@@ -1356,7 +1448,7 @@ const data = {
                 isHit: 0,
                 connected: [],
             },
-            mechSpikeLauncher: {
+            SpikeLauncher: {
                 id: 'spikeLauncher',
                 facing: 'turret',
                 type: 'polygon', 
@@ -1410,7 +1502,7 @@ const data = {
                 isHit: 0,
                 connected: [],
             },
-            mechEnergySword: {
+            EnergySword: {
                 id: 'energySword',
                 facing: 'turret',
                 type: 'polygon', 
@@ -1469,7 +1561,7 @@ const data = {
                 isHit: 0,
                 connected: [],
             },
-            tankCannon: {
+            Cannon: {
                 id: 'tankCannon',
                 facing: 'turret',
                 type: 'polygon', 
@@ -1517,6 +1609,58 @@ const data = {
                 isHit: 0,
                 connected: [],
             },
+            Sniper: {
+                id: 'defaultSniper',
+                facing: 'turret',
+                type: 'polygon', 
+                rOffset: 0,
+                size: [
+                    {x: -10, y: 0},
+                    {x: 10, y: 0},
+                    {x: 10, y: 120},
+                    {x: -10, y: 120},
+                ],
+                offset: {x: 0, y: -200},
+                style: {
+                    fill: 'rgba(150, 150, 150, 1)',
+                    stroke: {colour: '#696969', width: 5},
+                },
+                cannon: {
+                    keybind: 'click',
+                    x: 0,
+                    y: 0,
+                    reload: {c: 0, t: 30},
+                    spread: Math.PI/480,
+                    bullet: {
+                        type: 'polygon', 
+                        size: [
+                            {x: -8, y: 5},
+                            {x: 0, y: -20},
+                            {x: 8, y: 5},
+                        ],
+                        style: {
+                            fill: {r: 255, g: 100, b: 100, a: 1},
+                            stroke: {colour: {r: 255, g: 69, b: 69, a: 1}, width: 3},
+                        },
+                        decay: {
+                            life: 180, 
+                            fillStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                            strokeStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                            size: 1
+                        },
+                        dmg: 750,
+                        v: 60,
+                        vDrag: 1,
+                        vr: 0,
+                        rDrag: 0,
+                        friendly: true,
+                    },
+                },
+                collision: false,
+                hp: Infinity,
+                isHit: 0,
+                connected: [],
+            },
         },
     }
 };
@@ -1535,17 +1679,16 @@ if (savedPlayer !== null) {
 } else {
     // No saved data found
     console.log('no save found, creating new player');
-    player = JSON.parse(JSON.stringify(data.tank));
-    /*
-    player.x += 500;
-    entities.push(JSON.parse(JSON.stringify(data.tank)));
-    player.x += 500;
-    entities.push(JSON.parse(JSON.stringify(player)));
-    player.x += 500;
-    entities.push(JSON.parse(JSON.stringify(player)));
-    player.x += 500;
-    entities.push(JSON.parse(JSON.stringify(player)));
-    player.x = 0;*/
+    player = JSON.parse(JSON.stringify(data.drone));
+    drone = JSON.parse(JSON.stringify(data.drone));
+    tank = JSON.parse(JSON.stringify(data.tank));
+    mech = JSON.parse(JSON.stringify(data.mech));
+    mech.x += 500;
+    entities.push(JSON.parse(JSON.stringify(mech)));
+    tank.x += 1000;
+    entities.push(JSON.parse(JSON.stringify(tank)));
+    drone.x += 1500;
+    entities.push(JSON.parse(JSON.stringify(drone)));
     player.directControl = true;
     entities.push(player);
 };
@@ -1705,6 +1848,59 @@ function handlePlayerMotion(unit) {
             unit.y += tankVelocity.y;
             unit.vx = tankVelocity.x;
             unit.vy = tankVelocity.y;
+            break;
+        case 'drone':
+            let droneTopSpeed = unit.v;
+            if (unit.keyboard.capslock) {
+                droneTopSpeed *= 2;
+            }
+            if (unit.keyboard.shift) {
+                droneTopSpeed *= 1.5;
+            }
+            unit.isMoving = false;
+            if (unit.directControl) {
+                let droneVector = {x: 0, y: 0}; // special maths
+                if (unit.keyboard.w || unit.keyboard.arrowup) { 
+                    droneVector.y -= 1
+                    unit.isMoving = true;
+                }
+                if (unit.keyboard.s || unit.keyboard.arrowdown) {
+                    droneVector.y += 1
+                    unit.isMoving = true;
+                }
+                if (unit.keyboard.a || unit.keyboard.arrowleft) { 
+                    droneVector.x -= 1
+                    unit.isMoving = true;
+                }
+                if (unit.keyboard.d || unit.keyboard.arrowright) { 
+                    droneVector.x += 1
+                    unit.isMoving = true;
+                }
+                if (unit.isMoving) {
+                    unit.r = aim({x:0, y: 0}, droneVector);
+                }
+            }
+            
+            console.log(unit.x, unit.y);
+            if (unit.isMoving) {
+                let droneAcceleration = toComponent(droneTopSpeed/60, unit.r);
+                console.log(droneAcceleration);
+                unit.vx += droneAcceleration.x;
+                unit.vy += droneAcceleration.y;
+                let droneVelocity = Math.sqrt(unit.vx**2+unit.vy**2);
+                if (droneVelocity > unit.v) {
+                    let reduction = unit.v / droneVelocity;
+                    unit.vx *= reduction;
+                    unit.vy *= reduction;
+                }
+                console.log(unit.vx, unit.vy);
+            }
+            unit.x += unit.vx;
+            unit.y += unit.vy;
+            unit.vx *= 0.995;
+            unit.vy *= 0.995;
+            console.log(unit.x, unit.y);
+            
             break;
         default:
             throw 'ERROR: are you f*king retarded? Tf is that unit type?';
