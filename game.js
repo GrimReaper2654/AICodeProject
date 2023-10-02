@@ -1,12 +1,18 @@
 /*
 -----------------------------------------Changelog-----------------------------------------
-27/8/2023
+27/08/2023
  • commenced work
 - Tom Qiu
 
-28/9/2023
+28/09/2023
  • Official start of project
  • Disabled collision detection
+- Tom Qiu
+
+2/10/2023
+ • added tank and drone
+ • reenabled collision detection
+ • added 'blaster' created by Tiger
 - Tom Qiu
 
 -------------------------------------------------------------------------------------------
@@ -497,23 +503,36 @@ function pointInPolygon(point, polygon) {
             cnt++;
         }
     }
-    console.log(cnt);
     return inside;
 };
 
-function vMath(v1, v2, mode) {
+function vMath(v1, v2, mode) { // Does not have dot product lmao, doesn't even have projection
     switch (mode) {
+        case 'addition':
         case 'add':
             return {x: v1.x+v2.x, y: v1.y+v2.y};
+        case 'subtraction':
         case 'subtract':
             return {x: v1.x-v2.x, y: v1.y-v2.y};
+        case 'scalar multiplication':
+        case 'multiplication':
         case 'multiply': // v2 is now a scalar
             return {x: v1.x*v2, y: v1.y*v2};
+        case 'division':
         case 'divide': // v2 is now a scalar
             return {x: v1.x/v2, y: v1.y/v2};
         default:
             throw 'are you f*cking retarded?';
     }
+};
+
+function circleToPolygon(pos, r, sides) {
+    let step = Math.PI*2/sides;
+    let polygon = [];
+    for(let i = 0; i < sides; i++) {
+        polygon.push(vMath(toComponent(r, step*i),pos,'add'));
+    }
+    return polygon;
 };
 
 // The return of the excessively overcomplicated data storage system
@@ -755,6 +774,7 @@ const data = {
                                             spread: Math.PI/24,
                                             bullet: {
                                                 type: 'circle', 
+                                                cType: 'point', 
                                                 size: 5,
                                                 style: {
                                                     fill: {r: 100, g: 100, b: 100, a: 1},
@@ -1068,6 +1088,7 @@ const data = {
                             spread: Math.PI/96,
                             bullet: {
                                 type: 'circle', 
+                                cType: 'point', 
                                 size: 12,
                                 style: {
                                     fill: {r: 100, g: 100, b: 100, a: 1},
@@ -1156,6 +1177,7 @@ const data = {
                             spread: Math.PI/480,
                             bullet: {
                                 type: 'polygon', 
+                                cType: 'point', 
                                 size: [
                                     {x: -8, y: 5},
                                     {x: 0, y: -20},
@@ -1243,6 +1265,7 @@ const data = {
                     spread: 0,
                     bullet: {
                         type: 'circle', 
+                        cType: 'point', 
                         size: 8,
                         style: {
                             fill: {r: 100, g: 100, b: 100, a: 1},
@@ -1353,6 +1376,7 @@ const data = {
                             spread: Math.PI/24,
                             bullet: {
                                 type: 'circle', 
+                                cType: 'point', 
                                 size: 5,
                                 style: {
                                     fill: {r: 100, g: 100, b: 100, a: 1},
@@ -1424,6 +1448,7 @@ const data = {
                     spread: Math.PI/48,
                     bullet: {
                         type: 'circle', 
+                        cType: 'point', 
                         size: 8,
                         style: {
                             fill: {r: 100, g: 100, b: 100, a: 1},
@@ -1471,7 +1496,8 @@ const data = {
                     reload: {c: 0, t: 5},
                     spread: Math.PI/24,
                     bullet: {
-                        type: 'polygon', 
+                        type: 'polygon',
+                        cType: 'point',  
                         size: [
                             {x: 0, y: 5*4},
                             {x: -1.299*4, y: 0.75*4},
@@ -1491,6 +1517,53 @@ const data = {
                             size: 1.0005
                         },
                         dmg: 100,
+                        v: 20,
+                        vDrag: 0.97,
+                        vr: Math.PI/20,
+                        rDrag: 0.98,
+                    },
+                },
+                collision: false,
+                hp: Infinity,
+                isHit: 0,
+                connected: [],
+            },
+            Blaster: {
+                id: 'blaster',
+                facing: 'turret',
+                type: 'polygon', 
+                rOffset: 0,
+                size: [
+                    {x: -30, y: -30},
+                    {x: 30, y: -30},
+                    {x: 10, y: 0},
+                    {x: -10, y: 0},
+                ],
+                offset: {x: 0, y: -70},
+                style: {
+                    fill: 'rgba(150, 150, 150, 1)',
+                    stroke: {colour: '#696969', width: 5},
+                },
+                cannon: {
+                    keybind: '2',
+                    x: 0,
+                    y: -40,
+                    reload: {c: 0, t: 2},
+                    spread: Math.PI/100,
+                    bullet: {
+                        type: 'circle', 
+                        size: 5,
+                        style: {
+                            fill: {r: 20, g: 150, b: 150, a: 1},
+                            stroke: {colour: {r: 0, g: 250, b: 250, a: 1}, width: 3},
+                        },
+                        decay: {
+                            life: 100, 
+                            fillStyle: {r: -0.1, g: -0.1, b: -0.1, a: 0}, 
+                            strokeStyle: {r: -0.1, g: -0.1, b: -0.1, a: 0}, 
+                            size: 1.0005
+                        },
+                        dmg: 20,
                         v: 20,
                         vDrag: 0.97,
                         vr: Math.PI/20,
@@ -1585,6 +1658,7 @@ const data = {
                     spread: Math.PI/96,
                     bullet: {
                         type: 'circle', 
+                        cType: 'point', 
                         size: 12,
                         style: {
                             fill: {r: 100, g: 100, b: 100, a: 1},
@@ -1633,6 +1707,7 @@ const data = {
                     spread: Math.PI/480,
                     bullet: {
                         type: 'polygon', 
+                        cType: 'point', 
                         size: [
                             {x: -8, y: 5},
                             {x: 0, y: -20},
@@ -1679,7 +1754,7 @@ if (savedPlayer !== null) {
 } else {
     // No saved data found
     console.log('no save found, creating new player');
-    player = JSON.parse(JSON.stringify(data.drone));
+    player = JSON.parse(JSON.stringify(data.mech));
     drone = JSON.parse(JSON.stringify(data.drone));
     tank = JSON.parse(JSON.stringify(data.tank));
     mech = JSON.parse(JSON.stringify(data.mech));
@@ -1690,6 +1765,9 @@ if (savedPlayer !== null) {
     drone.x += 1500;
     entities.push(JSON.parse(JSON.stringify(drone)));
     player.directControl = true;
+    let leftWeapon = JSON.parse(JSON.stringify(data.template.weapons.Blaster));
+    leftWeapon.offset.x -= 100;
+    player.parts[1].connected[0].connected = [leftWeapon];
     entities.push(player);
 };
 
@@ -1880,11 +1958,8 @@ function handlePlayerMotion(unit) {
                     unit.r = aim({x:0, y: 0}, droneVector);
                 }
             }
-            
-            console.log(unit.x, unit.y);
             if (unit.isMoving) {
                 let droneAcceleration = toComponent(droneTopSpeed/60, unit.r);
-                console.log(droneAcceleration);
                 unit.vx += droneAcceleration.x;
                 unit.vy += droneAcceleration.y;
                 let droneVelocity = Math.sqrt(unit.vx**2+unit.vy**2);
@@ -1893,32 +1968,17 @@ function handlePlayerMotion(unit) {
                     unit.vx *= reduction;
                     unit.vy *= reduction;
                 }
-                console.log(unit.vx, unit.vy);
             }
             unit.x += unit.vx;
             unit.y += unit.vy;
             unit.vx *= 0.995;
             unit.vy *= 0.995;
-            console.log(unit.x, unit.y);
-            
             break;
         default:
             throw 'ERROR: are you f*king retarded? Tf is that unit type?';
 
     };
     //console.log(unit.keyboard);
-    /*
-    for (var i = 0; i < unit.weapons.length; i+=1) {
-        if (unit.weapons[i].keybind == CLICK) {
-            if (unit.hasClicked) {
-                unit = attemptShoot(i, unit);
-            }
-        } else {
-            if (unit.keyboard[unit.weapons[i].keybind]) {
-                unit = attemptShoot(i, unit);
-            }
-        }
-    }*/
     return unit;
 };
 
@@ -2065,48 +2125,96 @@ function handleDecay(objs) {
     return newObjs;
 };
 
-function recursiveColision(unit, pts, proj) {
-    let parts = JSON.parse(JSON.stringify(pts));
-    let projectile = JSON.parse(JSON.stringify(proj));
-    for (let i = 0; i < parts.length; i++) {
-        if (parts[i].collision) {
+function recursiveCollision(unit, parts, object) {
+    let pts = JSON.parse(JSON.stringify(parts));
+    let obj = JSON.parse(JSON.stringify(object));
+    for (let i = 0; i < pts.length; i++) {
+        if (pts[i].collision) {
             let collide = false;
-            if (parts[i].type == 'polygon') {
+            if (pts[i].type == 'polygon') {
+                let cType = '';
+                if (obj.cType) {
+                    cType = obj.cType;
+                } else {
+                    cType = obj.type;
+                }
                 let facing = unit.r;
-                if (parts[i].facing == 'turret') {
+                if (pts[i].facing == 'turret') {
                     facing = unit.mouseR;
                 }
-                let points = offsetPoints(rotatePolygon(offsetPoints(JSON.parse(JSON.stringify(parts[i].size)), parts[i].offset), facing), unit);
-                if (pointInPolygon(projectile, points)) {
-                    collide = true;
+                let points = offsetPoints(rotatePolygon(offsetPoints(JSON.parse(JSON.stringify(pts[i].size)), pts[i].offset), facing), unit);
+                switch (cType) {
+                    case 'point':
+                        if (pointInPolygon(obj, points)) {
+                            collide = true;
+                        }
+                        break;
+                    case 'circle':
+                        let r = obj.size;
+                        let notCircle = circleToPolygon(obj, r, 10); // a decagon is close enough to a circle
+                        if (polygonCollision(notCircle, points)) {
+                            collide = true;
+                        }
+                        break;
+                    case 'polygon': // unreliable
+                        if (polygonCollision(offsetPoints(rotatePolygon(JSON.parse(JSON.stringify(obj.size)), obj.r), obj), points)) {
+                            collide = true;
+                        }
+                        break;
+                    default:
+                        throw `ERROR: wtf is this object type! ${cType}`;
                 }
             } else {
-                //console.log(getDist(offsetPoints(JSON.parse(JSON.stringify([parts[i].offset])), unit)[0], projectile));
-                if (getDist(offsetPoints(JSON.parse(JSON.stringify([parts[i].offset])), unit)[0], projectile) <= parts[i].size) {
-                    collide = true;
+                //console.log(getDist(offsetPoints(JSON.parse(JSON.stringify([pts[i].offset])), unit)[0], obj));
+                let cType = '';
+                if (obj.cType) {
+                    cType = obj.cType;
+                } else {
+                    cType = obj.type;
+                }
+                switch (cType) {
+                    case 'point':
+                        if (getDist(vMath(JSON.parse(JSON.stringify(pts[i].offset)), unit, 'add'), obj) <= pts[i].size) {
+                            collide = true;
+                        }
+                        break;
+                    case 'circle':
+                        let r = obj.size;
+                        if (getDist(vMath(JSON.parse(JSON.stringify(pts[i].offset)), unit, 'add'), obj) <= pts[i].size + r) {
+                            collide = true;
+                        }
+                        break;
+                    case 'polygon':
+                        let notCircle = circleToPolygon(pts[i], pts[i].size, 10); // a decagon is close enough to a circle
+                        if (polygonCollision(notCircle, obj.size)) {
+                            collide = true;
+                        }
+                        break;
+                    default:
+                        throw `ERROR: wtf is this object type! ${cType}`;
                 }
             }
             if (collide) {
-                parts[i].hp -= projectile.dmg;
-                parts[i].isHit=5;
-                projectile.dmg = 0; // have to do this to stop it hitting multiple parts (this is inefficient but hard to fix. maybe rework this to not use recursion? bfs?)
-                return [parts, projectile];
+                pts[i].hp -= obj.dmg;
+                pts[i].isHit=5;
+                obj.dmg = 0; // have to do this to stop it hitting multiple pts (this is inefficient but hard to fix. maybe rework this to not use recursion? bfs?)
+                return [pts, obj];
             }
         }
-        let res = recursiveColision(unit, parts[i].connected, projectile);
-        parts[i].connected = res[0];
-        projectile = res[1];
+        let res = recursiveCollision(unit, pts[i].connected, obj);
+        pts[i].connected = res[0];
+        obj = res[1];
     }
-    return [parts, projectile];
+    return [pts, obj];
 };
 
-function handleColisions(units, projectiles) {
+function handleCollisions(units, projectiles) {
     let newProj = [];
     if (projectiles.length && units.length) {
         for (let i = 0; i < projectiles.length; i++) {
             for (let j = 0; j < units.length; j++) {
                 if (getDist(projectiles[i], units[j]) <= units[j].collisionR) {
-                    let res = recursiveColision(units[j], units[j].parts, projectiles[i]);
+                    let res = recursiveCollision(units[j], units[j].parts, projectiles[i]);
                     units[j].parts = res[0];
                     projectiles[i] = res[1];
                 }
@@ -2118,6 +2226,18 @@ function handleColisions(units, projectiles) {
         return [units, newProj];
     }
     return [units, projectiles];
+};
+
+function handleGroundCollisions(units, obstacles) {
+    for (let i = 0; i < units.length; i++) {
+        let unit = units[i];
+        for (let j = 0; j < units.length; j++) {
+            let obstacle = obstacles[j]
+            if ((obstacle.type == 'ground' && unit.type != 'drone') || obstacle.type == 'tall') {
+
+            }
+        }
+    }
 };
 
 function main() {
@@ -2150,7 +2270,7 @@ function main() {
     ];
     drawPolygon(square, {x: 0, y: 0}, false, 'rgba(0, 0, 255, 0.5)', {colour: '#696969', width: 10}, false);
 
-    let res = handleColisions(entities, projectiles);
+    let res = handleCollisions(entities, projectiles);
     entities = res[0];
     projectiles = res[1];
 
@@ -2173,28 +2293,3 @@ async function game() {
         t++;
     }
 };
-
-/*
-style: {
-    fill: {r: 255, g: 255, b: 255, a: 1},
-    stroke: {colour: {r: 255, g: 255, b: 255, a: 1}, width: 2},
-},
-decay: {
-    life: Infinity, // how many ticks the particle persists for
-    fillStyle: {r: 0, g: 0, b: 0, a: 0}, // add to fill style
-    strokeStyle: {r: 0, g: 0, b: 0, a: 0}, // add to stroke style
-    size: 1 // multiply size by this
-}
-
-
-*/
-
-/*
-make is compatible for primary school
-
-functions to make handling controls easier
-
-make a detailed plan
-
-*/
-
