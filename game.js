@@ -917,12 +917,13 @@ const data = {
         vx: 0,
         vy: 0,
         mouseR: 0, // current Aim
-        v: 1.5, // normal walking speed
-        vr: 90 / 60 / 180 * Math.PI, // rotation of tracks (feet)
-        tr: 180 / 60 / 180 * Math.PI, // rotation of turret (main body)
+        v: 2.5, // top speed
+        vr: 45 / 60 / 180 * Math.PI, // rotation of tracks (feet)
+        tr: 150 / 60 / 180 * Math.PI, // rotation of turret (main body)
         keyboard: [],
         aimPos: {x: 69, y: 69},
         collisionR: 140,
+        reverse: false,
         directControl: false,
         type: 'tank',
         parts: [
@@ -1534,7 +1535,8 @@ if (savedPlayer !== null) {
 } else {
     // No saved data found
     console.log('no save found, creating new player');
-    player = JSON.parse(JSON.stringify(data.mech));
+    player = JSON.parse(JSON.stringify(data.tank));
+    /*
     player.x += 500;
     entities.push(JSON.parse(JSON.stringify(data.tank)));
     player.x += 500;
@@ -1543,7 +1545,7 @@ if (savedPlayer !== null) {
     entities.push(JSON.parse(JSON.stringify(player)));
     player.x += 500;
     entities.push(JSON.parse(JSON.stringify(player)));
-    player.x = 0;
+    player.x = 0;*/
     player.directControl = true;
     entities.push(player);
 };
@@ -1606,50 +1608,108 @@ function load() {
 function handlePlayerMotion(unit) {
     if (unit.directControl) {
         unit.aimPos = mousepos;
+    } else {
+        if (unit.keyboard.aimPos) {
+            unit.aimPos = unit.keyboard.aimPos;
+        }
     }
     unit.mouseR = rotateAngle(unit.mouseR, aim(vMath(vMath(vMath(display,0.5,'multiply'),player,'subtract'),unit,'add'), vMath(vMath(unit.aimPos,player,'subtract'),unit,'add')), unit.tr);
     unit.lastMoved += 1;
-    unit.vx = 0;
-    unit.vy = 0;
-    let speed = unit.v;
-    unit.r = correctAngle(unit.r);
-    if (unit.keyboard.capslock) {
-        speed *= 4;
-    }
-    if (unit.keyboard.shift) {
-        speed *= 2.5;
-    }
-    let isMoving = false;
-    let vector = {x: 0, y: 0}; // special maths
-    if (unit.keyboard.w || unit.keyboard.arrowup) { 
-        vector.y -= 1
-        isMoving = true;
-    }
-    if (unit.keyboard.s || unit.keyboard.arrowdown) {
-        vector.y += 1
-        isMoving = true;
-    }
-    if (unit.keyboard.a || unit.keyboard.arrowleft) { 
-        vector.x -= 1
-        isMoving = true;
-    }
-    if (unit.keyboard.d || unit.keyboard.arrowright) { 
-        vector.x += 1
-        isMoving = true;
-    }
-    if (isMoving) {
-        if (unit.lastMoved >= 20) {
-            unit.r = aim({x:0, y: 0}, vector);
-        } else {
-            unit.r = rotateAngle(unit.r, aim({x:0, y: 0}, vector), unit.vr);
-        }
-        let velocity = toComponent(speed, unit.r);
-        unit.x += velocity.x;
-        unit.y += velocity.y;
-        unit.vx = velocity.x;
-        unit.vy = velocity.y;
-        unit.lastMoved = -1;
-    }
+    switch (unit.type) {
+        case 'mech':
+            unit.vx = 0;
+            unit.vy = 0;
+            let mechSpeed = unit.v;
+            unit.r = correctAngle(unit.r);
+            if (unit.keyboard.capslock) {
+                mechSpeed *= 4;
+            }
+            if (unit.keyboard.shift) {
+                mechSpeed *= 2.5;
+            }
+            let mechIsMoving = false;
+            let mechVector = {x: 0, y: 0}; // special maths
+            if (unit.keyboard.w || unit.keyboard.arrowup) { 
+                mechVector.y -= 1
+                mechIsMoving = true;
+            }
+            if (unit.keyboard.s || unit.keyboard.arrowdown) {
+                mechVector.y += 1
+                mechIsMoving = true;
+            }
+            if (unit.keyboard.a || unit.keyboard.arrowleft) { 
+                mechVector.x -= 1
+                mechIsMoving = true;
+            }
+            if (unit.keyboard.d || unit.keyboard.arrowright) { 
+                mechVector.x += 1
+                mechIsMoving = true;
+            }
+            if (mechIsMoving) {
+                if (unit.lastMoved >= 20) {
+                    unit.r = aim({x:0, y: 0}, mechVector);
+                } else {
+                    unit.r = rotateAngle(unit.r, aim({x:0, y: 0}, mechVector), unit.vr);
+                }
+                let mechVelocity = toComponent(mechSpeed, unit.r);
+                unit.x += mechVelocity.x;
+                unit.y += mechVelocity.y;
+                unit.vx = mechVelocity.x;
+                unit.vy = mechVelocity.y;
+                unit.lastMoved = -1;
+            }
+            break;
+        case 'tank':
+            let tankTopSpeed = unit.v;
+            unit.r = correctAngle(unit.r);
+            if (unit.keyboard.capslock) {
+                tankTopSpeed *= 2;
+            }
+            if (unit.keyboard.shift) {
+                tankTopSpeed *= 1.5;
+            }
+            let tankSpeed = Math.sqrt(unit.vx**2+unit.vy**2);
+            if (unit.reverse) {
+                tankSpeed = -Math.abs(tankSpeed);
+            }
+            if (unit.keyboard.w || unit.keyboard.arrowup) { 
+                tankSpeed += tankTopSpeed/10;
+            }
+            if (unit.keyboard.s || unit.keyboard.arrowdown) {
+                tankSpeed -= tankTopSpeed/10;
+            }
+            if (unit.keyboard.a || unit.keyboard.arrowleft) { 
+                unit.r = rotateAngle(unit.r, unit.r-unit.vr, unit.vr);
+            }
+            if (unit.keyboard.d || unit.keyboard.arrowright) { 
+                unit.r = rotateAngle(unit.r, unit.r+unit.vr, unit.vr);
+            }
+            if (tankSpeed < 0) {
+                unit.reverse = true;
+            } else {
+                unit.reverse = false;
+            }
+            tankSpeed = Math.abs(tankSpeed);
+            if (tankSpeed > tankTopSpeed) {
+                tankSpeed = Math.max(tankTopSpeed, tankSpeed-0.25*tankTopSpeed);
+            }
+            if (tankSpeed < -tankTopSpeed*0.75) {
+                tankSpeed = Math.min(-tankTopSpeed*0.75, tankSpeed+0.25*tankTopSpeed);
+            }
+            let tankR = unit.r;
+            if (unit.reverse) {
+                tankR = correctAngle(unit.r+Math.PI);
+            }
+            let tankVelocity = toComponent(Math.abs(tankSpeed), tankR);
+            unit.x += tankVelocity.x;
+            unit.y += tankVelocity.y;
+            unit.vx = tankVelocity.x;
+            unit.vy = tankVelocity.y;
+            break;
+        default:
+            throw 'ERROR: are you f*king retarded? Tf is that unit type?';
+
+    };
     //console.log(unit.keyboard);
     /*
     for (var i = 0; i < unit.weapons.length; i+=1) {
