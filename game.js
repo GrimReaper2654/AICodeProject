@@ -19,6 +19,10 @@
  • added obstacle collision (1/4)
 - Tom Qiu
 
+5/10/2023
+ • improved obstacle collision (2/4)
+- Tom Qiu
+
 -------------------------------------------------------------------------------------------
 */
 
@@ -515,23 +519,38 @@ function pointInPolygon(point, polygon) {
 
 function vMath(v1, v2, mode) { // Does not have dot product lmao, doesn't even have projection
     switch (mode) {
+        case '||':
+        case 'magnitude':
+            return Math.sqrt(v1.x**2+v1.y**2);
+        case '+': 
         case 'addition':
         case 'add':
             return {x: v1.x+v2.x, y: v1.y+v2.y};
+        case '-': 
         case 'subtraction':
         case 'subtract':
             return {x: v1.x-v2.x, y: v1.y-v2.y};
+        case '*': 
+        case 'x': 
         case 'scalar multiplication':
         case 'multiplication':
         case 'multiply': // v2 is now a scalar
             return {x: v1.x*v2, y: v1.y*v2};
+        case '/': 
         case 'division':
         case 'divide': // v2 is now a scalar
             return {x: v1.x/v2, y: v1.y/v2};
+        case '•': 
+        case '.': 
+        case 'dot product': 
+            return v1.x * v2.x + v1.y * v2.y;
         case 'cross product': // chat gpt, I believe in you (I doubt this is correct)
             return v1.x * v2.y - v1.y * v2.x;
+        case 'projection':
+        case 'vector resolute':
+        return vMath(v2, vMath(v1, v2, '.')/vMath(v2, null, '||')**2, 'x');
         default:
-            throw 'are you f*cking retarded?';
+            throw 'what are you trying to do to to that poor vector?';
     }
 };
 
@@ -1757,10 +1776,14 @@ const data = {
                 type: 'polygon',
                 cType: 'ground',
                 size: [
-                    {x: -500, y: -500},
-                    {x: 1000, y: -500},
-                    {x: 1000, y: -450},
-                    {x: -500, y: -450},
+                    {x: -500, y: -490},
+                    {x: -490, y: -500},
+                    {x: 990, y: -500},
+                    {x: 1000, y: -490},
+                    {x: 1000, y: -460},
+                    {x: 990, y: -450},
+                    {x: -490, y: -450},
+                    {x: -500, y: -460},
                 ],
                 style: {
                     fill: 'rgba(100, 100, 100, 1)',
@@ -1920,11 +1943,24 @@ function handlePlayerMotion(unit, obstacles) {
                 unit.vx = mechVelocity.x;
                 unit.vy = mechVelocity.y;
                 unit.lastMoved = -1;
+                /* // Old unrealistic collision (use if new version doesn't work)
                 if (handleGroundCollisions(unit, obstacles)) {
                     unit.x -= mechVelocity.x;
                     unit.y -= mechVelocity.y;
                     unit.vx = 0;
                     unit.vy = 0;
+                }*/
+                let res = handleGroundCollisions(unit, obstacles);
+                if (res) {
+                    unit.x -= mechVelocity.x;
+                    unit.y -= mechVelocity.y;
+                    let mechWallVector = {x: res.end.x - res.start.x, y: res.end.y - res.start.y};
+                    let mechSlideVector = vMath(vMath(mechVelocity, mechWallVector, 'projection'), 0.75, 'multiply');
+                    console.log(mechSlideVector);
+                    unit.x += mechSlideVector.x;
+                    unit.y += mechSlideVector.y;
+                    unit.vx = mechSlideVector.x;
+                    unit.vy = mechSlideVector.y;
                 }
             }
             //console.log('after', unit.r);
@@ -2118,17 +2154,17 @@ function lineCollision(l1, l2) { // dis do be broken tho...
     return false;
 };
 
-function polygonCircleIntersect(polygon, circle) { // dis also do be broken...
+function polygonCircleIntersect(polygon, circle) {
     for (let i = 0; i < polygon.length; i++) {
         let l1 = {start: polygon[i], end: i == polygon.length-1 ? polygon[0] : polygon[i+1]};
         if (lineCircleIntersectV2(l1, circle)) {
-            return true;
+            return l1;
         }
     }
     return false;
 };
 
-function lineCircleIntersectV2(line, circle) {
+function lineCircleIntersectV2(line, circle) { // HAIL OUR AI OVERLORDS
     console.log(line, circle);
     // Calculate the direction vector of the line
     const dx = line.end.x - line.start.x;
@@ -2434,14 +2470,15 @@ function obstacleCollision(unit, obstacle) {
 };
 
 function handleGroundCollisions(unit, obstacles) {
-    let collided = false;
+    // If man somehow collides with multiple obstacles at once, I will end myself
     for (let i = 0; i < obstacles.length; i++) {
         let obstacle = obstacles[i];
-        if (obstacleCollision(unit, obstacle)) {
-            collided = true;
+        let res = obstacleCollision(unit, obstacle);
+        if (res) {
+            return res;
         }
     }
-    return collided;
+    return false;
 };
 
 function main() {
