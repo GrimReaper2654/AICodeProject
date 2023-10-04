@@ -15,6 +15,10 @@
  • added 'blaster' created by Tiger
 - Tom Qiu
 
+5/10/2023
+ • added obstacle collision (1/4)
+- Tom Qiu
+
 -------------------------------------------------------------------------------------------
 */
 
@@ -147,6 +151,9 @@ function adjustAngle(a) {
 function rotateAngle(r, rTarget, increment) {
     if (Math.abs(r) > Math.PI*4 || Math.abs(rTarget) > Math.PI*4) {
         throw "Error: You f*cked up the angle thing again...";
+        console.log(r, rTarget);
+        r = correctAngle(r);
+        rTarget = correctAngle(rTarget);
     }
     if (r == rTarget) {
         return correctAngle(r);
@@ -521,6 +528,8 @@ function vMath(v1, v2, mode) { // Does not have dot product lmao, doesn't even h
         case 'division':
         case 'divide': // v2 is now a scalar
             return {x: v1.x/v2, y: v1.y/v2};
+        case 'cross product': // chat gpt, I believe in you (I doubt this is correct)
+            return v1.x * v2.y - v1.y * v2.x;
         default:
             throw 'are you f*cking retarded?';
     }
@@ -545,12 +554,14 @@ const data = {
         vy: 0,
         mouseR: 0, // current Aim
         lastMoved: 69,
-        v: 2, // normal walking speed
+        v: 5, // normal walking speed
         vr: 180 / 60 / 180 * Math.PI, // rotation of tracks (feet)
         tr: 360 / 60 / 180 * Math.PI, // rotation of turret (main body)
         keyboard: [],
         aimPos: {x: 69, y: 69},
         collisionR: 150,
+        groundCollisionR: 80,
+        tallCollisionR: 150,
         directControl: false,
         type: 'mech',
         parts: [
@@ -937,12 +948,14 @@ const data = {
         vx: 0,
         vy: 0,
         mouseR: 0, // current Aim
-        v: 2.5, // top speed
+        v: 4, // top speed
         vr: 45 / 60 / 180 * Math.PI, // rotation of tracks (feet)
         tr: 150 / 60 / 180 * Math.PI, // rotation of turret (main body)
         keyboard: [],
         aimPos: {x: 69, y: 69},
         collisionR: 140,
+        groundCollisionR: 120,
+        tallCollisionR: 180,
         reverse: false,
         directControl: false,
         type: 'tank',
@@ -1124,11 +1137,13 @@ const data = {
         vx: 0,
         vy: 0,
         mouseR: 0, // current Aim
-        v: 15, // top speed
+        v: 7.5, // top speed
         tr: 360 / 60 / 180 * Math.PI, // rotation of turret (main body)
         keyboard: [],
         aimPos: {x: 69, y: 69},
         collisionR: 120,
+        groundCollisionR: -1,
+        tallCollisionR: 110,
         isMoving: false,
         directControl: false,
         type: 'drone',
@@ -1737,12 +1752,32 @@ const data = {
                 connected: [],
             },
         },
+        obstacles: {
+            obstacle1: {
+                type: 'polygon',
+                cType: 'ground',
+                size: [
+                    {x: -500, y: -500},
+                    {x: 1000, y: -500},
+                    {x: 1000, y: -450},
+                    {x: -500, y: -450},
+                ],
+                style: {
+                    fill: 'rgba(100, 100, 100, 1)',
+                    stroke: {colour: '#696969', width: 10},
+                },
+            }
+        },
     }
 };
 
 var projectiles = [];
 var particles = [];
 var entities = [];
+var obstacles = [];
+
+obstacles.push(data.template.obstacles.obstacle1);
+
 // Loading savegames TODO: add saving entire game not just player
 var player = {};
 //localStorage.removeItem('player');
@@ -1755,15 +1790,19 @@ if (savedPlayer !== null) {
     // No saved data found
     console.log('no save found, creating new player');
     player = JSON.parse(JSON.stringify(data.mech));
+    /*
     drone = JSON.parse(JSON.stringify(data.drone));
     tank = JSON.parse(JSON.stringify(data.tank));
     mech = JSON.parse(JSON.stringify(data.mech));
-    mech.x += 500;
+    mech.x += 300;
+    mech.directControl = true;
     entities.push(JSON.parse(JSON.stringify(mech)));
-    tank.x += 1000;
+    tank.x += 600;
+    tank.directControl = true;
     entities.push(JSON.parse(JSON.stringify(tank)));
-    drone.x += 1500;
-    entities.push(JSON.parse(JSON.stringify(drone)));
+    drone.x += 900;
+    drone.directControl = true;
+    entities.push(JSON.parse(JSON.stringify(drone)));*/
     player.directControl = true;
     let leftWeapon = JSON.parse(JSON.stringify(data.template.weapons.Blaster));
     leftWeapon.offset.x -= 100;
@@ -1826,7 +1865,7 @@ function load() {
     game();
 };
 
-function handlePlayerMotion(unit) {
+function handlePlayerMotion(unit, obstacles) {
     if (unit.directControl) {
         unit.aimPos = mousepos;
     } else {
@@ -1836,17 +1875,18 @@ function handlePlayerMotion(unit) {
     }
     unit.mouseR = rotateAngle(unit.mouseR, aim(vMath(vMath(vMath(display,0.5,'multiply'),player,'subtract'),unit,'add'), vMath(vMath(unit.aimPos,player,'subtract'),unit,'add')), unit.tr);
     unit.lastMoved += 1;
+    unit.r = correctAngle(unit.r);
+    unit.mouseR = correctAngle(unit.mouseR);
     switch (unit.type) {
         case 'mech':
             unit.vx = 0;
             unit.vy = 0;
             let mechSpeed = unit.v;
-            unit.r = correctAngle(unit.r);
             if (unit.keyboard.capslock) {
-                mechSpeed *= 4;
+                mechSpeed *= 1.2;
             }
             if (unit.keyboard.shift) {
-                mechSpeed *= 2.5;
+                mechSpeed *= 1.2;
             }
             let mechIsMoving = false;
             let mechVector = {x: 0, y: 0}; // special maths
@@ -1866,20 +1906,29 @@ function handlePlayerMotion(unit) {
                 mechVector.x += 1
                 mechIsMoving = true;
             }
+            //console.log('before', unit.r);
             if (mechIsMoving) {
                 if (unit.lastMoved >= 20) {
                     unit.r = aim({x:0, y: 0}, mechVector);
                 } else {
                     unit.r = rotateAngle(unit.r, aim({x:0, y: 0}, mechVector), unit.vr);
                 }
+                unit.r = correctAngle(unit.r);
                 let mechVelocity = toComponent(mechSpeed, unit.r);
                 unit.x += mechVelocity.x;
                 unit.y += mechVelocity.y;
                 unit.vx = mechVelocity.x;
                 unit.vy = mechVelocity.y;
                 unit.lastMoved = -1;
+                if (handleGroundCollisions(unit, obstacles)) {
+                    unit.x -= mechVelocity.x;
+                    unit.y -= mechVelocity.y;
+                    unit.vx = 0;
+                    unit.vy = 0;
+                }
             }
-            break;
+            //console.log('after', unit.r);
+            return unit;
         case 'tank':
             let tankTopSpeed = unit.v;
             unit.r = correctAngle(unit.r);
@@ -1926,7 +1975,13 @@ function handlePlayerMotion(unit) {
             unit.y += tankVelocity.y;
             unit.vx = tankVelocity.x;
             unit.vy = tankVelocity.y;
-            break;
+            if (handleGroundCollisions(unit, obstacles)) {
+                unit.x -= tankVelocity.x;
+                unit.y -= tankVelocity.y;
+                unit.vx = 0;
+                unit.vy = 0;
+            }
+            return unit;
         case 'drone':
             let droneTopSpeed = unit.v;
             if (unit.keyboard.capslock) {
@@ -1971,15 +2026,20 @@ function handlePlayerMotion(unit) {
             }
             unit.x += unit.vx;
             unit.y += unit.vy;
+            if (handleGroundCollisions(unit, obstacles)) {
+                unit.x -= unit.vx;
+                unit.y -= unit.vy;
+                unit.vx = 0;
+                unit.vy = 0;
+            }
             unit.vx *= 0.995;
             unit.vy *= 0.995;
-            break;
+            return unit;
         default:
             throw 'ERROR: are you f*king retarded? Tf is that unit type?';
 
     };
     //console.log(unit.keyboard);
-    return unit;
 };
 
 function polygonCollision(polygon1, polygon2) {
@@ -1991,6 +2051,127 @@ function polygonCollision(polygon1, polygon2) {
     for (let i = 0; i < polygon2.length; i++) {
         if (pointInPolygon(polygon2[i], polygon1)) {
             return true;
+        }
+    }
+    return false;
+};
+
+function lineCollision(l1, l2) { // dis do be broken tho...
+    console.log('START######################################################');
+    console.log(l1,l2);
+    let l1Data = {min: {x: Math.min(l1.start.x, l1.end.x), y: Math.min(l1.start.y, l1.end.y)}, max: {x: Math.max(l1.start.x, l1.end.x), y: Math.max(l1.start.y, l1.end.y)}};
+    let l2Data = {min: {x: Math.min(l2.start.x, l1.end.x), y: Math.min(l2.start.y, l2.end.y)}, max: {x: Math.max(l2.start.x, l2.end.x), y: Math.max(l2.start.y, l2.end.y)}};
+    if (l1Data.max.x >= l2Data.min.x || l2Data.max.x >= l1Data.min.x) {
+        console.log('pass1');
+        if (l1Data.max.y >= l2Data.min.y || l2Data.max.y >= l1Data.min.y) {
+            console.log('pass2');
+            if (Math.round(l1.start.x*100) == Math.round(l1.end.x*100) || Math.round(l2.start.x*100) == Math.round(l2.end.x*100)) { // vertical lines
+                console.log('vertical lines recognised');
+                if (Math.round(l1.start.x*100) == Math.round(l1.end.x*100) && Math.round(l2.start.x*100) == Math.round(l2.end.x*100)) {
+                    console.log('both');
+                    if (Math.round(l1.start.x*100) == Math.round(l2.start.x*100)) {
+                        return true;
+                    }
+                    console.log('v parallel');
+                    return false;
+                }
+                if (Math.round(l1.start.x*100) == Math.round(l1.end.x*100)) {
+                    console.log('l1');
+                    if (l2.end.x <= l1.end.x && l2.start.x >= l1.end.x) {
+                        return true;
+                    }
+                    console.log('v no intersect');
+                    return false;
+                } else {
+                    console.log('l2');
+                    if (l1.end.x <= l2.end.x && l1.start.x >= l2.end.x) {
+                        return true;
+                    }
+                    console.log('v no intersect');
+                    return false;
+                }
+            }
+            let l1Grad = (l1.start.y - l1.end.y) / (l1.start.x - l1.end.x);
+            let l2Grad = (l2.start.y - l2.end.y) / (l2.start.x - l2.end.x);
+            let l1Intercept = l1.end.y - l1Grad * l1.end.x;
+            let l2Intercept = l2.end.y - l2Grad * l2.end.x;
+            if (Math.round(l1Grad*100) == Math.round(l2Grad*100) && Math.round(l1Intercept*100) == Math.round(l2Intercept*100)) {
+                console.log('parallel');
+                return false;
+            }
+            let intersection = {x: (l2Intercept - l1Intercept) / (l1Grad - l2Grad), y: l1Grad * (l2Intercept - l1Intercept) / (l1Grad - l2Grad) + l1Intercept};
+            console.log(intersection);
+            if (
+                ((l1.end.x <= intersection.x && l1.start.x >= intersection.x) || (l1.start.x <= intersection.x && l1.end.x >= intersection.x)) &&
+                ((l2.end.x <= intersection.x && l2.start.x >= intersection.x) || (l2.start.x <= intersection.x && l2.end.x >= intersection.x)) &&
+                ((l1.end.y <= intersection.y && l1.start.y >= intersection.y) || (l1.start.y <= intersection.y && l1.end.y >= intersection.y)) &&
+                ((l2.end.y <= intersection.y && l2.start.y >= intersection.y) || (l2.start.y <= intersection.y && l2.end.x >= intersection.y))
+            ) {
+                return true;
+            } else {
+                console.log('no collision');
+                return false;
+            }
+        }
+    }
+    console.log('ignore');
+    return false;
+};
+
+function polygonCircleIntersect(polygon, circle) { // dis also do be broken...
+    for (let i = 0; i < polygon.length; i++) {
+        let l1 = {start: polygon[i], end: i == polygon.length-1 ? polygon[0] : polygon[i+1]};
+        if (lineCircleIntersectV2(l1, circle)) {
+            return true;
+        }
+    }
+    return false;
+};
+
+function lineCircleIntersectV2(line, circle) {
+    console.log(line, circle);
+    // Calculate the direction vector of the line
+    const dx = line.end.x - line.start.x;
+    const dy = line.end.y - line.start.y;
+
+    // Calculate the vector from the circle's center to the line's start point
+    const cx = circle.x - line.start.x;
+    const cy = circle.y - line.start.y;
+
+    // Calculate the dot product of the line direction vector and the circle-to-start vector
+    const dotProduct = cx * dx + cy * dy;
+
+    // Calculate the squared length of the line
+    const lineLengthSq = dx * dx + dy * dy;
+
+    // Calculate the closest point on the line to the circle's center
+    let closestX, closestY;
+
+    if (lineLengthSq === 0) {
+        // If the line is just a point, set the closest point to be the line's start point
+        closestX = line.start.x;
+        closestY = line.start.y;
+    } else {
+        const t = Math.max(0, Math.min(1, dotProduct / lineLengthSq));
+        closestX = line.start.x + t * dx;
+        closestY = line.start.y + t * dy;
+    }
+
+    // Calculate the distance between the closest point and the circle's center
+    const distance = Math.sqrt((closestX - circle.x) ** 2 + (closestY - circle.y) ** 2);
+
+    // Check if the distance is less than or equal to the circle's radius
+    return distance <= circle.r;
+}
+
+function polyCollisionAdv(polygon1, polygon2) { // dis also do be broken...
+    for (let i = 0; i < polygon1.length; i++) {
+        let l1 = {start: polygon1[i], end: i == polygon1.length-1 ? polygon1[0] : polygon1[i+1]};
+        for (let j = 0; j < polygon2.length; j++) {
+            let l2 = {start: polygon2[j], end: j == polygon2.length-1 ? polygon2[0] : polygon2[j+1]};
+            if (lineCollision(l1, l2)) {
+                return true;
+            }
         }
     }
     return false;
@@ -2058,7 +2239,15 @@ function renderPart(unit, part) {
 
 function renderUnit(unit) {
     unit.parts = recursiveParts(unit, unit.parts, renderPart);
-    drawCircle(display.x/2 - player.x + unit.x, display.y/2 - player.y + unit.y, unit.collisionR, 'rgba(255, 255, 255, 0.1)', 'rgba(255, 0, 0, 0.9)', 5, 1);
+    if (unit.collisionR > 0) {
+        drawCircle(display.x/2 - player.x + unit.x, display.y/2 - player.y + unit.y, unit.collisionR, 'rgba(255, 255, 255, 0.1)', 'rgba(255, 0, 0, 0.9)', 5, 1);
+    }
+    if (unit.groundCollisionR > 0) {
+        drawCircle(display.x/2 - player.x + unit.x, display.y/2 - player.y + unit.y, unit.groundCollisionR, 'rgba(255, 255, 255, 0)', 'rgba(0, 200, 0, 0.5)', 5, 1);
+    }
+    if (unit.tallCollisionR > 0) {
+        drawCircle(display.x/2 - player.x + unit.x, display.y/2 - player.y + unit.y, unit.tallCollisionR, 'rgba(255, 255, 255, 0)', 'rgba(0, 0, 200, 0.5)', 5, 1);
+    }
 };
 
 function shoot(unit, part) {
@@ -2228,16 +2417,31 @@ function handleCollisions(units, projectiles) {
     return [units, projectiles];
 };
 
-function handleGroundCollisions(units, obstacles) {
-    for (let i = 0; i < units.length; i++) {
-        let unit = units[i];
-        for (let j = 0; j < units.length; j++) {
-            let obstacle = obstacles[j]
-            if ((obstacle.type == 'ground' && unit.type != 'drone') || obstacle.type == 'tall') {
+function obstacleCollision(unit, obstacle) {
+    let collisionR = 0;
+    if (obstacle.cType == 'ground') {
+        if (unit.groundCollisionR <= 0) {
+            return false;
+        }
+        collisionR = unit.groundCollisionR;
+    } else {
+        collisionR = unit.tallCollisionR;
+    }
+    //let notCircle = circleToPolygon(unit, collisionR, 12); // a dodecagon is close enough to a circle
+    //return polygonCollision(notCircle, obstacle.size);
+    //return polyCollisionAdv(notCircle, obstacle.size);
+    return polygonCircleIntersect(obstacle.size, {x: unit.x, y: unit.y, r: collisionR});
+};
 
-            }
+function handleGroundCollisions(unit, obstacles) {
+    let collided = false;
+    for (let i = 0; i < obstacles.length; i++) {
+        let obstacle = obstacles[i];
+        if (obstacleCollision(unit, obstacle)) {
+            collided = true;
         }
     }
+    return collided;
 };
 
 function main() {
@@ -2273,9 +2477,13 @@ function main() {
     let res = handleCollisions(entities, projectiles);
     entities = res[0];
     projectiles = res[1];
-
+    for (let i = 0; i < obstacles.length; i++) {
+        //console.log(obstacles[i]);
+        drawPolygon(obstacles[i].size, {x: 0, y: 0}, 0, obstacles[i].style.fill, obstacles[i].style.stroke, false);
+    }
     for (let i = 0; i < entities.length; i++) {
-        entities[i] = handlePlayerMotion(entities[i]);
+        entities[i] = handlePlayerMotion(entities[i], obstacles);
+        //console.log(entities[i]);
         entities[i] = handleShooting(entities[i]);
         renderUnit(entities[i]);
     }
@@ -2293,3 +2501,6 @@ async function game() {
         t++;
     }
 };
+
+// #1220DE
+
