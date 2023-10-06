@@ -27,6 +27,7 @@
  • finished obstacle collision (4/4)
  • updated colour scheme
  • added line collision (used for melee weapons with long hitboxes)
+ • added hp gauge
 - Tom Qiu
 
 -------------------------------------------------------------------------------------------
@@ -602,8 +603,9 @@ const data = {
                     fill: 'rgba(140, 140, 140, 1)',
                     stroke: {colour: '#696969', width: 5},
                 },
-                collision: true,
-                hp: 500,
+                collision: false,
+                hp: 1,
+                maxHp: 1,
                 isHit: 0,
                 connected: [
                     {
@@ -628,6 +630,7 @@ const data = {
                         },
                         collision: false,
                         hp: 1,
+                        maxHp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -653,6 +656,7 @@ const data = {
                         },
                         collision: false,
                         hp: 1,
+                        maxHp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -669,6 +673,7 @@ const data = {
                         },
                         collision: false,
                         hp: 1,
+                        maxHp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -697,6 +702,7 @@ const data = {
                 },
                 collision: false,
                 hp: 1,
+                maxHp: 1,
                 collideDmg: 0,
                 isHit: 0,
                 connected: [
@@ -722,6 +728,7 @@ const data = {
                         },
                         collision: true,
                         hp: 3000,
+                        maxHp: 3000,
                         collideDmg: 500,
                         isHit: 0,
                         connected: [
@@ -743,6 +750,7 @@ const data = {
                                 },
                                 collision: false,
                                 hp: 1,
+                                maxHp: 1,
                                 isHit: 0,
                                 connected: [
                                     {
@@ -763,6 +771,7 @@ const data = {
                                         },
                                         collision: false,
                                         hp: 1,
+                                        maxHp: 1,
                                         isHit: 0,
                                         connected: [],
                                     },
@@ -784,6 +793,7 @@ const data = {
                                         },
                                         collision: false,
                                         hp: 1,
+                                        maxHp: 1,
                                         isHit: 0,
                                         connected: [],
                                     },
@@ -833,6 +843,7 @@ const data = {
                                         },
                                         collision: false,
                                         hp: 1,
+                                        maxHp: 1,
                                         isHit: 0,
                                         connected: [],
                                     },
@@ -854,6 +865,7 @@ const data = {
                                         },
                                         collision: false,
                                         hp: 1,
+                                        maxHp: 1,
                                         isHit: 0,
                                         connected: [],
                                     },
@@ -883,6 +895,7 @@ const data = {
                         },
                         collision: true,
                         hp: 3000,
+                        maxHp: 3000,
                         collideDmg: 500,
                         isHit: 0,
                         connected: [
@@ -944,6 +957,7 @@ const data = {
                                 },
                                 collision: false,
                                 hp: 1,
+                                maxHp: 1,
                                 isHit: 0,
                                 connected: [],
                             },
@@ -971,6 +985,7 @@ const data = {
                         },
                         collision: true,
                         hp: 5000,
+                        maxHp: 5000,
                         collideDmg: 500,
                         isHit: 0,
                         core: true,
@@ -989,6 +1004,7 @@ const data = {
                         },
                         collision: false,
                         hp: 1,
+                        maxHp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -1035,6 +1051,7 @@ const data = {
                 collision: true,
                 core: true,
                 hp: 20000,
+                maxHp: 20000,
                 isHit: 0,
                 connected: [
                     {
@@ -1059,6 +1076,7 @@ const data = {
                         },
                         collision: false,
                         hp: 1,
+                        maxHp: 1,
                         isHit: 0,
                         connected: [],
                         groundCollision: true,
@@ -1085,6 +1103,7 @@ const data = {
                         },
                         collision: false,
                         hp: 1,
+                        maxHp: 1,
                         isHit: 0,
                         connected: [],
                         groundCollision: true,
@@ -1111,6 +1130,7 @@ const data = {
                 },
                 collision: false,
                 hp: 1,
+                maxHp: 1,
                 isHit: 0,
                 connected: [
                     {
@@ -1131,6 +1151,7 @@ const data = {
                         },
                         collision: false,
                         hp: 1,
+                        maxHp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -1180,6 +1201,7 @@ const data = {
                         },
                         collision: false,
                         hp: 1,
+                        maxHp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -1225,6 +1247,7 @@ const data = {
                 collision: true,
                 core: true,
                 hp: 1000,
+                maxHp: 1000,
                 isHit: 0,
                 connected: [
                     {
@@ -1277,6 +1300,7 @@ const data = {
                         },
                         collision: false,
                         hp: 1,
+                        maxHp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -1361,6 +1385,7 @@ const data = {
                 },
                 collision: false,
                 hp: 1,
+                maxHp: 1,
                 isHit: 0,
                 connected: [],
             },
@@ -1382,6 +1407,7 @@ const data = {
                 },
                 collision: false,
                 hp: 1,
+                maxHp: 1,
                 isHit: 0,
                 connected: [
                     {
@@ -1402,6 +1428,7 @@ const data = {
                         },
                         collision: false,
                         hp: 1,
+                        maxHp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -1423,6 +1450,7 @@ const data = {
                         },
                         collision: false,
                         hp: 1,
+                        maxHp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -1472,6 +1500,7 @@ const data = {
                         },
                         collision: false,
                         hp: 1,
+                        maxHp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -1493,6 +1522,7 @@ const data = {
                         },
                         collision: false,
                         hp: 1,
+                        maxHp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -1544,6 +1574,7 @@ const data = {
                 },
                 collision: false,
                 hp: 1,
+                maxHp: 1,
                 isHit: 0,
                 connected: [],
             },
@@ -1599,6 +1630,7 @@ const data = {
                 },
                 collision: false,
                 hp: 1,
+                maxHp: 1,
                 isHit: 0,
                 connected: [],
             },
@@ -1646,6 +1678,7 @@ const data = {
                 },
                 collision: false,
                 hp: 1,
+                maxHp: 1,
                 isHit: 0,
                 connected: [],
             },
@@ -1705,6 +1738,7 @@ const data = {
                 },
                 collision: false,
                 hp: 1,
+                maxHp: 1,
                 isHit: 0,
                 connected: [],
             },
@@ -1754,6 +1788,7 @@ const data = {
                 },
                 collision: false,
                 hp: 1,
+                maxHp: 1,
                 isHit: 0,
                 connected: [],
             },
@@ -1807,6 +1842,7 @@ const data = {
                 },
                 collision: false,
                 hp: 1,
+                maxHp: 1,
                 isHit: 0,
                 connected: [],
             },
@@ -1929,9 +1965,9 @@ if (savedPlayer !== null) {
     tank.x += 1000;
     //tank.directControl = true;
     entities.push(JSON.parse(JSON.stringify(tank)));
-    drone.x += 900;
-    drone.directControl = true;
-    //entities.push(JSON.parse(JSON.stringify(drone)));
+    drone.x += 1500;
+    //drone.directControl = true;
+    entities.push(JSON.parse(JSON.stringify(drone)));
     player.directControl = true;
     /*
     let leftWeapon = JSON.parse(JSON.stringify(data.template.weapons.Blaster));
@@ -2374,7 +2410,23 @@ function renderPart(unit, part) {
         if (part.facing == 'turret') {
             facing = unit.mouseR;
         }
-        drawPolygon(np, {x: unit.x, y: unit.y}, facing, part.style.fill, part.style.stroke, false);
+        let stroke = JSON.parse(JSON.stringify(part.style.stroke));
+        if (part.hp != part.maxHp) {
+            if (part.hp > part.maxHp) {
+                stroke.colour = 'rgba(0,255,255,1)';
+                stroke.width += 2;
+            }
+            // hp colours modeled by https://www.desmos.com/calculator/icqpr5wi1k
+            //let change = Math.round(2950/(0.25*(1-part.hp/part.maxHp)*255+10)-40); 
+            //let change = (255/Math.log(255)) * Math.log(-(1-part.hp/part.maxHp)*255+255);
+            let change = -0.004 * ((1-part.hp/part.maxHp)*255)**2 + 255;
+            console.log((1-part.hp/part.maxHp)*255);
+            //console.log(change);
+            stroke.colour = `rgba(${255-change},${change},0,1)`;
+            //let change = Math.round(255*(1-part.hp/part.maxHp));
+            //stroke.colour = `rgba(${change},${255-change},0,1)`;
+        }
+        drawPolygon(np, {x: unit.x, y: unit.y}, facing, part.style.fill, stroke, false);
     } else {
         drawCircle(display.x/2 - player.x + unit.x + part.offset.x, display.y/2 - player.y + unit.y + part.offset.y, part.size, part.style.fill, part.style.stroke.colour, part.style.stroke.width, 1);
     }
