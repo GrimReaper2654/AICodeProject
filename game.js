@@ -23,6 +23,11 @@
  • improved obstacle collision (2/4)
 - Tom Qiu
 
+6/10/2023
+ • finished obstacle collision (4/4)
+ • updated colour scheme
+- Tom Qiu
+
 -------------------------------------------------------------------------------------------
 */
 
