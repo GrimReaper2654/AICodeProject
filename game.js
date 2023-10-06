@@ -449,12 +449,12 @@ function grid(spacing) { // TODO: update colours
     var start = (player.y - display.y / 2) < 0 ? Math.ceil((player.y - display.y / 2) / spacing) * spacing : Math.floor((player.y - display.y / 2) / spacing) * spacing - spacing * 2;
     var end = (player.y + display.y / 2) < 0 ? Math.ceil((player.y + display.y / 2) / spacing) * spacing : Math.floor((player.y + display.y / 2) / spacing) * spacing + spacing * 2;
     for (let i = start; i <= end; i += spacing) {
-        drawLine({x:(player.x - display.x / 2) - spacing,y:i}, r=0, display.x+spacing*2, {colour:'#999999',width:5,opacity:0.5});
+        drawLine({x:(player.x - display.x / 2) - spacing,y:i}, r=0, display.x+spacing*2, {colour:'#000000',width:10,opacity:0.05});
     }
     start = (player.x - display.x / 2) < 0 ? Math.ceil((player.x - display.x / 2) / spacing) * spacing : Math.floor((player.x - display.x / 2) / spacing) * spacing - spacing * 2;
     end = (player.x + display.x / 2) < 0 ? Math.ceil((player.x + display.x / 2) / spacing) * spacing : Math.floor((player.x + display.x / 2) / spacing) * spacing + spacing * 2;
     for (var i = start; i < end; i += spacing) {
-        drawLine({x:i,y:(player.y - display.y / 2) -spacing}, r=Math.PI/2, display.y+spacing*2, {colour:'#999999',width:5,opacity:0.5});
+        drawLine({x:i,y:(player.y - display.y / 2) -spacing}, r=Math.PI/2, display.y+spacing*2, {colour:'#000000',width:10,opacity:0.05});
     }
 };
 
@@ -1518,7 +1518,7 @@ const data = {
                     {x: 10, y: 0},
                     {x: -10, y: 0},
                 ],
-                offset: {x: -100, y: -70},
+                offset: {x: 0, y: -70},
                 style: {
                     fill: 'rgba(150, 150, 150, 1)',
                     stroke: {colour: '#696969', width: 5},
@@ -1579,7 +1579,7 @@ const data = {
                     stroke: {colour: '#696969', width: 5},
                 },
                 cannon: {
-                    keybind: '2',
+                    keybind: 'click',
                     x: 0,
                     y: -40,
                     reload: {c: 0, t: 2},
@@ -1776,20 +1776,69 @@ const data = {
                 type: 'polygon',
                 cType: 'ground',
                 size: [
-                    {x: -500, y: -490},
-                    {x: -490, y: -500},
-                    {x: 990, y: -500},
-                    {x: 1000, y: -490},
-                    {x: 1000, y: -460},
-                    {x: 990, y: -450},
-                    {x: -490, y: -450},
-                    {x: -500, y: -460},
+                    {x: -500, y: -650},
+                    {x: -450, y: -700},
+                    {x: 950, y: -700},
+                    {x: 1000, y: -650},
+                    {x: 1000, y: -450},
+                    {x: 950, y: -400},
+                    {x: -450, y: -400},
+                    {x: -500, y: -450},
                 ],
                 style: {
-                    fill: 'rgba(100, 100, 100, 1)',
-                    stroke: {colour: '#696969', width: 10},
+                    fill: 'rgba(50, 250, 250, 0.8)',
+                    stroke: {colour: 'rgba(45, 225, 225, 0.8)', width: 10},
                 },
-            }
+            },
+            obstacle2: {
+                type: 'polygon',
+                cType: 'ground',
+                size: [
+                    {x: -500+200, y: 650+200},
+                    {x: -450+200, y: 700+200},
+                    {x: 950+200, y: 700+200},
+                    {x: 1000+200, y: 650+200},
+                    {x: 1000+200, y: 450},
+                    {x: 950+200, y: 400},
+                    {x: -450+200, y: 400},
+                    {x: -500+200, y: 450},
+                ],
+                style: {
+                    fill: 'rgba(50, 250, 250, 0.8)',
+                    stroke: {colour: 'rgba(45, 225, 225, 0.8)', width: 10},
+                },
+            },
+            obstacle3: {
+                type: 'polygon',
+                cType: 'tall',
+                size: circleToPolygon({x: -800, y: 0}, 250, 6),
+                style: {
+                    fill: 'rgba(128, 128, 128, 1)',
+                    stroke: {colour: 'rgba(115, 115, 115, 1)', width: 10},
+                },
+            },
+            obstacle4: {
+                type: 'polygon',
+                cType: 'tall',
+                size: [
+                    {x: 950+500, y: -500},
+                    {x: 1000+500, y: -550},
+                    {x: 1000+500, y: -1350},
+                    {x: 950+500, y: -1400},
+                    {x: 50+500, y: -1400},
+                    {x: 0+500, y: -1350},
+                    {x: 0+500, y: -1250},
+                    {x: 50+500, y: -1200},
+                    {x: 750+500, y: -1200},
+                    {x: 800+500, y: -1150},
+                    {x: 800+500, y: -550},
+                    {x: 850+500, y: -500},
+                ],
+                style: {
+                    fill: 'rgba(128, 128, 128, 1)',
+                    stroke: {colour: 'rgba(115, 115, 115, 1)', width: 10},
+                },
+            },
         },
     }
 };
@@ -1800,6 +1849,17 @@ var entities = [];
 var obstacles = [];
 
 obstacles.push(data.template.obstacles.obstacle1);
+obstacles.push(data.template.obstacles.obstacle2);
+obstacles.push(data.template.obstacles.obstacle3);
+obstacles.push(data.template.obstacles.obstacle4);
+let obstacle5 = JSON.parse(JSON.stringify(data.template.obstacles.obstacle4));
+obstacle5.cType = 'ground';
+obstacle5.style = {
+    fill: 'rgba(50, 250, 250, 0.8)',
+    stroke: {colour: 'rgba(45, 225, 225, 0.8)', width: 10},
+};
+obstacle5.size = offsetPoints(rotatePolygon(obstacle5.size, Math.PI/2), {x: 300, y: 500});
+obstacles.push(obstacle5);
 
 // Loading savegames TODO: add saving entire game not just player
 var player = {};
@@ -1813,23 +1873,29 @@ if (savedPlayer !== null) {
     // No saved data found
     console.log('no save found, creating new player');
     player = JSON.parse(JSON.stringify(data.mech));
-
     drone = JSON.parse(JSON.stringify(data.drone));
     tank = JSON.parse(JSON.stringify(data.tank));
     mech = JSON.parse(JSON.stringify(data.mech));
-    mech.x += 300;
-    mech.directControl = true;
+    mech.x += 500;
+    //mech.directControl = true;
+    let lWeapon = JSON.parse(JSON.stringify(data.template.weapons.SpikeLauncher));
+    lWeapon.offset.x -= 100;
+    mech.parts[1].connected[0].connected = [lWeapon];
+    let rWeapon = JSON.parse(JSON.stringify(data.template.weapons.MachineGun));
+    rWeapon.offset.x += 100;
+    mech.parts[1].connected[1].connected = [rWeapon];
     entities.push(JSON.parse(JSON.stringify(mech)));
-    tank.x += 600;
-    tank.directControl = true;
+    tank.x += 1000;
+    //tank.directControl = true;
     entities.push(JSON.parse(JSON.stringify(tank)));
     drone.x += 900;
     drone.directControl = true;
-    entities.push(JSON.parse(JSON.stringify(drone)));
+    //entities.push(JSON.parse(JSON.stringify(drone)));*/
     player.directControl = true;
+    /*
     let leftWeapon = JSON.parse(JSON.stringify(data.template.weapons.Blaster));
     leftWeapon.offset.x -= 100;
-    player.parts[1].connected[0].connected = [leftWeapon];
+    player.parts[1].connected[0].connected = [leftWeapon];*/
     entities.push(player);
 };
 
@@ -1950,17 +2016,18 @@ function handlePlayerMotion(unit, obstacles) {
                     unit.vx = 0;
                     unit.vy = 0;
                 }*/
-                let res = handleGroundCollisions(unit, obstacles);
+                let res = handleGroundCollisions(unit, obstacles, true, mechVelocity);
                 if (res) {
                     unit.x -= mechVelocity.x;
                     unit.y -= mechVelocity.y;
-                    let mechWallVector = {x: res.end.x - res.start.x, y: res.end.y - res.start.y};
-                    let mechSlideVector = vMath(vMath(mechVelocity, mechWallVector, 'projection'), 0.75, 'multiply');
-                    console.log(mechSlideVector);
-                    unit.x += mechSlideVector.x;
-                    unit.y += mechSlideVector.y;
-                    unit.vx = mechSlideVector.x;
-                    unit.vy = mechSlideVector.y;
+                    if (res != 'well, shit') {
+                        let mechWallVector = {x: res.end.x - res.start.x, y: res.end.y - res.start.y};
+                        let mechSlideVector = vMath(vMath(mechVelocity, mechWallVector, 'projection'), 0.75, 'multiply');
+                        unit.x += mechSlideVector.x;
+                        unit.y += mechSlideVector.y;
+                        unit.vx = mechSlideVector.x;
+                        unit.vy = mechSlideVector.y;
+                    }
                 }
             }
             //console.log('after', unit.r);
@@ -2165,7 +2232,7 @@ function polygonCircleIntersect(polygon, circle) {
 };
 
 function lineCircleIntersectV2(line, circle) { // HAIL OUR AI OVERLORDS
-    console.log(line, circle);
+    //console.log(line, circle);
     // Calculate the direction vector of the line
     const dx = line.end.x - line.start.x;
     const dy = line.end.y - line.start.y;
@@ -2275,14 +2342,14 @@ function renderPart(unit, part) {
 
 function renderUnit(unit) {
     unit.parts = recursiveParts(unit, unit.parts, renderPart);
-    if (unit.collisionR > 0) {
+    if (unit.collisionR > 0 && false) {
         drawCircle(display.x/2 - player.x + unit.x, display.y/2 - player.y + unit.y, unit.collisionR, 'rgba(255, 255, 255, 0.1)', 'rgba(255, 0, 0, 0.9)', 5, 1);
     }
     if (unit.groundCollisionR > 0) {
-        drawCircle(display.x/2 - player.x + unit.x, display.y/2 - player.y + unit.y, unit.groundCollisionR, 'rgba(255, 255, 255, 0)', 'rgba(0, 200, 0, 0.5)', 5, 1);
+        drawCircle(display.x/2 - player.x + unit.x, display.y/2 - player.y + unit.y, unit.groundCollisionR, 'rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.1)', 5, 1);
     }
     if (unit.tallCollisionR > 0) {
-        drawCircle(display.x/2 - player.x + unit.x, display.y/2 - player.y + unit.y, unit.tallCollisionR, 'rgba(255, 255, 255, 0)', 'rgba(0, 0, 200, 0.5)', 5, 1);
+        drawCircle(display.x/2 - player.x + unit.x, display.y/2 - player.y + unit.y, unit.tallCollisionR, 'rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.1)', 5, 1);
     }
 };
 
@@ -2453,6 +2520,27 @@ function handleCollisions(units, projectiles) {
     return [units, projectiles];
 };
 
+function handleBulletWallCollisions(obstacles, projectiles) {
+    let newProj = [];
+    if (projectiles.length && obstacles.length) {
+        for (let i = 0; i < projectiles.length; i++) {
+            let noHit = true;
+            for (let j = 0; j < obstacles.length; j++) {
+                if (obstacles[j].cType == 'tall') {
+                    if (pointInPolygon(projectiles[i], obstacles[j].size)) {
+                        noHit = false;
+                        break;
+                    }
+                }
+            }
+            if (noHit) {
+                newProj.push(projectiles[i]);
+            }
+        }
+    }
+    return newProj;
+};
+
 function obstacleCollision(unit, obstacle) {
     let collisionR = 0;
     if (obstacle.cType == 'ground') {
@@ -2469,22 +2557,45 @@ function obstacleCollision(unit, obstacle) {
     return polygonCircleIntersect(obstacle.size, {x: unit.x, y: unit.y, r: collisionR});
 };
 
-function handleGroundCollisions(unit, obstacles) {
+function handleGroundCollisions(u, obstacles, smort=false, prevMotion=null) {
+    let unit = JSON.parse(JSON.stringify(u));
     // If man somehow collides with multiple obstacles at once, I will end myself
+    let can = true;
     for (let i = 0; i < obstacles.length; i++) {
         let obstacle = obstacles[i];
         let res = obstacleCollision(unit, obstacle);
         if (res) {
-            return res;
+            let otherCan = true;
+            if (smort) { // f*ck optimisation, if it works it works
+                unit.x -= prevMotion.x;
+                unit.y -= prevMotion.y;
+                let mechWallVector = {x: res.end.x - res.start.x, y: res.end.y - res.start.y};
+                let mechSlideVector = vMath(vMath(prevMotion, mechWallVector, 'projection'), 0.75, 'multiply');
+                unit.x += mechSlideVector.x;
+                unit.y += mechSlideVector.y;
+                unit.vx = mechSlideVector.x;
+                unit.vy = mechSlideVector.y;
+                if (obstacleCollision(unit, obstacle)) {
+                    can = false;
+                    otherCan = false;
+                }
+            }
+            if (otherCan) {
+                return res;
+            }
         }
     }
-    return false;
+    if (can) {
+        return false;
+    }
+    return 'well, shit';
 };
 
 function main() {
     clearCanvas('main');
     clearCanvas('canvasOverlay');
-    grid(200);
+    grid(500);
+    /*
     const points = [
         {x: 100, y: 100},
         {x: 200, y: 50},
@@ -2510,13 +2621,16 @@ function main() {
         {x: 0, y: 100}
     ];
     drawPolygon(square, {x: 0, y: 0}, false, 'rgba(0, 0, 255, 0.5)', {colour: '#696969', width: 10}, false);
-
+    */
+    projectiles = handleBulletWallCollisions(obstacles, projectiles);
     let res = handleCollisions(entities, projectiles);
     entities = res[0];
     projectiles = res[1];
     for (let i = 0; i < obstacles.length; i++) {
-        //console.log(obstacles[i]);
-        drawPolygon(obstacles[i].size, {x: 0, y: 0}, 0, obstacles[i].style.fill, obstacles[i].style.stroke, false);
+        if (obstacles[i].cType == 'ground') {
+            //console.log(obstacles[i]);
+            drawPolygon(obstacles[i].size, {x: 0, y: 0}, 0, obstacles[i].style.fill, obstacles[i].style.stroke, false);
+        }
     }
     for (let i = 0; i < entities.length; i++) {
         entities[i] = handlePlayerMotion(entities[i], obstacles);
@@ -2528,6 +2642,12 @@ function main() {
     //console.log(projectiles);
     projectiles = handleDecay(projectiles);
     renderParticles(projectiles);
+    for (let i = 0; i < obstacles.length; i++) {
+        if (obstacles[i].cType == 'tall') {
+            //console.log(obstacles[i]);
+            drawPolygon(obstacles[i].size, {x: 0, y: 0}, 0, obstacles[i].style.fill, obstacles[i].style.stroke, false);
+        }
+    }
 };
 
 var t=0;
