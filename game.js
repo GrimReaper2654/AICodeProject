@@ -1813,7 +1813,7 @@ if (savedPlayer !== null) {
     // No saved data found
     console.log('no save found, creating new player');
     player = JSON.parse(JSON.stringify(data.mech));
-    /*
+
     drone = JSON.parse(JSON.stringify(data.drone));
     tank = JSON.parse(JSON.stringify(data.tank));
     mech = JSON.parse(JSON.stringify(data.mech));
@@ -1825,7 +1825,7 @@ if (savedPlayer !== null) {
     entities.push(JSON.parse(JSON.stringify(tank)));
     drone.x += 900;
     drone.directControl = true;
-    entities.push(JSON.parse(JSON.stringify(drone)));*/
+    entities.push(JSON.parse(JSON.stringify(drone)));
     player.directControl = true;
     let leftWeapon = JSON.parse(JSON.stringify(data.template.weapons.Blaster));
     leftWeapon.offset.x -= 100;
