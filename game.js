@@ -26,6 +26,7 @@
 6/10/2023
  • finished obstacle collision (4/4)
  • updated colour scheme
+ • added line collision (used for melee weapons with long hitboxes)
 - Tom Qiu
 
 -------------------------------------------------------------------------------------------
@@ -583,11 +584,12 @@ const data = {
         tr: 360 / 60 / 180 * Math.PI, // rotation of turret (main body)
         keyboard: [],
         aimPos: {x: 69, y: 69},
-        collisionR: 150,
+        collisionR: 500,
         groundCollisionR: 80,
         tallCollisionR: 150,
         directControl: false,
         type: 'mech',
+        alive: true,
         parts: [
             {
                 id: 'LowerBodyContainer',
@@ -625,7 +627,7 @@ const data = {
                             stroke: {colour: '#696969', width: 5},
                         },
                         collision: false,
-                        hp: Infinity,
+                        hp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -650,7 +652,7 @@ const data = {
                             stroke: {colour: '#696969', width: 5},
                         },
                         collision: false,
-                        hp: Infinity,
+                        hp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -666,7 +668,7 @@ const data = {
                             stroke: {colour: '#696969', width: 5},
                         },
                         collision: false,
-                        hp: Infinity,
+                        hp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -674,7 +676,7 @@ const data = {
                 groundCollision: true,
             },
             {
-                id: 'mainBody',
+                id: 'mainBodycontainer',
                 facing: 'turret',
                 type: 'polygon', 
                 rOffset: 0,
@@ -693,9 +695,9 @@ const data = {
                     fill: 'rgba(210, 210, 210, 1)',
                     stroke: {colour: '#696969', width: 10},
                 },
-                collision: true,
-                hp: 5000,
-                collideDmg: 500,
+                collision: false,
+                hp: 1,
+                collideDmg: 0,
                 isHit: 0,
                 connected: [
                     {
@@ -740,7 +742,7 @@ const data = {
                                     stroke: {colour: '#696969', width: 5},
                                 },
                                 collision: false,
-                                hp: Infinity,
+                                hp: 1,
                                 isHit: 0,
                                 connected: [
                                     {
@@ -760,7 +762,7 @@ const data = {
                                             stroke: {colour: '#696969', width: 5},
                                         },
                                         collision: false,
-                                        hp: Infinity,
+                                        hp: 1,
                                         isHit: 0,
                                         connected: [],
                                     },
@@ -781,7 +783,7 @@ const data = {
                                             stroke: {colour: '#696969', width: 5},
                                         },
                                         collision: false,
-                                        hp: Infinity,
+                                        hp: 1,
                                         isHit: 0,
                                         connected: [],
                                     },
@@ -805,7 +807,7 @@ const data = {
                                             keybind: 'click',
                                             x: 0,
                                             y: 0,
-                                            reload: {c: 0, t: 1},
+                                            reload: {c: 0, t: 2},
                                             spread: Math.PI/24,
                                             bullet: {
                                                 type: 'circle', 
@@ -821,7 +823,7 @@ const data = {
                                                     strokeStyle: {r: 0, g: 0, b: 0, a: 0}, 
                                                     size: 1
                                                 },
-                                                dmg: 20,
+                                                dmg: 25,
                                                 v: 25,
                                                 vDrag: 0.99,
                                                 vr: 0,
@@ -830,7 +832,7 @@ const data = {
                                             },
                                         },
                                         collision: false,
-                                        hp: Infinity,
+                                        hp: 1,
                                         isHit: 0,
                                         connected: [],
                                     },
@@ -851,7 +853,7 @@ const data = {
                                             stroke: {colour: '#696969', width: 5},
                                         },
                                         collision: false,
-                                        hp: Infinity,
+                                        hp: 1,
                                         isHit: 0,
                                         connected: [],
                                     },
@@ -885,17 +887,17 @@ const data = {
                         isHit: 0,
                         connected: [
                             {
-                                id: 'gunRight',
+                                id: 'swordRight',
                                 facing: 'turret',
                                 type: 'polygon', 
-                                rOffset: Math.PI,
+                                rOffset: 0,
                                 size: [
                                     {x: -25, y: 25},
                                     {x: 25, y: 25},
-                                    {x: 20, y: 0},
-                                    {x: -20, y: 0},
+                                    {x: 20, y: 50},
+                                    {x: -20, y: 50},
                                 ],
-                                offset: {x: 100, y: -70},
+                                offset: {x: 100, y: -125},
                                 style: {
                                     fill: 'rgba(150, 150, 150, 1)',
                                     stroke: {colour: '#696969', width: 5},
@@ -908,42 +910,71 @@ const data = {
                                     spread: 0,
                                     bullet: {
                                         type: 'polygon', 
+                                        cType: 'line', 
+                                        cSize: {start: {x: 0, y: 0}, end: {x: 0, y: -250}},
                                         size: [
                                             {x: -25, y: 0},
-                                            {x: -15, y: 15},
-                                            {x: -15, y: 30},
-                                            {x: -20, y: 35},
-                                            {x: -25, y: 200},
-                                            {x: 0, y: 250},
-                                            {x: 25, y: 200},
-                                            {x: 20, y: 35},
-                                            {x: 15, y: 30},
-                                            {x: 15, y: 15},
+                                            {x: -15, y: -15},
+                                            {x: -15, y: -30},
+                                            {x: -20, y: -35},
+                                            {x: -25, y: -200},
+                                            {x: 0, y: -250},
+                                            {x: 25, y: -200},
+                                            {x: 20, y: -35},
+                                            {x: 15, y: -30},
+                                            {x: 15, y: -15},
                                             {x: 25, y: 0},
                                         ],
                                         style: {
-                                            fill: {r: 50, g: 200, b: 255, a: 0.3},
-                                            stroke: {colour: {r: 50, g: 200, b: 255, a: 0.3}, width: 5},
+                                            fill: {r: 50, g: 200, b: 255, a: 0.5},
+                                            stroke: {colour: {r: 50, g: 200, b: 255, a: 0.7}, width: 5},
                                         },
                                         decay: {
-                                            life: 5, 
+                                            life: 2, 
                                             fillStyle: {r: 0, g: 0, b: 0, a: -0.05}, 
                                             strokeStyle: {r: 0, g: 0, b: 0, a: -0.05}, 
                                             size: 1
                                         },
-                                        dmg: 1000,
-                                        v: -1,
+                                        dmg: 100,
+                                        v: 1,
                                         vDrag: 1,
                                         vr: 0,
                                         rDrag: 1,
                                     },
                                 },
                                 collision: false,
-                                hp: Infinity,
+                                hp: 1,
                                 isHit: 0,
                                 connected: [],
                             },
                         ],
+                    },
+                    {
+                        id: 'mainBody',
+                        facing: 'turret',
+                        type: 'polygon', 
+                        rOffset: 0,
+                        size: [
+                            {x: -60, y: 40},
+                            {x: 60, y: 40},
+                            {x: 70, y: 30},
+                            {x: 70, y: -30},
+                            {x: 60, y: -40},
+                            {x: -60, y: -40},
+                            {x: -70, y: -30},
+                            {x: -70, y: 30},
+                        ],
+                        offset: {x: 0, y: 0},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 10},
+                        },
+                        collision: true,
+                        hp: 5000,
+                        collideDmg: 500,
+                        isHit: 0,
+                        core: true,
+                        connected: [],
                     },
                     {
                         id: 'head',
@@ -957,7 +988,7 @@ const data = {
                             stroke: {colour: '#696969', width: 5},
                         },
                         collision: false,
-                        hp: Infinity,
+                        hp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -977,12 +1008,13 @@ const data = {
         tr: 150 / 60 / 180 * Math.PI, // rotation of turret (main body)
         keyboard: [],
         aimPos: {x: 69, y: 69},
-        collisionR: 140,
+        collisionR: 500,
         groundCollisionR: 120,
         tallCollisionR: 180,
         reverse: false,
         directControl: false,
         type: 'tank',
+        alive: true,
         parts: [
             {
                 id: 'mainBodyContainer',
@@ -1001,6 +1033,7 @@ const data = {
                     stroke: {colour: '#696969', width: 10},
                 },
                 collision: true,
+                core: true,
                 hp: 20000,
                 isHit: 0,
                 connected: [
@@ -1025,7 +1058,7 @@ const data = {
                             stroke: {colour: '#696969', width: 10},
                         },
                         collision: false,
-                        hp: Infinity,
+                        hp: 1,
                         isHit: 0,
                         connected: [],
                         groundCollision: true,
@@ -1051,7 +1084,7 @@ const data = {
                             stroke: {colour: '#696969', width: 10},
                         },
                         collision: false,
-                        hp: Infinity,
+                        hp: 1,
                         isHit: 0,
                         connected: [],
                         groundCollision: true,
@@ -1077,7 +1110,7 @@ const data = {
                     stroke: {colour: '#696969', width: 10},
                 },
                 collision: false,
-                hp: Infinity,
+                hp: 1,
                 isHit: 0,
                 connected: [
                     {
@@ -1097,7 +1130,7 @@ const data = {
                             stroke: {colour: '#696969', width: 10},
                         },
                         collision: false,
-                        hp: Infinity,
+                        hp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -1146,7 +1179,7 @@ const data = {
                             },
                         },
                         collision: false,
-                        hp: Infinity,
+                        hp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -1165,12 +1198,13 @@ const data = {
         tr: 360 / 60 / 180 * Math.PI, // rotation of turret (main body)
         keyboard: [],
         aimPos: {x: 69, y: 69},
-        collisionR: 120,
+        collisionR: 500,
         groundCollisionR: -1,
         tallCollisionR: 110,
         isMoving: false,
         directControl: false,
         type: 'drone',
+        alive: true,
         parts: [
             {
                 id: 'mainBodyContainer',
@@ -1189,6 +1223,7 @@ const data = {
                     stroke: {colour: '#696969', width: 10},
                 },
                 collision: true,
+                core: true,
                 hp: 1000,
                 isHit: 0,
                 connected: [
@@ -1241,7 +1276,7 @@ const data = {
                             },
                         },
                         collision: false,
-                        hp: Infinity,
+                        hp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -1325,7 +1360,7 @@ const data = {
                     },
                 },
                 collision: false,
-                hp: Infinity,
+                hp: 1,
                 isHit: 0,
                 connected: [],
             },
@@ -1346,7 +1381,7 @@ const data = {
                     stroke: {colour: '#696969', width: 5},
                 },
                 collision: false,
-                hp: Infinity,
+                hp: 1,
                 isHit: 0,
                 connected: [
                     {
@@ -1366,7 +1401,7 @@ const data = {
                             stroke: {colour: '#696969', width: 5},
                         },
                         collision: false,
-                        hp: Infinity,
+                        hp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -1387,7 +1422,7 @@ const data = {
                             stroke: {colour: '#696969', width: 5},
                         },
                         collision: false,
-                        hp: Infinity,
+                        hp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -1436,7 +1471,7 @@ const data = {
                             },
                         },
                         collision: false,
-                        hp: Infinity,
+                        hp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -1457,7 +1492,7 @@ const data = {
                             stroke: {colour: '#696969', width: 5},
                         },
                         collision: false,
-                        hp: Infinity,
+                        hp: 1,
                         isHit: 0,
                         connected: [],
                     },
@@ -1508,7 +1543,7 @@ const data = {
                     },
                 },
                 collision: false,
-                hp: Infinity,
+                hp: 1,
                 isHit: 0,
                 connected: [],
             },
@@ -1563,7 +1598,7 @@ const data = {
                     },
                 },
                 collision: false,
-                hp: Infinity,
+                hp: 1,
                 isHit: 0,
                 connected: [],
             },
@@ -1610,7 +1645,7 @@ const data = {
                     },
                 },
                 collision: false,
-                hp: Infinity,
+                hp: 1,
                 isHit: 0,
                 connected: [],
             },
@@ -1652,11 +1687,11 @@ const data = {
                             {x: 25, y: 0},
                         ],
                         style: {
-                            fill: {r: 50, g: 200, b: 255, a: 0.3},
-                            stroke: {colour: {r: 50, g: 200, b: 255, a: 0.3}, width: 5},
+                            fill: {r: 50, g: 200, b: 255, a: 0.5},
+                            stroke: {colour: {r: 50, g: 200, b: 255, a: 0.7}, width: 5},
                         },
                         decay: {
-                            life: 5, 
+                            life: 2, 
                             fillStyle: {r: 0, g: 0, b: 0, a: -0.05}, 
                             strokeStyle: {r: 0, g: 0, b: 0, a: -0.05}, 
                             size: 1
@@ -1669,7 +1704,7 @@ const data = {
                     },
                 },
                 collision: false,
-                hp: Infinity,
+                hp: 1,
                 isHit: 0,
                 connected: [],
             },
@@ -1718,7 +1753,7 @@ const data = {
                     },
                 },
                 collision: false,
-                hp: Infinity,
+                hp: 1,
                 isHit: 0,
                 connected: [],
             },
@@ -1771,7 +1806,7 @@ const data = {
                     },
                 },
                 collision: false,
-                hp: Infinity,
+                hp: 1,
                 isHit: 0,
                 connected: [],
             },
@@ -1878,6 +1913,7 @@ if (savedPlayer !== null) {
     // No saved data found
     console.log('no save found, creating new player');
     player = JSON.parse(JSON.stringify(data.mech));
+    
     drone = JSON.parse(JSON.stringify(data.drone));
     tank = JSON.parse(JSON.stringify(data.tank));
     mech = JSON.parse(JSON.stringify(data.mech));
@@ -1895,7 +1931,7 @@ if (savedPlayer !== null) {
     entities.push(JSON.parse(JSON.stringify(tank)));
     drone.x += 900;
     drone.directControl = true;
-    //entities.push(JSON.parse(JSON.stringify(drone)));*/
+    //entities.push(JSON.parse(JSON.stringify(drone)));
     player.directControl = true;
     /*
     let leftWeapon = JSON.parse(JSON.stringify(data.template.weapons.Blaster));
@@ -2442,6 +2478,7 @@ function recursiveCollision(unit, parts, object) {
                 let points = offsetPoints(rotatePolygon(offsetPoints(JSON.parse(JSON.stringify(pts[i].size)), pts[i].offset), facing), unit);
                 switch (cType) {
                     case 'point':
+                        //drawCircle(display.x/2 - player.x + obj.x, display.y/2 - player.y + obj.y, 5, 'rgba(0, 0, 0, 1)', 'rgba(0, 0, 0, 1)', 2, 1);
                         if (pointInPolygon(obj, points)) {
                             collide = true;
                         }
@@ -2456,6 +2493,20 @@ function recursiveCollision(unit, parts, object) {
                     case 'polygon': // unreliable
                         if (polygonCollision(offsetPoints(rotatePolygon(JSON.parse(JSON.stringify(obj.size)), obj.r), obj), points)) {
                             collide = true;
+                        }
+                        break;
+                    case 'line': // TODO: make it actual line collision (currently many point collisions)
+                        let s = offsetPoints(rotatePolygon([JSON.parse(JSON.stringify(obj.cSize.start)), JSON.parse(JSON.stringify(obj.cSize.end))], obj.r), obj);
+                        let segment = {start: s[0], end: s[1]};
+                        let diff = vMath(segment.end, segment.start, '-');
+                        for (let i = 0.1; i < 1; i += 0.2) {
+                            let point = vMath(JSON.parse(JSON.stringify(segment.start)), vMath(JSON.parse(JSON.stringify(diff)), i, '*'), '+');
+                            //drawCircle(display.x/2 - player.x + point.x, display.y/2 - player.y + point.y, 5, 'rgba(0, 0, 0, 1)', 'rgba(0, 0, 0, 1)', 2, 1);
+                            //drawPolygon(points, {x: 0, y: 0}, 0, 'rgba(0, 0, 0, 1)', 'rgba(0, 0, 0, 1)', false, true);
+                            if (pointInPolygon(point, points)) {
+                                collide = true;
+                                break;
+                            } 
                         }
                         break;
                     default:
@@ -2487,12 +2538,20 @@ function recursiveCollision(unit, parts, object) {
                             collide = true;
                         }
                         break;
+                    case 'line':
+                        let s = offsetPoints(rotatePolygon([JSON.parse(JSON.stringify(obj.cSize.start)), JSON.parse(JSON.stringify(obj.cSize.end))], obj.r), obj);
+                        let segment = {start: s[0], end: s[1]};
+                        if (lineCircleIntersectV2(segment, {x: unit.x, y: unit.y, r: unit.size})) {
+                            collide = true;
+                        }
+                        break;
                     default:
                         throw `ERROR: wtf is this object type! ${cType}`;
                 }
             }
             if (collide) {
                 pts[i].hp -= obj.dmg;
+                console.log(pts[i].hp);
                 pts[i].isHit=5;
                 obj.dmg = 0; // have to do this to stop it hitting multiple pts (this is inefficient but hard to fix. maybe rework this to not use recursion? bfs?)
                 return [pts, obj];
@@ -2596,57 +2655,67 @@ function handleGroundCollisions(u, obstacles, smort=false, prevMotion=null) {
     return 'well, shit';
 };
 
+function checkDeadParts(unit, parts) {
+    //console.log(unit, parts);
+    if (parts) {
+        let newParts = [];
+        for (let i = 0; i < parts.length; i++) {
+            if (parts[i].hp > 0) {
+                parts[i].connected = checkDeadParts(unit, parts[i].connected);
+                newParts.push(parts[i]);
+            } else {
+                if (parts[i].core) {
+                    unit.alive = false;
+                }
+            }
+        }
+        //console.log(newParts);
+        return newParts;
+    }
+    return [];
+};
+
 function main() {
+    // draw the background
     clearCanvas('main');
     clearCanvas('canvasOverlay');
     grid(500);
-    /*
-    const points = [
-        {x: 100, y: 100},
-        {x: 200, y: 50},
-        {x: 150, y: 100},
-        {x: 200, y: 200}
-    ];
-    drawPolygon(points, {x: 100, y: 100}, 0, 'rgba(0, 0, 255, 0.75)', {colour: '#696969', width: 10}, false);
-    drawPolygon(points, {x: 100, y: 100}, Math.PI/2, 'rgba(0, 0, 255, 0.75)', {colour: '#696969', width: 10}, false);
-    drawPolygon(points, {x: 100, y: 100}, Math.PI, 'rgba(0, 0, 255, 0.75)', {colour: '#696969', width: 10}, false);
-    drawPolygon(points, {x: 100, y: 100}, 3*Math.PI/2, 'rgba(0, 0, 255, 0.75)', {colour: '#696969', width: 10}, false);
-    const points2 = [
-        {x: 0, y: 0},
-        {x: 100, y: 0},
-        {x: 100, y: 100},
-        {x: 0, y: 100}
-    ];
-    drawPolygon(points2, {x: 0, y: 0}, Math.PI/4, 'rgba(255, 0, 0, 0.75)', {colour: '#696969', width: 10}, false);
-    drawPolygon(points2, {x: 0, y: 0}, false, 'rgba(0, 255, 0, 0.5)', {colour: '#696969', width: 10}, false);
-    const square = [
-        {x: 0, y: 0},
-        {x: 100, y: 0},
-        {x: 100, y: 100},
-        {x: 0, y: 100}
-    ];
-    drawPolygon(square, {x: 0, y: 0}, false, 'rgba(0, 0, 255, 0.5)', {colour: '#696969', width: 10}, false);
-    */
-    projectiles = handleBulletWallCollisions(obstacles, projectiles);
-    let res = handleCollisions(entities, projectiles);
-    entities = res[0];
-    projectiles = res[1];
+
+    // Render ground obstacles
     for (let i = 0; i < obstacles.length; i++) {
         if (obstacles[i].cType == 'ground') {
             //console.log(obstacles[i]);
             drawPolygon(obstacles[i].size, {x: 0, y: 0}, 0, obstacles[i].style.fill, obstacles[i].style.stroke, false);
         }
     }
+
+    // Process entities
+    let newEntities = [];
     for (let i = 0; i < entities.length; i++) {
-        entities[i] = handlePlayerMotion(entities[i], obstacles);
         //console.log(entities[i]);
+        entities[i].parts = checkDeadParts(entities[i], entities[i].parts);
+        //console.log(entities[i]);
+        entities[i] = handlePlayerMotion(entities[i], obstacles);
         entities[i] = handleShooting(entities[i]);
         renderUnit(entities[i]);
+        if (entities[i].alive) {
+            newEntities.push(entities[i]);
+        }
     }
-    projectiles = simulatePhysics(projectiles);
-    //console.log(projectiles);
-    projectiles = handleDecay(projectiles);
+    entities = newEntities;
+
+    // Process Projectiles
     renderParticles(projectiles);
+    projectiles = simulatePhysics(projectiles);
+    projectiles = handleDecay(projectiles);
+
+    // Handle Collisions
+    projectiles = handleBulletWallCollisions(obstacles, projectiles);
+    let res = handleCollisions(entities, projectiles);
+    entities = res[0];
+    projectiles = res[1];
+
+    // Render Tall obstacles
     for (let i = 0; i < obstacles.length; i++) {
         if (obstacles[i].cType == 'tall') {
             //console.log(obstacles[i]);
