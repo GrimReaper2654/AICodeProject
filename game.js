@@ -30,6 +30,12 @@
  • added hp gauge
 - Tom Qiu
 
+7/10/2023
+ • fixed shield colour (hp > maxhp)
+ • added armour to tank
+ • added explosions
+- Tom Qiu
+
 -------------------------------------------------------------------------------------------
 */
 
