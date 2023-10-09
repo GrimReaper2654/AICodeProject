@@ -40,6 +40,11 @@
  • created level 1 map
 - Tiger
 
+9/10/2023
+ • centered wall parts
+ • fixed obstacle collision (5/4)
+- Tom Qiu
+
 -------------------------------------------------------------------------------------------
 */
 
@@ -3010,29 +3015,49 @@ const data = {
                 type: 'polygon',
                 cType: 'tall',
                 size: [
-                    {x: 0, y: 0},
-                    {x: 1000, y: 0},
-                    {x: 800, y: 200},
-                    {x: 200, y: 200},
+                    {x: -500, y: -100},
+                    {x: 500, y: -100},
+                    {x: 300, y: 100},
+                    {x: -300, y: 100},
                 ],
                 style: {
                     fill: 'rgba(128, 128, 128, 1)',
                     stroke: {colour: 'rgba(115, 115, 115, 1)', width: 10},
                 },
+                collisionEdges: [0,2],
             },
             basicFiller: {
                 type: 'polygon',
                 cType: 'tall',
                 size: [
-                    {x: 0, y: 0},
-                    {x: 400, y: 0},
-                    {x: 200, y: 200},
+                    {x: -200, y: -100},
+                    {x: 200, y: -100},
+                    {x: 0, y: 100},
                 ],
                 style: {
                     fill: 'rgba(128, 128, 128, 1)',
                     stroke: {colour: 'rgba(115, 115, 115, 1)', width: 10},
                 },
-            }
+                collisionEdges: [0],
+            },
+            level2Lake: {
+                type: 'polygon',
+                cType: 'ground',
+                size: [
+                    {x: -280, y: 100},
+                    {x: 280, y: 100},
+                    {x: 300, y: 80},
+                    {x: 300, y: -80},
+                    {x: 280, y: -100},
+                    {x: -280, y: -100},
+                    {x: -300, y: -80},
+                    {x: -300, y: 80},
+                ],
+                style: {
+                    fill: 'rgba(50, 250, 250, 0.8)',
+                    stroke: {colour: 'rgba(45, 225, 225, 0.8)', width: 10},
+                },
+            },
         },
         parts: {
             empty: {
@@ -3115,8 +3140,8 @@ if (savedPlayer !== null) {
     player = addWeapon(player, 'LightMachineGun', 'mech', 'leftArmSide');
     player = addWeapon(player, 'LightMachineGun', 'mech', 'rightArmSide');
     player = addWeapon(player, 'GunTurret', 'mech', 'headTurret');
-    //player = addWeapon(player, 'DualRPG', 'mech', 'back');
-    player = addWeapon(player, 'ShieldProjectorMech', 'mech', 'back');
+    player = addWeapon(player, 'DualRPG', 'mech', 'back');
+    //player = addWeapon(player, 'ShieldProjectorMech', 'mech', 'back');
     entities.push(player);
 };
 
@@ -3176,14 +3201,97 @@ function load() {
     game();
 };
 
+function loadLevel(n) {
+    console.log('Startin the game...');
+    replacehtml(`<canvas id="main" width="${display.x}" height="${display.y}" style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas><canvas id="canvasOverlay" width="${display.x}" height="${display.y}" style="position: absolute; top: 0; left: 0; z-index: 2;"></canvas>`);
+    switch (n) {
+        case 1:
+            level1({x: 0, y: -900});
+            break;
+        case 2:
+            level2({x: 0, y: -900});
+            break;
+        case 3:
+            level3({x: 0, y: -900});
+            break;
+        default:
+            throw `ERROR: Unknown level ${n}`;
+    }
+    game();
+};
+
 function placeObstacle(objId, r, coords) {
     let obj = JSON.parse(JSON.stringify(data.template.obstacles[objId]));
     obj.size = offsetPoints(rotatePolygon(obj.size, r), coords);
+    for (let i = 0; i < obj.size.length; i++) {
+        obj.size[i].x = Math.round(obj.size[i].x/10)*10;
+        obj.size[i].y = Math.round(obj.size[i].y/10)*10;
+    }
+
     obstacles.push(obj);
     return 0
 };
 
-function level1() {
+function level1(pos={x: 0, y: 0}, scale=1) {
+    const basicWall = 'basicWall';
+    const basicFiller = 'basicFiller';
+
+    obstacles = [];
+    entities = [];
+    projectiles = [];
+    explosions = [];
+    particles = [];
+    
+    placeObstacle(basicWall, 0, vMath(vMath({x: 0, y: -600}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI/2, vMath(vMath({x: 400, y: -200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI/2*3, vMath(vMath({x: -400, y: -200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI/2, vMath(vMath({x: 400, y: 800}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI/2*3, vMath(vMath({x: -400, y: 800}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI, vMath(vMath({x: 0, y: 1200}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, Math.PI/2*3, vMath(vMath({x: 400, y: 300}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, Math.PI/2, vMath(vMath({x: -400, y: 300}, pos, '+'), scale, '*'));
+
+    player = JSON.parse(JSON.stringify(data.mech));
+    player.directControl = true;
+    entities.push(player);
+    console.log('Loaded level 1');
+};
+
+function level2(pos={x: 0, y: 0}, scale=1) {
+    const basicWall = 'basicWall';
+    const basicFiller = 'basicFiller';
+
+    obstacles = [];
+    entities = [];
+    projectiles = [];
+    explosions = [];
+    particles = [];
+    
+    placeObstacle('level2Lake', 0, vMath(vMath({x: 0, y: 0}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, 0, vMath(vMath({x: 0, y: -600}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI/2, vMath(vMath({x: 400, y: -200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI/2*3, vMath(vMath({x: -400, y: -200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI/2, vMath(vMath({x: 400, y: 800}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI/2*3, vMath(vMath({x: -400, y: 800}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI, vMath(vMath({x: 0, y: 1200}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, Math.PI/2*3, vMath(vMath({x: 400, y: 300}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, Math.PI/2, vMath(vMath({x: -400, y: 300}, pos, '+'), scale, '*'));
+
+    player = JSON.parse(JSON.stringify(data.mech));
+    let enemy = JSON.parse(JSON.stringify(data.mech));
+    player.directControl = true;
+    player = addWeapon(player, 'MediumMachineGun', 'mech', 'rightArmMain');
+    enemy = addWeapon(enemy, 'MediumMachineGun', 'mech', 'leftArmMain');
+    enemy = addWeapon(enemy, 'MediumMachineGun', 'mech', 'rightArmMain');
+    enemy.aimPos = {x: enemy.x, y: enemy.y + 200};
+    enemy.x = (0 + pos.x) * scale;
+    enemy.y = (-300 + pos.y) * scale;
+    entities.push(player);
+    entities.push(enemy);
+    console.log('Loaded level 2');
+};
+
+function level3(pos={x: 0, y: 0}, scale=1) {
     const basicWall = 'basicWall';
     const basicFiller = 'basicFiller';
 
@@ -3193,19 +3301,34 @@ function level1() {
     explosions = [];
     particles = [];
 
-    placeObstacle(basicWall, 0, {x: -500, y: -500});
-    placeObstacle(basicWall, Math.PI/2, {x: 500, y: -500});
-    placeObstacle(basicWall, Math.PI/-2, {x: -500, y: 500});
-    placeObstacle(basicWall, Math.PI/2, {x: 500, y: 500});
-    placeObstacle(basicWall, Math.PI/-2, {x: -500, y: 1500});
-    placeObstacle(basicWall, Math.PI, {x: 500, y: 1500});
-    placeObstacle(basicFiller, Math.PI/2, {x: -300, y: 300});
-    placeObstacle(basicFiller, Math.PI/-2, {x: 300, y: 700});
+    placeObstacle(basicWall, 0, vMath(vMath({x: 0, y: -600}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI/2, vMath(vMath({x: 400, y: -200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI/2*3, vMath(vMath({x: -400, y: -200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI/2, vMath(vMath({x: 400, y: 800}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI/2*3, vMath(vMath({x: -400, y: 800}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI, vMath(vMath({x: 0, y: 1200}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, Math.PI/2*3, vMath(vMath({x: 400, y: 300}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, Math.PI/2, vMath(vMath({x: -400, y: 300}, pos, '+'), scale, '*'));
 
     player = JSON.parse(JSON.stringify(data.mech));
+    let enemy1 = JSON.parse(JSON.stringify(data.tank));
     player.directControl = true;
+    player = addWeapon(player, 'RPG', 'mech', 'back');
+    player = addWeapon(player, 'MediumMachineGun', 'mech', 'rightArmMain');
+    enemy1.aimPos = {x: enemy1.x, y: enemy1.y + 200};
+    enemy1.x = (0 + pos.x) * scale;
+    enemy1.y = (-300 + pos.y) * scale;
+    enemy1.r = Math.PI/2;
+    let enemy2 = JSON.parse(JSON.stringify(data.mech));
+    player.directControl = true;
+    enemy2.aimPos = {x: enemy2.x, y: enemy2.y + 200};
+    enemy2.x = (0 + pos.x) * scale;
+    enemy2.y = (100 + pos.y) * scale;
+    enemy2.r = Math.PI/2;
     entities.push(player);
-    console.log('Loaded level 1');
+    entities.push(enemy1);
+    entities.push(enemy2);
+    console.log('Loaded level 2');
 };
 
 function recursiveAddParts(unit, parts, weapon) {
@@ -3555,9 +3678,22 @@ function lineCollision(l1, l2) { // dis do be broken tho...
     return false;
 };
 
-function polygonCircleIntersect(polygon, circle) {
+function polygonCircleIntersect(polygon, circle, round=false, collisionEdges) {
     for (let i = 0; i < polygon.length; i++) {
+        if (collisionEdges) {
+            if (isin(i, collisionEdges) == false) {
+                continue;
+            }
+        }
         let l1 = {start: polygon[i], end: i == polygon.length-1 ? polygon[0] : polygon[i+1]};
+        if (round) {
+            l1.start.x = Math.round(l1.start.x);
+            l1.start.y = Math.round(l1.start.y);
+            l1.end.x = Math.round(l1.end.x);
+            l1.end.y = Math.round(l1.end.y);
+            circle.x = Math.round(circle.x);
+            circle.y = Math.round(circle.y);
+        }
         if (lineCircleIntersectV2(l1, circle)) {
             return l1;
         }
@@ -3982,18 +4118,19 @@ function obstacleCollision(unit, obstacle) {
     //let notCircle = circleToPolygon(unit, collisionR, 12); // a dodecagon is close enough to a circle
     //return polygonCollision(notCircle, obstacle.size);
     //return polyCollisionAdv(notCircle, obstacle.size);
-    return polygonCircleIntersect(obstacle.size, {x: unit.x, y: unit.y, r: collisionR});
+    return polygonCircleIntersect(obstacle.size, {x: unit.x, y: unit.y, r: collisionR}, true, obstacle.collisionEdges);
 };
 
 function handleGroundCollisions(u, obstacles, smort=false, prevMotion=null) {
     let unit = JSON.parse(JSON.stringify(u));
     // If man somehow collides with multiple obstacles at once, I will end myself
-    let can = true;
+    let hasCollided = false;
     for (let i = 0; i < obstacles.length; i++) {
         let obstacle = obstacles[i];
         let res = obstacleCollision(unit, obstacle);
         if (res) {
-            let otherCan = true;
+            hasCollided = true;
+            let thisVectorWorks = true;
             if (smort) { // f*ck optimisation, if it works it works
                 unit.x -= prevMotion.x;
                 unit.y -= prevMotion.y;
@@ -4003,22 +4140,22 @@ function handleGroundCollisions(u, obstacles, smort=false, prevMotion=null) {
                 unit.y += mechSlideVector.y;
                 unit.vx = mechSlideVector.x;
                 unit.vy = mechSlideVector.y;
-                // TODO: add a loop here to make sure the unit does not hit any obstacles after sliding
-                if (obstacleCollision(unit, obstacle)) {
-                    can = false;
-                    otherCan = false;
+                for (let j = 0; j < obstacles.length; j++) {
+                    if (obstacleCollision(unit, obstacles[j])) {
+                        thisVectorWorks = false;
+                        break;
+                    }
                 }
             }
-            if (otherCan) { // TODO: don't return the vector immediately, check all other obstacles for collision as well
+            if (thisVectorWorks) {
                 return res;
             }
         }
     }
-    // TODO: if a suitable slide vector was found, return it somewhere around here
-    if (can) {
-        return false;
+    if (hasCollided) {
+        return 'well, shit'; // this just means a suitable vector was not found and the unit is rooted in place as a last resort
     }
-    return 'well, shit'; // this just means a suitable vector was not found and the unit is rooted in place as a last resort
+    return false; 
 };
 
 function checkDeadParts(unit, parts) {
@@ -4197,7 +4334,6 @@ function main() {
 
 var t=0;
 async function game() {
-    level1();
     while (1) {
         main();
         await sleep(1000/60);
