@@ -977,6 +977,29 @@ const data = {
                 isHit: 0,
                 connected: [
                     {
+                        id: 'frontArmour',
+                        facing: 'body',
+                        type: 'polygon', 
+                        rOffset: 0,
+                        size: [
+                            {x: -90, y: -10},
+                            {x: 0, y: -25},
+                            {x: 90, y: -10},
+                            {x: 90, y: 0},
+                            {x: -90, y: 0},
+                        ],
+                        offset: {x: 0, y: -100},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 10},
+                        },
+                        collision: true,
+                        hp: 5000,
+                        maxHp: 5000,
+                        isHit: 0,
+                        connected: [],
+                    },
+                    {
                         id: 'tracks1',
                         type: 'polygon', 
                         facing: 'body',
@@ -1300,6 +1323,40 @@ const data = {
                         connected: [],
                         groundCollision: false,
                     },
+                    {
+                        id: 'rightSide',
+                        type: 'circle', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: 0,
+                        offset: {x: 0, y: 0},
+                        style: {
+                            fill: 'rgba(0, 0, 0, 0)',
+                            stroke: {colour: 'rgba(0, 0, 0, 0)', width: 1},
+                        },
+                        collision: false,
+                        hp: 1,
+                        maxHp: 1,
+                        isHit: 0,
+                        connected: [],
+                    },
+                    {
+                        id: 'leftSide',
+                        type: 'circle', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: 0,
+                        offset: {x: 0, y: 0},
+                        style: {
+                            fill: 'rgba(0, 0, 0, 0)',
+                            stroke: {colour: 'rgba(0, 0, 0, 0)', width: 1},
+                        },
+                        collision: false,
+                        hp: 1,
+                        maxHp: 1,
+                        isHit: 0,
+                        connected: [],
+                    },
                 ],
             },
             {
@@ -1326,7 +1383,7 @@ const data = {
                 isHit: 0,
                 connected: [
                     {
-                        id: 'turretBarrel',
+                        id: 'main',
                         facing: 'turret',
                         type: 'polygon', 
                         rOffset: 0,
@@ -1340,56 +1397,6 @@ const data = {
                         style: {
                             fill: 'rgba(210, 210, 210, 1)',
                             stroke: {colour: '#696969', width: 10},
-                        },
-                        collision: false,
-                        hp: 1,
-                        maxHp: 1,
-                        isHit: 0,
-                        connected: [],
-                    },
-                    {
-                        id: 'tankCannon',
-                        facing: 'turret',
-                        type: 'polygon', 
-                        rOffset: 0,
-                        size: [
-                            {x: -15, y: 30},
-                            {x: -15, y: 0},
-                            {x: 15, y: 0},
-                            {x: 15, y: 30},
-                        ],
-                        offset: {x: 0, y: -200},
-                        style: {
-                            fill: 'rgba(150, 150, 150, 1)',
-                            stroke: {colour: '#696969', width: 10},
-                        },
-                        cannon: {
-                            keybind: 'click',
-                            x: 0,
-                            y: 0,
-                            reload: {c: 0, t: 90},
-                            spread: Math.PI/96,
-                            bullet: {
-                                type: 'circle', 
-                                cType: 'point', 
-                                size: 12,
-                                style: {
-                                    fill: {r: 100, g: 100, b: 100, a: 1},
-                                    stroke: {colour: {r: 69, g: 69, b: 69, a: 1}, width: 3},
-                                },
-                                decay: {
-                                    life: 150, 
-                                    fillStyle: {r: 0, g: 0, b: 0, a: 0}, 
-                                    strokeStyle: {r: 0, g: 0, b: 0, a: 0}, 
-                                    size: 1
-                                },
-                                dmg: 1000,
-                                v: 30,
-                                vDrag: 0.99,
-                                vr: 0,
-                                rDrag: 0,
-                                friendly: true,
-                            },
                         },
                         collision: false,
                         hp: 1,
@@ -1907,8 +1914,8 @@ const data = {
                 isHit: 0,
                 connected: [],
             },
-            LightMachineGunSideMounted: {
-                id: 'LightMachineGunSideMounted',
+            CannonSideMounted: {
+                id: 'cannonSideMounted',
                 facing: 'turret',
                 type: 'polygon', 
                 rOffset: 5*Math.PI/180,
@@ -3137,8 +3144,8 @@ if (savedPlayer !== null) {
     //player = addWeapon(player, 'Nuker', 'mech', 'leftArmMain');
     //player = addWeapon(player, 'Blaster', 'mech', 'leftArmMain');
     player = addWeapon(player, 'MediumMachineGun', 'mech', 'rightArmMain');
-    player = addWeapon(player, 'LightMachineGun', 'mech', 'leftArmSide');
-    player = addWeapon(player, 'LightMachineGun', 'mech', 'rightArmSide');
+    player = addWeapon(player, 'Cannon', 'mech', 'leftArmSide');
+    player = addWeapon(player, 'Cannon', 'mech', 'rightArmSide');
     player = addWeapon(player, 'GunTurret', 'mech', 'headTurret');
     player = addWeapon(player, 'DualRPG', 'mech', 'back');
     //player = addWeapon(player, 'ShieldProjectorMech', 'mech', 'back');
@@ -3213,6 +3220,9 @@ function loadLevel(n) {
             break;
         case 3:
             level3({x: 0, y: -900});
+            break;
+        case 4:
+            testing();
             break;
         default:
             throw `ERROR: Unknown level ${n}`;
@@ -3296,10 +3306,10 @@ function level3(pos={x: 0, y: 0}, scale=1) {
     const basicFiller = 'basicFiller';
 
     obstacles = [];
-    entities = [];
     projectiles = [];
     explosions = [];
     particles = [];
+    entities = [];
 
     placeObstacle(basicWall, 0, vMath(vMath({x: 0, y: -600}, pos, '+'), scale, '*'));
     placeObstacle(basicWall, Math.PI/2, vMath(vMath({x: 400, y: -200}, pos, '+'), scale, '*'));
@@ -3328,7 +3338,25 @@ function level3(pos={x: 0, y: 0}, scale=1) {
     entities.push(player);
     entities.push(enemy1);
     entities.push(enemy2);
-    console.log('Loaded level 2');
+    console.log('Loaded level 3');
+};
+
+function testing() {
+    obstacles = [];
+    entities = [];
+    projectiles = [];
+    explosions = [];
+    particles = [];
+
+    player = JSON.parse(JSON.stringify(data.tank));
+    let enemy1 = JSON.parse(JSON.stringify(data.tank));
+    player.directControl = true;
+    player = addWeapon(player, 'RPG', 'tank', 'main');
+    player = addWeapon(player, 'Cannon', 'tank', 'rightSide');
+    player = addWeapon(player, 'Cannon', 'tank', 'leftSide');
+    entities.push(player);
+    entities.push(enemy1);
+    console.log('Loaded testing area');
 };
 
 function recursiveAddParts(unit, parts, weapon) {
@@ -3363,10 +3391,26 @@ function recursiveInvert(parts) {
     return parts;
 };
 
-function addWeapon(unit, weaponID, unitType, slot) {
+function recursiveModify(parts, facing=undefined, keybind=undefined) {
+    for (let i = 0; i < parts.length; i++) {
+        if (facing) {
+            parts[i].facing = facing;
+        }
+        if (keybind) {
+            if (parts[i].cannon) {
+                parts[i].cannon.keybind = keybind;
+            }
+        }
+        parts[i].connected = recursiveModify(parts[i].connected);
+    }
+    return parts;
+}
+
+function addWeapon(unit, weaponID, unitType, slot, keybind='click') {
     let weapon = JSON.parse(JSON.stringify(data.template.weapons[weaponID]));
     let offset = {x: 0, y: 0};
     let invert = false;
+    let facing = 'turret';
     switch (unitType) {
         case 'mech':
             switch (slot) {
@@ -3387,12 +3431,34 @@ function addWeapon(unit, weaponID, unitType, slot) {
                     offset = vMath(offset, {x: 0, y: 20}, '+');
                     break;
                 default:
-                    throw `tf is this slot type! ${slot[0]}`
+                    throw `tf is this slot type! ${slot[0]}`;
+            }
+            break;
+        case 'tank':
+            switch (slot) {
+                case 'main':
+                    offset = vMath(offset, {x: 0, y: -150}, '+');
+                    if (weaponID == 'RPG') {
+                        offset = vMath(offset, {x: -40, y: 0}, '+');
+                    }
+                    break;
+                case 'rightSide':
+                    invert = true;
+                case 'leftSide':
+                    weapon = JSON.parse(JSON.stringify(data.template.weapons[weaponID+'SideMounted']));
+                    offset = vMath(offset, {x: -140, y: -0}, '+');
+                    facing = 'body';
+                    break;
+                default:
+                    throw `tf is this slot type! ${slot[0]}`;
             }
             break;
         default:
-            throw `dafaq is a ${unitType}!`
+            throw `ERROR: Unsupported unit type for weapon assignment: ${unitType}!`;
     }
+    weapon.facing = facing;
+    weapon.keybind = keybind;
+    weapon.connected = recursiveModify(weapon.connected, facing, keybind);
     weapon.offset = vMath(weapon.offset, offset, '+');
     weapon.connected = recursiveOffset(weapon.connected, offset);
     weapon.id = slot;
@@ -4101,8 +4167,9 @@ function handleBulletWallCollisions(obstacles, projectiles) {
                 newProj.push(projectiles[i]);
             }
         }
+        return newProj;
     }
-    return newProj;
+    return projectiles;
 };
 
 function obstacleCollision(unit, obstacle) {
@@ -4291,12 +4358,10 @@ function main() {
         }
     }
     entities = newEntities;
-
     // Process Projectiles
     renderParticles(projectiles);
     projectiles = simulatePhysics(projectiles);
     projectiles = handleDecay(projectiles);
-
     // Render Entities
     for (let i = 0; i < entities.length; i++) {
         renderUnit(entities[i]);
