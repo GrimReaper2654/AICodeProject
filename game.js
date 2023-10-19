@@ -1509,6 +1509,215 @@ const data = {
         ],
         effects: [],
     },
+    turret: {
+        x: 0,
+        y: 0,
+        r: 0, // direction of motion
+        vx: 0,
+        vy: 0,
+        mouseR: 0, // current Aim
+        v: 0, // top speed
+        tr: 180 / 60 / 180 * Math.PI, // rotation of turret (main body)
+        keyboard: [],
+        aimPos: {x: 69, y: 69},
+        collisionR: 500,
+        groundCollisionR: -1,
+        tallCollisionR: -1,
+        isMoving: false,
+        directControl: false,
+        type: 'staticTurret',
+        alive: true,
+        parts: [
+            {
+                id: 'Base1',
+                facing: 'body',
+                type: 'polygon', 
+                rOffset: 0,
+                size: [
+                    {x: -75, y: 125},
+                    {x: 75, y: 125},
+                    {x: 75, y: -125},
+                    {x: -75, y: -125},
+                ],
+                offset: {x: 0, y: 0},
+                style: {
+                    fill: 'rgba(150, 150, 150, 1)',
+                    stroke: {colour: '#696969', width: 10},
+                },
+                collision: false,
+                core: false,
+                hp: 1,
+                maxHp: 1,
+                isHit: 0,
+                connected: [
+                    {
+                        id: 'Base2',
+                        facing: 'body',
+                        type: 'polygon', 
+                        rOffset: 0,
+                        size: [
+                            {y: -75, x: 125},
+                            {y: 75, x: 125},
+                            {y: 75, x: -125},
+                            {y: -75, x: -125},
+                        ],
+                        offset: {x: 0, y: 0},
+                        style: {
+                            fill: 'rgba(150, 150, 150, 1)',
+                            stroke: {colour: '#696969', width: 10},
+                        },
+                        collision: false,
+                        core: false,
+                        hp: 1,
+                        maxHp: 1,
+                        isHit: 0,
+                        connected: [],
+                    },
+                    {
+                        id: 'Base3',
+                        facing: 'body',
+                        type: 'polygon', 
+                        rOffset: 0,
+                        size: [
+                            {y: -75, x: 75},
+                            {y: 75, x: 75},
+                            {y: 75, x: -75},
+                            {y: -75, x: -75},
+                        ],
+                        offset: {x: 0, y: 0},
+                        style: {
+                            fill: 'rgba(180, 180, 180, 1)',
+                            stroke: {colour: '#696969', width: 10},
+                        },
+                        collision: false,
+                        core: false,
+                        hp: 1,
+                        maxHp: 1,
+                        isHit: 0,
+                        connected: [],
+                    },
+                    {
+                        id: 'turretBody',
+                        facing: 'turret',
+                        type: 'polygon', 
+                        rOffset: 0,
+                        size: [
+                            {x: -50*1.5, y: 60*1.5},
+                            {x: 50*1.5, y: 60*1.5},
+                            {x: 50*1.5, y: -45*1.5},
+                            {x: 25*1.5, y: -70*1.5},
+                            {x: -25*1.5, y: -70*1.5},
+                            {x: -50*1.5, y: -45*1.5},
+                        ],
+                        offset: {x: 0, y: 0},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 10},
+                        },
+                        core: true,
+                        collision: true,
+                        hp: 2500,
+                        maxHp: 2500,
+                        isHit: 0,
+                        connected: [
+                            {
+                                id: 'armour1',
+                                facing: 'turret',
+                                type: 'polygon', 
+                                rOffset: 0,
+                                size: [
+                                    {x: -15, y: 200},
+                                    {x: -15, y: 30},
+                                    {x: 15, y: 30},
+                                    {x: 15, y: 200},
+                                ],
+                                offset: {x: 95, y: -100},
+                                style: {
+                                    fill: 'rgba(210, 210, 210, 1)',
+                                    stroke: {colour: '#696969', width: 10},
+                                },
+                                collision: true,
+                                hp: 1000,
+                                maxHp: 1000,
+                                isHit: 0,
+                                connected: [],
+                            },
+                            {
+                                id: 'armour2',
+                                facing: 'turret',
+                                type: 'polygon', 
+                                rOffset: 0,
+                                size: [
+                                    {x: -15, y: 200},
+                                    {x: -15, y: 30},
+                                    {x: 15, y: 30},
+                                    {x: 15, y: 200},
+                                ],
+                                offset: {x: -95, y: -100},
+                                style: {
+                                    fill: 'rgba(210, 210, 210, 1)',
+                                    stroke: {colour: '#696969', width: 10},
+                                },
+                                collision: true,
+                                hp: 1000,
+                                maxHp: 1000,
+                                isHit: 0,
+                                connected: [],
+                            },
+                            {
+                                id: 'armour3',
+                                facing: 'turret',
+                                type: 'polygon', 
+                                rOffset: 0,
+                                size: [
+                                    {x: -100, y: 15},
+                                    {x: -100, y: -15},
+                                    {x: 100, y: -15},
+                                    {x: 100, y: 15},
+                                ],
+                                offset: {x: 0, y: 110},
+                                style: {
+                                    fill: 'rgba(210, 210, 210, 1)',
+                                    stroke: {colour: '#696969', width: 10},
+                                },
+                                collision: true,
+                                hp: 1000,
+                                maxHp: 1000,
+                                isHit: 0,
+                                connected: [],
+                            },
+                            {
+                                id: 'mainGun',
+                                type: 'circle', 
+                                facing: 'body',
+                                rOffset: 0,
+                                size: 0,
+                                offset: {x: 0, y: 0},
+                                style: {
+                                    fill: 'rgba(0, 0, 0, 0)',
+                                    stroke: {colour: 'rgba(0, 0, 0, 0)', width: 1},
+                                },
+                                collision: false,
+                                hp: 1,
+                                maxHp: 1,
+                                isHit: 0,
+                                connected: [],
+                            },
+                        ],
+                    }
+                ],
+            },
+        ],
+        effects: [],
+    },
+    costs: {
+        mech: 2500,
+        tank: 2000,
+        drone: 2000,
+        script: 5000,
+        scriptExtension: 1000, // extends unit script lengrh by 1000 characters
+        mainScriptExtension: 2000, // extends unit script lengrh by 1000 characters
+    },
     template: {
         physics: {
             x: 0,     // x coordinate
@@ -1538,6 +1747,31 @@ const data = {
                 strokeStyle: {r: 0, g: 0, b: 0, a: 0}, // add to stroke style
                 size: 1 // multiply size by this
             }
+        },
+        memory: {
+            team: '', // which team the unit belongs to
+            id: '', // the name of the unit
+            memory: '', // the stored data of the unit, should store enemies to target and where to move to
+            transmission: [], // data recieved from the main combat logic, should be given targets to attack or formations to move in
+            script: '', // the script to be executed by the unit every tick
+            orders: [], // all the actions that the unit will execute
+        },
+        team: {
+            id: '', // the team name
+            money: 10000, // money avalaible to purchace units and resources
+            script: '', // the script that purchaces new units and sends commands to existing units
+            memory: '', // the main data storage of every team, should store advanced tactics and strategies
+            transmission: [], // data recieved from units
+            resources: {
+                scripts: 3, // number of different scripts avalaible, scripts-1 = number of different types of units
+                mainScriptLength: 2000, // main logic has limit of 1000 characters
+                UnitScriptLength: 5000, // unit scripts have a limit of 4000 characters
+            },
+            scripts: { // scripts owned by the team
+
+            },
+            spawn: {x: 0, y: 0}, // where new units will be spawned
+            orders: [], // orders to be executed by the team (spawn stuff)
         },
         weapons: {
             debugWeapon: {
@@ -2949,6 +3183,265 @@ const data = {
                     },
                 ],
             },
+            mainCannon: {
+                id: 'mainCannon',
+                facing: 'turret',
+                type: 'polygon', 
+                rOffset: 0,
+                size: [
+                    {x: -15, y: 0},
+                    {x: 15, y: 0},
+                    {x: 15, y: 30},
+                    {x: -15, y: 30},
+                ],
+                offset: {x: 0, y: -230},
+                style: {
+                    fill: 'rgba(130, 130, 130, 1)',
+                    stroke: {colour: '#696969', width: 5},
+                },
+                cannon: {
+                    keybind: 'click',
+                    x: 0,
+                    y: 0,
+                    reload: {c: 15, t: 120},
+                    spread: Math.PI/480,
+                    bullet: {
+                        type: 'circle', 
+                        cType: 'point', 
+                        size: 20,
+                        style: {
+                            fill: {r: 100, g: 100, b: 100, a: 1},
+                            stroke: {colour: {r: 90, g: 90, b: 90, a: 1}, width: 5},
+                        },
+                        decay: {
+                            life: 180, 
+                            fillStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                            strokeStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                            size: 1
+                        },
+                        dmg: 1000,
+                        explosion: {
+                            dmg: 200, // damage/tick in the explosion radius
+                            maxR: 50,
+                            expandSpeed: 5,
+                            r:50,
+                        },
+                        v: 20,
+                        vDrag: 1,
+                        accel: false,
+                        vr: 0,
+                        rDrag: 0,
+                        friendly: true,
+                    },
+                },
+                collision: false,
+                hp: 1,
+                maxHp: 1,
+                isHit: 0,
+                connected: [
+                    {
+                        id: 'cannonBarrel',
+                        facing: 'turret',
+                        type: 'polygon', 
+                        rOffset: 0,
+                        size: [
+                            {x: -12, y: 0},
+                            {x: 12, y: 0},
+                            {x: 12, y: -200},
+                            {x: -12, y: -200},
+                        ],
+                        offset: {x: 0, y: 0},
+                        style: {
+                            fill: 'rgba(130, 130, 130, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: false,
+                        hp: 1,
+                        maxHp: 1,
+                        isHit: 0,
+                        connected: [],
+                    }
+                ],
+            },
+            dualCannon: {
+                id: 'dualCannonContainer',
+                facing: 'body',
+                type: 'circle', 
+                rOffset: 0,
+                size: 0,
+                offset: {x: 0, y: 0},
+                style: {
+                    fill: 'rgba(130, 130, 130, 1)',
+                    stroke: {colour: '#696969', width: 5},
+                },
+                collision: false,
+                hp: 1,
+                maxHp: 1,
+                isHit: 0,
+                connected: [
+                    {
+                        id: 'mainCannon1',
+                        facing: 'turret',
+                        type: 'polygon', 
+                        rOffset: 0,
+                        size: [
+                            {x: -15, y: 0},
+                            {x: 15, y: 0},
+                            {x: 15, y: 30},
+                            {x: -15, y: 30},
+                        ],
+                        offset: {x: 20, y: -180},
+                        style: {
+                            fill: 'rgba(130, 130, 130, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        cannon: {
+                            keybind: 'click',
+                            x: 0,
+                            y: 0,
+                            reload: {c: 15, t: 120},
+                            spread: Math.PI/480,
+                            bullet: {
+                                type: 'circle', 
+                                cType: 'point', 
+                                size: 15,
+                                style: {
+                                    fill: {r: 100, g: 100, b: 100, a: 1},
+                                    stroke: {colour: {r: 90, g: 90, b: 90, a: 1}, width: 5},
+                                },
+                                decay: {
+                                    life: 180, 
+                                    fillStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                                    strokeStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                                    size: 1
+                                },
+                                dmg: 600,
+                                explosion: {
+                                    dmg: 200, // damage/tick in the explosion radius
+                                    maxR: 50,
+                                    expandSpeed: 5,
+                                    r:50,
+                                },
+                                v: 20,
+                                vDrag: 1,
+                                accel: false,
+                                vr: 0,
+                                rDrag: 0,
+                                friendly: true,
+                            },
+                        },
+                        collision: false,
+                        hp: 1,
+                        maxHp: 1,
+                        isHit: 0,
+                        connected: [
+                            {
+                                id: 'cannonBarrel1',
+                                facing: 'turret',
+                                type: 'polygon', 
+                                rOffset: 0,
+                                size: [
+                                    {x: -12, y: 0},
+                                    {x: 12, y: 0},
+                                    {x: 12, y: -150},
+                                    {x: -12, y: -150},
+                                ],
+                                offset: {x: 20, y: 0},
+                                style: {
+                                    fill: 'rgba(130, 130, 130, 1)',
+                                    stroke: {colour: '#696969', width: 5},
+                                },
+                                collision: false,
+                                hp: 1,
+                                maxHp: 1,
+                                isHit: 0,
+                                connected: [],
+                            }
+                        ],
+                    },
+                    {
+                        id: 'mainCannon2',
+                        facing: 'turret',
+                        type: 'polygon', 
+                        rOffset: 0,
+                        size: [
+                            {x: -15, y: 0},
+                            {x: 15, y: 0},
+                            {x: 15, y: 30},
+                            {x: -15, y: 30},
+                        ],
+                        offset: {x: -20, y: -180},
+                        style: {
+                            fill: 'rgba(130, 130, 130, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        cannon: {
+                            keybind: 'click',
+                            x: 0,
+                            y: 0,
+                            reload: {c: 15, t: 120},
+                            spread: Math.PI/480,
+                            delay: {c: 75, t: 60},
+                            bullet: {
+                                type: 'circle', 
+                                cType: 'point', 
+                                size: 15,
+                                style: {
+                                    fill: {r: 100, g: 100, b: 100, a: 1},
+                                    stroke: {colour: {r: 90, g: 90, b: 90, a: 1}, width: 5},
+                                },
+                                decay: {
+                                    life: 180, 
+                                    fillStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                                    strokeStyle: {r: 0, g: 0, b: 0, a: 0}, 
+                                    size: 1
+                                },
+                                dmg: 600,
+                                explosion: {
+                                    dmg: 200, // damage/tick in the explosion radius
+                                    maxR: 50,
+                                    expandSpeed: 5,
+                                    r:50,
+                                },
+                                v: 20,
+                                vDrag: 1,
+                                accel: false,
+                                vr: 0,
+                                rDrag: 0,
+                                friendly: true,
+                            },
+                        },
+                        collision: false,
+                        hp: 1,
+                        maxHp: 1,
+                        isHit: 0,
+                        connected: [
+                            {
+                                id: 'cannonBarrel2',
+                                facing: 'turret',
+                                type: 'polygon', 
+                                rOffset: 0,
+                                size: [
+                                    {x: -12, y: 0},
+                                    {x: 12, y: 0},
+                                    {x: 12, y: -150},
+                                    {x: -12, y: -150},
+                                ],
+                                offset: {x: -20, y: 0},
+                                style: {
+                                    fill: 'rgba(130, 130, 130, 1)',
+                                    stroke: {colour: '#696969', width: 5},
+                                },
+                                collision: false,
+                                hp: 1,
+                                maxHp: 1,
+                                isHit: 0,
+                                connected: [],
+                            }
+                        ],
+                    }
+                ],
+            },
         },
         obstacles: {
             obstacle1: {
@@ -3085,9 +3578,13 @@ const data = {
                 connected: [],
             },
         },
+    },
+    scripts: {
+        turretAI: 'aaargh',
     }
 };
 
+var teams = [];
 var projectiles = [];
 var particles = [];
 var entities = [];
@@ -3341,22 +3838,44 @@ function level3(pos={x: 0, y: 0}, scale=1) {
     console.log('Loaded level 3');
 };
 
-function testing() {
+function testing(pos={x: 0, y: 0}, scale=1) {
+    const basicWall = 'basicWall';
+
+    teams = [];
     obstacles = [];
-    entities = [];
     projectiles = [];
     explosions = [];
     particles = [];
+    entities = [];
+
+    let enemyForce = JSON.parse(JSON.stringify(data.template.team));
+    enemyForce.id = 'Enemy';
+    enemyForce.scripts.turretAI = data.scripts.turretAI;
+    teams.push(enemyForce);
+    placeObstacle(basicWall, Math.PI/2, vMath(vMath({x: 400, y: -200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI/2*3, vMath(vMath({x: -400, y: -200}, pos, '+'), scale, '*'));
 
     player = JSON.parse(JSON.stringify(data.tank));
-    let enemy1 = JSON.parse(JSON.stringify(data.tank));
+    let enemy1 = Object.assign({}, JSON.parse(JSON.stringify(data.turret)), JSON.parse(JSON.stringify(data.template.memory)));
+    enemy1.script = 'turretAI';
     player.directControl = true;
-    player = addWeapon(player, 'RPG', 'tank', 'main');
+    player = addWeapon(player, 'dualCannon', 'tank', 'main');
     player = addWeapon(player, 'Cannon', 'tank', 'rightSide');
     player = addWeapon(player, 'Cannon', 'tank', 'leftSide');
+    enemy1 = addWeapon(enemy1, 'dualCannon', 'staticTurret', 'mainGun');
     entities.push(player);
+    console.log(enemy1);
     entities.push(enemy1);
     console.log('Loaded testing area');
+};
+
+function spawnUnit(team, unitType, unitName, script) {
+    let unit = Object.assign({}, JSON.parse(JSON.stringify(data[unitType])), JSON.parse(JSON.stringify(data.memory)));
+    unit.team = team.id;
+    unit.id = unitName;
+    unit.x = team.spawn.x;
+    unit.y = team.spawn.y;
+    unit.script = script;
 };
 
 function recursiveAddParts(unit, parts, weapon) {
@@ -3437,9 +3956,9 @@ function addWeapon(unit, weaponID, unitType, slot, keybind='click') {
         case 'tank':
             switch (slot) {
                 case 'main':
-                    offset = vMath(offset, {x: 0, y: -150}, '+');
+                    offset = vMath(offset, {x: 0, y: -70}, '+');
                     if (weaponID == 'RPG') {
-                        offset = vMath(offset, {x: -40, y: 0}, '+');
+                        offset = {x: -40, y: -150};
                     }
                     break;
                 case 'rightSide':
@@ -3448,6 +3967,18 @@ function addWeapon(unit, weaponID, unitType, slot, keybind='click') {
                     weapon = JSON.parse(JSON.stringify(data.template.weapons[weaponID+'SideMounted']));
                     offset = vMath(offset, {x: -140, y: -0}, '+');
                     facing = 'body';
+                    break;
+                default:
+                    throw `tf is this slot type! ${slot[0]}`;
+            }
+            break;
+        case 'staticTurret':
+            switch (slot) {
+                case 'mainGun':
+                    offset = vMath(offset, {x: 0, y: -100}, '+');
+                    if (weaponID == 'RPG') {
+                        offset = {x: -40, y: -180};
+                    }
                     break;
                 default:
                     throw `tf is this slot type! ${slot[0]}`;
@@ -3602,12 +4133,19 @@ function handlePlayerMotion(unit, obstacles) {
             unit.y += tankVelocity.y;
             unit.vx = tankVelocity.x;
             unit.vy = tankVelocity.y;
-            if (handleGroundCollisions(unit, obstacles)) {
-                unit.x -= tankVelocity.x;
-                unit.y -= tankVelocity.y;
-                unit.vx = 0;
-                unit.vy = 0;
-            }
+            let res = handleGroundCollisions(unit, obstacles, true, tankVelocity);
+                if (res) {
+                    unit.x -= tankVelocity.x;
+                    unit.y -= tankVelocity.y;
+                    if (res != 'well, shit') {
+                        let tankWallVector = {x: res.end.x - res.start.x, y: res.end.y - res.start.y};
+                        let tankSlideVector = vMath(vMath(tankVelocity, tankWallVector, 'projection'), 0.9, 'multiply');
+                        unit.x += tankSlideVector.x;
+                        unit.y += tankSlideVector.y;
+                        unit.vx = tankSlideVector.x;
+                        unit.vy = tankSlideVector.y;
+                    }
+                }
             return unit;
         case 'drone':
             let droneTopSpeed = unit.v;
@@ -3662,8 +4200,10 @@ function handlePlayerMotion(unit, obstacles) {
             unit.vx *= 0.995;
             unit.vy *= 0.995;
             return unit;
+        case 'staticTurret':
+            return unit;
         default:
-            throw 'ERROR: are you f*king retarded? Tf is that unit type?';
+            throw 'ERROR: are you f**king retarded? Tf is that unit type?';
 
     };
 };
@@ -3801,7 +4341,7 @@ function lineCircleIntersectV2(line, circle) { // HAIL OUR AI OVERLORDS
 
     // Check if the distance is less than or equal to the circle's radius
     return distance <= circle.r;
-}
+};
 
 function polyCollisionAdv(polygon1, polygon2) { // dis also do be broken...
     for (let i = 0; i < polygon1.length; i++) {
@@ -3973,6 +4513,7 @@ function shoot(unit, part) {
 };
 
 function handleShooting(unit) {
+    console.log(unit);
     unit.parts = recursiveParts(unit, unit.parts, shoot);
     return unit;
 };
@@ -4190,7 +4731,6 @@ function obstacleCollision(unit, obstacle) {
 
 function handleGroundCollisions(u, obstacles, smort=false, prevMotion=null) {
     let unit = JSON.parse(JSON.stringify(u));
-    // If man somehow collides with multiple obstacles at once, I will end myself
     let hasCollided = false;
     for (let i = 0; i < obstacles.length; i++) {
         let obstacle = obstacles[i];
@@ -4289,7 +4829,7 @@ function detectCollision(unit, part, obj) { // UNFINISHED, shields were ababdone
             throw `ERROR: wtf is this object type2! ${cType}`;
     }
     return false;
-}
+};
 
 function handleShields(unit, parts, projectiles, explosions) { // UNFINISHED, shields were ababdoned due to self collision issues.
     //console.log(unit, parts);
@@ -4333,6 +4873,35 @@ function handleShields(unit, parts, projectiles, explosions) { // UNFINISHED, sh
     return [];
 };
 
+const testingScript = `(function() {
+    let data = {}
+    return data; 
+})()`;
+
+function runScript(unit, teams, obstacles, projectiles, explosions, particles, entities) {
+    let player = undefined;
+    let t = undefined;
+    let script = '';
+    for (let i = 0; i < teams.length; i++) {
+        if (teams[i].id == unit.team) {
+            script = teams.scripts[unit.script];
+            return eval(script);
+        }
+    }
+    throw 'ERROR: No script found';
+};
+
+function handleOrders(unit) {
+    for (let i = 0; i < unit.orders.length; i++) {
+        let order = unit.orders[i];
+        switch (order.id) {
+            case 'move':
+                switch (order.data)
+        }
+    }
+    return unit;
+};
+
 function main() {
     // draw the background
     clearCanvas('main');
@@ -4347,10 +4916,18 @@ function main() {
         }
     }
 
+    // Execute Player Scripts
+
+
     // Process entities
     let newEntities = [];
     for (let i = 0; i < entities.length; i++) {
+        console.log(entities[i]);
         entities[i].parts = checkDeadParts(entities[i], entities[i].parts);
+        if (entities[i].script == 'turretAI') {
+            entities[i].orders = runScript(JSON.parse(JSON.stringify(entities[i])), JSON.parse(JSON.stringify(teams)), JSON.parse(JSON.stringify(obstacles)), JSON.parse(JSON.stringify(projectiles)), JSON.parse(JSON.stringify(explosions)), JSON.parse(JSON.stringify(particles)), JSON.parse(JSON.stringify(entities)));
+        }
+        entities[i] = handleOrders(entities[i]);
         entities[i] = handlePlayerMotion(entities[i], obstacles);
         entities[i] = handleShooting(entities[i]);
         if (entities[i].alive) {
@@ -4359,13 +4936,13 @@ function main() {
     }
     entities = newEntities;
     // Process Projectiles
-    renderParticles(projectiles);
     projectiles = simulatePhysics(projectiles);
     projectiles = handleDecay(projectiles);
     // Render Entities
     for (let i = 0; i < entities.length; i++) {
         renderUnit(entities[i]);
     }
+    renderParticles(projectiles);
 
     // Handle Collisions
     projectiles = handleBulletWallCollisions(obstacles, projectiles);
