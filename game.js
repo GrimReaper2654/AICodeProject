@@ -4010,202 +4010,384 @@ function addWeapon(unit, weaponID, unitType, slot, keybind='click') {
 
 function handlePlayerMotion(unit, obstacles) {
     //console.log(unit.keyboard);
-    if (unit.directControl) {
-        unit.aimPos = mousepos;
-    } else {
-        if (unit.keyboard.aimPos) {
-            unit.aimPos = unit.keyboard.aimPos;
-        }
-    }
     unit.mouseR = rotateAngle(unit.mouseR, aim(vMath(vMath(vMath(display,0.5,'multiply'),player,'subtract'),unit,'add'), vMath(vMath(unit.aimPos,player,'subtract'),unit,'add')), unit.tr);
     unit.lastMoved += 1;
     unit.r = correctAngle(unit.r);
     unit.mouseR = correctAngle(unit.mouseR);
-    switch (unit.type) {
-        case 'mech':
-            unit.vx = 0;
-            unit.vy = 0;
-            let mechSpeed = unit.v;
-            if (unit.keyboard.capslock) {
-                mechSpeed *= 1.2;
-            }
-            if (unit.keyboard.shift) {
-                mechSpeed *= 1.2;
-            }
-            let mechIsMoving = false;
-            let mechVector = {x: 0, y: 0}; // special maths
-            if (unit.keyboard.w || unit.keyboard.arrowup) { 
-                mechVector.y -= 1
-                mechIsMoving = true;
-            }
-            if (unit.keyboard.s || unit.keyboard.arrowdown) {
-                mechVector.y += 1
-                mechIsMoving = true;
-            }
-            if (unit.keyboard.a || unit.keyboard.arrowleft) { 
-                mechVector.x -= 1
-                mechIsMoving = true;
-            }
-            if (unit.keyboard.d || unit.keyboard.arrowright) { 
-                mechVector.x += 1
-                mechIsMoving = true;
-            }
-            //console.log('before', unit.r);
-            if (mechIsMoving) {
-                if (unit.lastMoved >= 20) {
-                    unit.r = aim({x:0, y: 0}, mechVector);
-                } else {
-                    unit.r = rotateAngle(unit.r, aim({x:0, y: 0}, mechVector), unit.vr);
-                }
-                unit.r = correctAngle(unit.r);
-                let mechVelocity = toComponent(mechSpeed, unit.r);
-                unit.x += mechVelocity.x;
-                unit.y += mechVelocity.y;
-                unit.vx = mechVelocity.x;
-                unit.vy = mechVelocity.y;
-                unit.lastMoved = -1;
-                /* // Old unrealistic collision (use if new version doesn't work)
-                if (handleGroundCollisions(unit, obstacles)) {
-                    unit.x -= mechVelocity.x;
-                    unit.y -= mechVelocity.y;
-                    unit.vx = 0;
-                    unit.vy = 0;
-                }*/
-                let res = handleGroundCollisions(unit, obstacles, true, mechVelocity);
-                if (res) {
-                    unit.x -= mechVelocity.x;
-                    unit.y -= mechVelocity.y;
-                    if (res != 'well, shit') {
-                        let mechWallVector = {x: res.end.x - res.start.x, y: res.end.y - res.start.y};
-                        let mechSlideVector = vMath(vMath(mechVelocity, mechWallVector, 'projection'), 0.75, 'multiply');
-                        unit.x += mechSlideVector.x;
-                        unit.y += mechSlideVector.y;
-                        unit.vx = mechSlideVector.x;
-                        unit.vy = mechSlideVector.y;
-                    }
-                }
-            }
-            //console.log('after', unit.r);
-            return unit;
-        case 'tank':
-            let tankTopSpeed = unit.v;
-            unit.r = correctAngle(unit.r);
-            if (unit.keyboard.capslock) {
-                tankTopSpeed *= 2;
-            }
-            if (unit.keyboard.shift) {
-                tankTopSpeed *= 1.5;
-            }
-            let tankSpeed = Math.sqrt(unit.vx**2+unit.vy**2);
-            if (unit.reverse) {
-                tankSpeed = -Math.abs(tankSpeed);
-            }
-            if (unit.keyboard.w || unit.keyboard.arrowup) { 
-                tankSpeed += tankTopSpeed/10;
-            }
-            if (unit.keyboard.s || unit.keyboard.arrowdown) {
-                tankSpeed -= tankTopSpeed/10;
-            }
-            if (unit.keyboard.a || unit.keyboard.arrowleft) { 
-                unit.r = rotateAngle(unit.r, unit.r-unit.vr, unit.vr);
-            }
-            if (unit.keyboard.d || unit.keyboard.arrowright) { 
-                unit.r = rotateAngle(unit.r, unit.r+unit.vr, unit.vr);
-            }
-            if (tankSpeed < 0) {
-                unit.reverse = true;
-            } else {
-                unit.reverse = false;
-            }
-            tankSpeed = Math.abs(tankSpeed);
-            if (tankSpeed > tankTopSpeed) {
-                tankSpeed = Math.max(tankTopSpeed, tankSpeed-0.25*tankTopSpeed);
-            }
-            if (tankSpeed < -tankTopSpeed*0.75) {
-                tankSpeed = Math.min(-tankTopSpeed*0.75, tankSpeed+0.25*tankTopSpeed);
-            }
-            let tankR = unit.r;
-            if (unit.reverse) {
-                tankR = correctAngle(unit.r+Math.PI);
-            }
-            let tankVelocity = toComponent(Math.abs(tankSpeed), tankR);
-            unit.x += tankVelocity.x;
-            unit.y += tankVelocity.y;
-            unit.vx = tankVelocity.x;
-            unit.vy = tankVelocity.y;
-            let res = handleGroundCollisions(unit, obstacles, true, tankVelocity);
-                if (res) {
-                    unit.x -= tankVelocity.x;
-                    unit.y -= tankVelocity.y;
-                    if (res != 'well, shit') {
-                        let tankWallVector = {x: res.end.x - res.start.x, y: res.end.y - res.start.y};
-                        let tankSlideVector = vMath(vMath(tankVelocity, tankWallVector, 'projection'), 0.9, 'multiply');
-                        unit.x += tankSlideVector.x;
-                        unit.y += tankSlideVector.y;
-                        unit.vx = tankSlideVector.x;
-                        unit.vy = tankSlideVector.y;
-                    }
-                }
-            return unit;
-        case 'drone':
-            let droneTopSpeed = unit.v;
-            if (unit.keyboard.capslock) {
-                droneTopSpeed *= 2;
-            }
-            if (unit.keyboard.shift) {
-                droneTopSpeed *= 1.5;
-            }
-            unit.isMoving = false;
-            if (unit.directControl) {
-                let droneVector = {x: 0, y: 0}; // special maths
-                if (unit.keyboard.w || unit.keyboard.arrowup) { 
-                    droneVector.y -= 1
-                    unit.isMoving = true;
-                }
-                if (unit.keyboard.s || unit.keyboard.arrowdown) {
-                    droneVector.y += 1
-                    unit.isMoving = true;
-                }
-                if (unit.keyboard.a || unit.keyboard.arrowleft) { 
-                    droneVector.x -= 1
-                    unit.isMoving = true;
-                }
-                if (unit.keyboard.d || unit.keyboard.arrowright) { 
-                    droneVector.x += 1
-                    unit.isMoving = true;
-                }
-                if (unit.isMoving) {
-                    unit.r = aim({x:0, y: 0}, droneVector);
-                }
-            }
-            if (unit.isMoving) {
-                let droneAcceleration = toComponent(droneTopSpeed/60, unit.r);
-                unit.vx += droneAcceleration.x;
-                unit.vy += droneAcceleration.y;
-                let droneVelocity = Math.sqrt(unit.vx**2+unit.vy**2);
-                if (droneVelocity > unit.v) {
-                    let reduction = unit.v / droneVelocity;
-                    unit.vx *= reduction;
-                    unit.vy *= reduction;
-                }
-            }
-            unit.x += unit.vx;
-            unit.y += unit.vy;
-            if (handleGroundCollisions(unit, obstacles)) {
-                unit.x -= unit.vx;
-                unit.y -= unit.vy;
+    if (unit.directControl) {
+        unit.aimPos = mousepos;
+        switch (unit.type) {
+            case 'mech':
                 unit.vx = 0;
                 unit.vy = 0;
-            }
-            unit.vx *= 0.995;
-            unit.vy *= 0.995;
-            return unit;
-        case 'staticTurret':
-            return unit;
-        default:
-            throw 'ERROR: are you f**king retarded? Tf is that unit type?';
-
-    };
+                let mechSpeed = unit.v;
+                if (unit.keyboard.capslock) {
+                    mechSpeed *= 1.2;
+                }
+                if (unit.keyboard.shift) {
+                    mechSpeed *= 1.2;
+                }
+                let mechIsMoving = false;
+                let mechVector = {x: 0, y: 0}; // special maths
+                if (unit.keyboard.w || unit.keyboard.arrowup) { 
+                    mechVector.y -= 1
+                    mechIsMoving = true;
+                }
+                if (unit.keyboard.s || unit.keyboard.arrowdown) {
+                    mechVector.y += 1
+                    mechIsMoving = true;
+                }
+                if (unit.keyboard.a || unit.keyboard.arrowleft) { 
+                    mechVector.x -= 1
+                    mechIsMoving = true;
+                }
+                if (unit.keyboard.d || unit.keyboard.arrowright) { 
+                    mechVector.x += 1
+                    mechIsMoving = true;
+                }
+                //console.log('before', unit.r);
+                if (mechIsMoving) {
+                    if (unit.lastMoved >= 20) {
+                        unit.r = aim({x:0, y: 0}, mechVector);
+                    } else {
+                        unit.r = rotateAngle(unit.r, aim({x:0, y: 0}, mechVector), unit.vr);
+                    }
+                    unit.r = correctAngle(unit.r);
+                    let mechVelocity = toComponent(mechSpeed, unit.r);
+                    unit.x += mechVelocity.x;
+                    unit.y += mechVelocity.y;
+                    unit.vx = mechVelocity.x;
+                    unit.vy = mechVelocity.y;
+                    unit.lastMoved = -1;
+                    /* // Old unrealistic collision (use if new version doesn't work)
+                    if (handleGroundCollisions(unit, obstacles)) {
+                        unit.x -= mechVelocity.x;
+                        unit.y -= mechVelocity.y;
+                        unit.vx = 0;
+                        unit.vy = 0;
+                    }*/
+                    let res = handleGroundCollisions(unit, obstacles, true, mechVelocity);
+                    if (res) {
+                        unit.x -= mechVelocity.x;
+                        unit.y -= mechVelocity.y;
+                        if (res != 'well, shit') {
+                            let mechWallVector = {x: res.end.x - res.start.x, y: res.end.y - res.start.y};
+                            let mechSlideVector = vMath(vMath(mechVelocity, mechWallVector, 'projection'), 0.75, 'multiply');
+                            unit.x += mechSlideVector.x;
+                            unit.y += mechSlideVector.y;
+                            unit.vx = mechSlideVector.x;
+                            unit.vy = mechSlideVector.y;
+                        }
+                    }
+                }
+                //console.log('after', unit.r);
+                return unit;
+            case 'tank':
+                let tankTopSpeed = unit.v;
+                unit.r = correctAngle(unit.r);
+                if (unit.keyboard.capslock) {
+                    tankTopSpeed *= 2;
+                }
+                if (unit.keyboard.shift) {
+                    tankTopSpeed *= 1.5;
+                }
+                let tankSpeed = Math.sqrt(unit.vx**2+unit.vy**2);
+                if (unit.reverse) {
+                    tankSpeed = -Math.abs(tankSpeed);
+                }
+                if (unit.keyboard.w || unit.keyboard.arrowup) { 
+                    tankSpeed += tankTopSpeed/10;
+                }
+                if (unit.keyboard.s || unit.keyboard.arrowdown) {
+                    tankSpeed -= tankTopSpeed/10;
+                }
+                if (unit.keyboard.a || unit.keyboard.arrowleft) { 
+                    unit.r = rotateAngle(unit.r, unit.r-unit.vr, unit.vr);
+                }
+                if (unit.keyboard.d || unit.keyboard.arrowright) { 
+                    unit.r = rotateAngle(unit.r, unit.r+unit.vr, unit.vr);
+                }
+                if (tankSpeed < 0) {
+                    unit.reverse = true;
+                } else {
+                    unit.reverse = false;
+                }
+                tankSpeed = Math.abs(tankSpeed);
+                if (tankSpeed > tankTopSpeed) {
+                    tankSpeed = Math.max(tankTopSpeed, tankSpeed-0.25*tankTopSpeed);
+                }
+                if (tankSpeed < -tankTopSpeed*0.75) {
+                    tankSpeed = Math.min(-tankTopSpeed*0.75, tankSpeed+0.25*tankTopSpeed);
+                }
+                let tankR = unit.r;
+                if (unit.reverse) {
+                    tankR = correctAngle(unit.r+Math.PI);
+                }
+                let tankVelocity = toComponent(Math.abs(tankSpeed), tankR);
+                unit.x += tankVelocity.x;
+                unit.y += tankVelocity.y;
+                unit.vx = tankVelocity.x;
+                unit.vy = tankVelocity.y;
+                let res = handleGroundCollisions(unit, obstacles, true, tankVelocity);
+                    if (res) {
+                        unit.x -= tankVelocity.x;
+                        unit.y -= tankVelocity.y;
+                        if (res != 'well, shit') {
+                            let tankWallVector = {x: res.end.x - res.start.x, y: res.end.y - res.start.y};
+                            let tankSlideVector = vMath(vMath(tankVelocity, tankWallVector, 'projection'), 0.9, 'multiply');
+                            unit.x += tankSlideVector.x;
+                            unit.y += tankSlideVector.y;
+                            unit.vx = tankSlideVector.x;
+                            unit.vy = tankSlideVector.y;
+                        }
+                    }
+                return unit;
+            case 'drone':
+                let droneTopSpeed = unit.v;
+                if (unit.keyboard.capslock) {
+                    droneTopSpeed *= 2;
+                }
+                if (unit.keyboard.shift) {
+                    droneTopSpeed *= 1.5;
+                }
+                unit.isMoving = false;
+                if (unit.directControl) {
+                    let droneVector = {x: 0, y: 0}; // special maths
+                    if (unit.keyboard.w || unit.keyboard.arrowup) { 
+                        droneVector.y -= 1
+                        unit.isMoving = true;
+                    }
+                    if (unit.keyboard.s || unit.keyboard.arrowdown) {
+                        droneVector.y += 1
+                        unit.isMoving = true;
+                    }
+                    if (unit.keyboard.a || unit.keyboard.arrowleft) { 
+                        droneVector.x -= 1
+                        unit.isMoving = true;
+                    }
+                    if (unit.keyboard.d || unit.keyboard.arrowright) { 
+                        droneVector.x += 1
+                        unit.isMoving = true;
+                    }
+                    if (unit.isMoving) {
+                        unit.r = aim({x:0, y: 0}, droneVector);
+                    }
+                }
+                if (unit.isMoving) {
+                    let droneAcceleration = toComponent(droneTopSpeed/60, unit.r);
+                    unit.vx += droneAcceleration.x;
+                    unit.vy += droneAcceleration.y;
+                    let droneVelocity = Math.sqrt(unit.vx**2+unit.vy**2);
+                    if (droneVelocity > unit.v) {
+                        let reduction = unit.v / droneVelocity;
+                        unit.vx *= reduction;
+                        unit.vy *= reduction;
+                    }
+                }
+                unit.x += unit.vx;
+                unit.y += unit.vy;
+                if (handleGroundCollisions(unit, obstacles)) {
+                    unit.x -= unit.vx;
+                    unit.y -= unit.vy;
+                    unit.vx = 0;
+                    unit.vy = 0;
+                }
+                unit.vx *= 0.995;
+                unit.vy *= 0.995;
+                return unit;
+            case 'staticTurret':
+                return unit;
+            default:
+                throw 'ERROR: are you f**king retarded? Tf is that unit type?';
+    
+        };
+    } else {
+        switch (unit.type) {
+            case 'mech':
+                unit.vx = 0;
+                unit.vy = 0;
+                let mechSpeed = unit.v;
+                if (unit.keyboard.capslock) {
+                    mechSpeed *= 1.2;
+                }
+                if (unit.keyboard.shift) {
+                    mechSpeed *= 1.2;
+                }
+                let mechIsMoving = false;
+                let mechVector = {x: 0, y: 0}; // special maths
+                if (unit.keyboard.w || unit.keyboard.arrowup) { 
+                    mechVector.y -= 1
+                    mechIsMoving = true;
+                }
+                if (unit.keyboard.s || unit.keyboard.arrowdown) {
+                    mechVector.y += 1
+                    mechIsMoving = true;
+                }
+                if (unit.keyboard.a || unit.keyboard.arrowleft) { 
+                    mechVector.x -= 1
+                    mechIsMoving = true;
+                }
+                if (unit.keyboard.d || unit.keyboard.arrowright) { 
+                    mechVector.x += 1
+                    mechIsMoving = true;
+                }
+                //console.log('before', unit.r);
+                if (mechIsMoving) {
+                    if (unit.lastMoved >= 20) {
+                        unit.r = aim({x:0, y: 0}, mechVector);
+                    } else {
+                        unit.r = rotateAngle(unit.r, aim({x:0, y: 0}, mechVector), unit.vr);
+                    }
+                    unit.r = correctAngle(unit.r);
+                    let mechVelocity = toComponent(mechSpeed, unit.r);
+                    unit.x += mechVelocity.x;
+                    unit.y += mechVelocity.y;
+                    unit.vx = mechVelocity.x;
+                    unit.vy = mechVelocity.y;
+                    unit.lastMoved = -1;
+                    /* // Old unrealistic collision (use if new version doesn't work)
+                    if (handleGroundCollisions(unit, obstacles)) {
+                        unit.x -= mechVelocity.x;
+                        unit.y -= mechVelocity.y;
+                        unit.vx = 0;
+                        unit.vy = 0;
+                    }*/
+                    let res = handleGroundCollisions(unit, obstacles, true, mechVelocity);
+                    if (res) {
+                        unit.x -= mechVelocity.x;
+                        unit.y -= mechVelocity.y;
+                        if (res != 'well, shit') {
+                            let mechWallVector = {x: res.end.x - res.start.x, y: res.end.y - res.start.y};
+                            let mechSlideVector = vMath(vMath(mechVelocity, mechWallVector, 'projection'), 0.75, 'multiply');
+                            unit.x += mechSlideVector.x;
+                            unit.y += mechSlideVector.y;
+                            unit.vx = mechSlideVector.x;
+                            unit.vy = mechSlideVector.y;
+                        }
+                    }
+                }
+                //console.log('after', unit.r);
+                return unit;
+            case 'tank':
+                let tankTopSpeed = unit.v;
+                unit.r = correctAngle(unit.r);
+                if (unit.keyboard.capslock) {
+                    tankTopSpeed *= 2;
+                }
+                if (unit.keyboard.shift) {
+                    tankTopSpeed *= 1.5;
+                }
+                let tankSpeed = Math.sqrt(unit.vx**2+unit.vy**2);
+                if (unit.reverse) {
+                    tankSpeed = -Math.abs(tankSpeed);
+                }
+                if (unit.keyboard.w || unit.keyboard.arrowup) { 
+                    tankSpeed += tankTopSpeed/10;
+                }
+                if (unit.keyboard.s || unit.keyboard.arrowdown) {
+                    tankSpeed -= tankTopSpeed/10;
+                }
+                if (unit.keyboard.a || unit.keyboard.arrowleft) { 
+                    unit.r = rotateAngle(unit.r, unit.r-unit.vr, unit.vr);
+                }
+                if (unit.keyboard.d || unit.keyboard.arrowright) { 
+                    unit.r = rotateAngle(unit.r, unit.r+unit.vr, unit.vr);
+                }
+                if (tankSpeed < 0) {
+                    unit.reverse = true;
+                } else {
+                    unit.reverse = false;
+                }
+                tankSpeed = Math.abs(tankSpeed);
+                if (tankSpeed > tankTopSpeed) {
+                    tankSpeed = Math.max(tankTopSpeed, tankSpeed-0.25*tankTopSpeed);
+                }
+                if (tankSpeed < -tankTopSpeed*0.75) {
+                    tankSpeed = Math.min(-tankTopSpeed*0.75, tankSpeed+0.25*tankTopSpeed);
+                }
+                let tankR = unit.r;
+                if (unit.reverse) {
+                    tankR = correctAngle(unit.r+Math.PI);
+                }
+                let tankVelocity = toComponent(Math.abs(tankSpeed), tankR);
+                unit.x += tankVelocity.x;
+                unit.y += tankVelocity.y;
+                unit.vx = tankVelocity.x;
+                unit.vy = tankVelocity.y;
+                let res = handleGroundCollisions(unit, obstacles, true, tankVelocity);
+                    if (res) {
+                        unit.x -= tankVelocity.x;
+                        unit.y -= tankVelocity.y;
+                        if (res != 'well, shit') {
+                            let tankWallVector = {x: res.end.x - res.start.x, y: res.end.y - res.start.y};
+                            let tankSlideVector = vMath(vMath(tankVelocity, tankWallVector, 'projection'), 0.9, 'multiply');
+                            unit.x += tankSlideVector.x;
+                            unit.y += tankSlideVector.y;
+                            unit.vx = tankSlideVector.x;
+                            unit.vy = tankSlideVector.y;
+                        }
+                    }
+                return unit;
+            case 'drone':
+                let droneTopSpeed = unit.v;
+                if (unit.keyboard.capslock) {
+                    droneTopSpeed *= 2;
+                }
+                if (unit.keyboard.shift) {
+                    droneTopSpeed *= 1.5;
+                }
+                unit.isMoving = false;
+                if (unit.directControl) {
+                    let droneVector = {x: 0, y: 0}; // special maths
+                    if (unit.keyboard.w || unit.keyboard.arrowup) { 
+                        droneVector.y -= 1
+                        unit.isMoving = true;
+                    }
+                    if (unit.keyboard.s || unit.keyboard.arrowdown) {
+                        droneVector.y += 1
+                        unit.isMoving = true;
+                    }
+                    if (unit.keyboard.a || unit.keyboard.arrowleft) { 
+                        droneVector.x -= 1
+                        unit.isMoving = true;
+                    }
+                    if (unit.keyboard.d || unit.keyboard.arrowright) { 
+                        droneVector.x += 1
+                        unit.isMoving = true;
+                    }
+                    if (unit.isMoving) {
+                        unit.r = aim({x:0, y: 0}, droneVector);
+                    }
+                }
+                if (unit.isMoving) {
+                    let droneAcceleration = toComponent(droneTopSpeed/60, unit.r);
+                    unit.vx += droneAcceleration.x;
+                    unit.vy += droneAcceleration.y;
+                    let droneVelocity = Math.sqrt(unit.vx**2+unit.vy**2);
+                    if (droneVelocity > unit.v) {
+                        let reduction = unit.v / droneVelocity;
+                        unit.vx *= reduction;
+                        unit.vy *= reduction;
+                    }
+                }
+                unit.x += unit.vx;
+                unit.y += unit.vy;
+                if (handleGroundCollisions(unit, obstacles)) {
+                    unit.x -= unit.vx;
+                    unit.y -= unit.vy;
+                    unit.vx = 0;
+                    unit.vy = 0;
+                }
+                unit.vx *= 0.995;
+                unit.vy *= 0.995;
+                return unit;
+            case 'staticTurret':
+                return unit;
+            default:
+                throw 'ERROR: are you f**king retarded? Tf is that unit type?';
+    
+        };
+    }
 };
 
 function polygonCollision(polygon1, polygon2) {
@@ -4896,7 +5078,7 @@ function handleOrders(unit) {
         let order = unit.orders[i];
         switch (order.id) {
             case 'move':
-                switch (order.data)
+                unit.moveR = order.data;
         }
     }
     return unit;
