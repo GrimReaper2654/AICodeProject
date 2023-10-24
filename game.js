@@ -588,6 +588,14 @@ function circleToPolygon(pos, r, sides) {
     return polygon;
 };
 
+const code1 = `
+let orders = [];
+let target = entities[0];
+orders.push({id: 'aim', value: {x: target.x, y: target.y}});
+orders.push({id: 'click', value: true});
+return orders;
+`;
+
 // The return of the excessively overcomplicated data storage system
 const data = {
     mech: {
@@ -1319,6 +1327,551 @@ const data = {
                         collision: true,
                         hp: 2500,
                         maxHp: 2500,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'rightSide',
+                        type: 'circle', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: 0,
+                        offset: {x: 0, y: 0},
+                        style: {
+                            fill: 'rgba(0, 0, 0, 0)',
+                            stroke: {colour: 'rgba(0, 0, 0, 0)', width: 1},
+                        },
+                        collision: false,
+                        hp: 1,
+                        maxHp: 1,
+                        isHit: 0,
+                        connected: [],
+                    },
+                    {
+                        id: 'leftSide',
+                        type: 'circle', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: 0,
+                        offset: {x: 0, y: 0},
+                        style: {
+                            fill: 'rgba(0, 0, 0, 0)',
+                            stroke: {colour: 'rgba(0, 0, 0, 0)', width: 1},
+                        },
+                        collision: false,
+                        hp: 1,
+                        maxHp: 1,
+                        isHit: 0,
+                        connected: [],
+                    },
+                ],
+            },
+            {
+                id: 'turretBody',
+                facing: 'turret',
+                type: 'polygon', 
+                rOffset: 0,
+                size: [
+                    {x: -50, y: 60},
+                    {x: 50, y: 60},
+                    {x: 50, y: -45},
+                    {x: 25, y: -70},
+                    {x: -25, y: -70},
+                    {x: -50, y: -45},
+                ],
+                offset: {x: 0, y: 0},
+                style: {
+                    fill: 'rgba(210, 210, 210, 1)',
+                    stroke: {colour: '#696969', width: 10},
+                },
+                collision: false,
+                hp: 1,
+                maxHp: 1,
+                isHit: 0,
+                connected: [
+                    {
+                        id: 'main',
+                        facing: 'turret',
+                        type: 'polygon', 
+                        rOffset: 0,
+                        size: [
+                            {x: -12, y: 100},
+                            {x: -12, y: 0},
+                            {x: 12, y: 0},
+                            {x: 12, y: 100},
+                        ],
+                        offset: {x: 0, y: -170},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 10},
+                        },
+                        collision: false,
+                        hp: 1,
+                        maxHp: 1,
+                        isHit: 0,
+                        connected: [],
+                    },
+                ],
+            }
+        ],
+        effects: [],
+    },
+    tonk: {
+        x: 0,
+        y: 0,
+        r: 0, // direction of motion
+        vx: 0,
+        vy: 0,
+        mouseR: 0, // current Aim
+        v: 4, // top speed
+        vr: 45 / 60 / 180 * Math.PI, // rotation of tracks (feet)
+        tr: 150 / 60 / 180 * Math.PI, // rotation of turret (main body)
+        keyboard: [],
+        aimPos: {x: 69, y: 69},
+        collisionR: 600,
+        groundCollisionR: 120,
+        tallCollisionR: 180,
+        reverse: false,
+        directControl: false,
+        type: 'tank',
+        alive: true,
+        parts: [
+            {
+                id: 'mainBodyContainer',
+                facing: 'body',
+                type: 'polygon', 
+                rOffset: 0,
+                size: [
+                    {x: -90, y: -100},
+                    {x: 90, y: -100},
+                    {x: 90, y: 100},
+                    {x: -90, y: 100},
+                ],
+                offset: {x: 0, y: 0},
+                style: {
+                    fill: 'rgba(210, 210, 210, 1)',
+                    stroke: {colour: '#696969', width: 10},
+                },
+                collision: true,
+                core: true,
+                hp: 50000,
+                maxHp: 50000,
+                isHit: 0,
+                connected: [
+                    {
+                        id: 'frontArmour',
+                        facing: 'body',
+                        type: 'polygon', 
+                        rOffset: 0,
+                        size: [
+                            {x: -90, y: -10},
+                            {x: 0, y: -25},
+                            {x: 90, y: -10},
+                            {x: 90, y: 0},
+                            {x: -90, y: 0},
+                        ],
+                        offset: {x: 0, y: -100},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 10},
+                        },
+                        collision: true,
+                        hp: 75000,
+                        maxHp: 75000,
+                        isHit: 0,
+                        connected: [
+                            {
+                                id: 'bulldozer',
+                                facing: 'body',
+                                type: 'polygon', 
+                                rOffset: 0,
+                                size: [
+                                    {x: -100, y: 0},
+                                    {x: 100, y: 0},
+                                    {x: 100, y: -50},
+                                    {x: 75, y: -30},
+                                    {x: -75, y: -30},
+                                    {x: -100, y: -50},
+                                ],
+                                offset: {x: 0, y: -150},
+                                style: {
+                                    fill: 'rgba(200, 200, 200, 1)',
+                                    stroke: {colour: '#696969', width: 10},
+                                },
+                                collision: true,
+                                hp: 150000,
+                                maxHp: 150000,
+                                isHit: 0,
+                                connected: [
+                                    {
+                                        id: 'support1',
+                                        facing: 'body',
+                                        type: 'polygon', 
+                                        rOffset: 0,
+                                        size: [
+                                            {x: -10, y: 0},
+                                            {x: 10, y: 0},
+                                            {x: 10, y: 30},
+                                            {x: -10, y: 30},
+                                        ],
+                                        offset: {x: -30, y: -150},
+                                        style: {
+                                            fill: 'rgba(200, 200, 200, 1)',
+                                            stroke: {colour: '#696969', width: 10},
+                                        },
+                                        collision: false,
+                                        hp: 1,
+                                        maxHp: 1,
+                                        isHit: 0,
+                                        connected: [],
+                                    },
+                                    {
+                                        id: 'support2',
+                                        facing: 'body',
+                                        type: 'polygon', 
+                                        rOffset: 0,
+                                        size: [
+                                            {x: -10, y: 0},
+                                            {x: 10, y: 0},
+                                            {x: 10, y: 30},
+                                            {x: -10, y: 30},
+                                        ],
+                                        offset: {x: 30, y: -150},
+                                        style: {
+                                            fill: 'rgba(200, 200, 200, 1)',
+                                            stroke: {colour: '#696969', width: 10},
+                                        },
+                                        collision: false,
+                                        hp: 1,
+                                        maxHp: 1,
+                                        isHit: 0,
+                                        connected: [],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                    {
+                        id: 'tracks1',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -15, y: 130},
+                            {x: 15, y: 130},
+                            {x: 25, y: 120},
+                            {x: 25, y: -120},
+                            {x: 15, y: -130},
+                            {x: -15, y: -130},
+                            {x: -25, y: -120},
+                            {x: -25, y: 120},
+                        ],
+                        offset: {x: -90, y: 0},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 10},
+                        },
+                        collision: false,
+                        hp: 1,
+                        maxHp: 1,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: true,
+                    },
+                    {
+                        id: 'tracks2',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -15, y: 130},
+                            {x: 15, y: 130},
+                            {x: 25, y: 120},
+                            {x: 25, y: -120},
+                            {x: 15, y: -130},
+                            {x: -15, y: -130},
+                            {x: -25, y: -120},
+                            {x: -25, y: 120},
+                        ],
+                        offset: {x: 90, y: 0},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 10},
+                        },
+                        collision: false,
+                        hp: 1,
+                        maxHp: 1,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: true,
+                    },
+                    {
+                        id: 'armour1.5',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: 130},
+                            {x: 5, y: 130},
+                            {x: 15, y: 125},
+                            {x: 15, y: 85},
+                            {x: 5, y: 80},
+                            {x: -5, y: 80},
+                            {x: -15, y: 85},
+                            {x: -15, y: 125},
+                        ],
+                        offset: {x: -100, y: 0},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 10000,
+                        maxHp: 10000,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'armour1.4',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: 30},
+                            {x: 5, y: 30},
+                            {x: 15, y: 35},
+                            {x: 15, y: 85},
+                            {x: 5, y: 80},
+                            {x: -5, y: 80},
+                            {x: -15, y: 85},
+                            {x: -15, y: 35},
+                        ],
+                        offset: {x: -100, y: -2},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 10000,
+                        maxHp: 10000,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'armour1.3',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: 30},
+                            {x: 5, y: 30},
+                            {x: 15, y: 35},
+                            {x: 15, y: -15},
+                            {x: 5, y: -20},
+                            {x: -5, y: -20},
+                            {x: -15, y: -15},
+                            {x: -15, y: 35},
+                        ],
+                        offset: {x: -100, y: -4},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 10000,
+                        maxHp: 10000,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'armour1.2',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: -70},
+                            {x: 5, y: -70},
+                            {x: 15, y: -65},
+                            {x: 15, y: -15},
+                            {x: 5, y: -20},
+                            {x: -5, y: -20},
+                            {x: -15, y: -15},
+                            {x: -15, y: -65},
+                        ],
+                        offset: {x: -100, y: -6},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 10000,
+                        maxHp: 10000,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'armour1.1',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: -70},
+                            {x: 5, y: -70},
+                            {x: 15, y: -65},
+                            {x: 15, y: -115},
+                            {x: 5, y: -120},
+                            {x: -5, y: -120},
+                            {x: -15, y: -115},
+                            {x: -15, y: -65},
+                        ],
+                        offset: {x: -100, y: -8},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 10000,
+                        maxHp: 10000,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'armour2.5',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: 130},
+                            {x: 5, y: 130},
+                            {x: 15, y: 125},
+                            {x: 15, y: 85},
+                            {x: 5, y: 80},
+                            {x: -5, y: 80},
+                            {x: -15, y: 85},
+                            {x: -15, y: 125},
+                        ],
+                        offset: {x: 100, y: 0},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 10000,
+                        maxHp: 10000,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'armour2.4',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: 30},
+                            {x: 5, y: 30},
+                            {x: 15, y: 35},
+                            {x: 15, y: 85},
+                            {x: 5, y: 80},
+                            {x: -5, y: 80},
+                            {x: -15, y: 85},
+                            {x: -15, y: 35},
+                        ],
+                        offset: {x: 100, y: -2},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 10000,
+                        maxHp: 10000,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'armour2.3',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: 30},
+                            {x: 5, y: 30},
+                            {x: 15, y: 35},
+                            {x: 15, y: -15},
+                            {x: 5, y: -20},
+                            {x: -5, y: -20},
+                            {x: -15, y: -15},
+                            {x: -15, y: 35},
+                        ],
+                        offset: {x: 100, y: -4},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 10000,
+                        maxHp: 10000,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'armour2.2',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: -70},
+                            {x: 5, y: -70},
+                            {x: 15, y: -65},
+                            {x: 15, y: -15},
+                            {x: 5, y: -20},
+                            {x: -5, y: -20},
+                            {x: -15, y: -15},
+                            {x: -15, y: -65},
+                        ],
+                        offset: {x: 100, y: -6},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 10000,
+                        maxHp: 10000,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'armour2.1',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: -70},
+                            {x: 5, y: -70},
+                            {x: 15, y: -65},
+                            {x: 15, y: -115},
+                            {x: 5, y: -120},
+                            {x: -5, y: -120},
+                            {x: -15, y: -115},
+                            {x: -15, y: -65},
+                        ],
+                        offset: {x: 100, y: -8},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 10000,
+                        maxHp: 10000,
                         isHit: 0,
                         connected: [],
                         groundCollision: false,
@@ -3580,7 +4133,7 @@ const data = {
         },
     },
     scripts: {
-        turretAI: 'aaargh',
+        turretAI: `(function() {${code1}})()`,
     }
 };
 
@@ -3638,14 +4191,12 @@ if (savedPlayer !== null) {
     player.directControl = true;
     
     player = addWeapon(player, 'MediumMachineGun', 'mech', 'leftArmMain');
-    //player = addWeapon(player, 'Nuker', 'mech', 'leftArmMain');
-    //player = addWeapon(player, 'Blaster', 'mech', 'leftArmMain');
     player = addWeapon(player, 'MediumMachineGun', 'mech', 'rightArmMain');
     player = addWeapon(player, 'Cannon', 'mech', 'leftArmSide');
     player = addWeapon(player, 'Cannon', 'mech', 'rightArmSide');
     player = addWeapon(player, 'GunTurret', 'mech', 'headTurret');
     player = addWeapon(player, 'DualRPG', 'mech', 'back');
-    //player = addWeapon(player, 'ShieldProjectorMech', 'mech', 'back');
+
     entities.push(player);
 };
 
@@ -3857,7 +4408,9 @@ function testing(pos={x: 0, y: 0}, scale=1) {
 
     player = JSON.parse(JSON.stringify(data.tank));
     let enemy1 = Object.assign({}, JSON.parse(JSON.stringify(data.turret)), JSON.parse(JSON.stringify(data.template.memory)));
+    let enemy2 = Object.assign({}, JSON.parse(JSON.stringify(data.mech)), JSON.parse(JSON.stringify(data.template.memory)));
     enemy1.script = 'turretAI';
+    enemy2.script = 'turretAI';
     player.directControl = true;
     player = addWeapon(player, 'dualCannon', 'tank', 'main');
     player = addWeapon(player, 'Cannon', 'tank', 'rightSide');
@@ -3865,7 +4418,27 @@ function testing(pos={x: 0, y: 0}, scale=1) {
     enemy1 = addWeapon(enemy1, 'dualCannon', 'staticTurret', 'mainGun');
     entities.push(player);
     console.log(enemy1);
-    entities.push(enemy1);
+    enemy1.x = -750;
+    enemy1.y = 750;
+    entities.push(JSON.parse(JSON.stringify(enemy1)));
+    enemy1.x = 750;
+    enemy1.y = 750;
+    entities.push(JSON.parse(JSON.stringify(enemy1)));
+    enemy1.x = 750;
+    enemy1.y = -750;
+    entities.push(JSON.parse(JSON.stringify(enemy1)));
+    enemy1.x = -750;
+    enemy1.y = -750
+    entities.push(JSON.parse(JSON.stringify(enemy1)));
+    enemy2.x = 0;
+    enemy2.y = -1250
+    enemy2 = addWeapon(enemy2, 'MediumMachineGun', 'mech', 'leftArmMain');
+    enemy2 = addWeapon(enemy2, 'MediumMachineGun', 'mech', 'rightArmMain');
+    enemy2 = addWeapon(enemy2, 'Cannon', 'mech', 'leftArmSide');
+    enemy2 = addWeapon(enemy2, 'Cannon', 'mech', 'rightArmSide');
+    enemy2 = addWeapon(enemy2, 'GunTurret', 'mech', 'headTurret');
+    enemy2 = addWeapon(enemy2, 'DualRPG', 'mech', 'back');
+    entities.push(JSON.parse(JSON.stringify(enemy2)));
     console.log('Loaded testing area');
 };
 
@@ -4010,384 +4583,202 @@ function addWeapon(unit, weaponID, unitType, slot, keybind='click') {
 
 function handlePlayerMotion(unit, obstacles) {
     //console.log(unit.keyboard);
-    unit.mouseR = rotateAngle(unit.mouseR, aim(vMath(vMath(vMath(display,0.5,'multiply'),player,'subtract'),unit,'add'), vMath(vMath(unit.aimPos,player,'subtract'),unit,'add')), unit.tr);
+    if (unit.keyboard.aimPos) {
+        unit.aimPos = unit.keyboard.aimPos;
+        unit.keyboard.aimPos = undefined;
+    }
+    if (unit.directControl) {
+        unit.aimPos = vMath(vMath(mousepos, unit, '+'), vMath(display, 0.5, '*'), '-');
+    }
+    unit.mouseR = rotateAngle(unit.mouseR, aim(unit, unit.aimPos), unit.tr);
     unit.lastMoved += 1;
     unit.r = correctAngle(unit.r);
     unit.mouseR = correctAngle(unit.mouseR);
-    if (unit.directControl) {
-        unit.aimPos = mousepos;
-        switch (unit.type) {
-            case 'mech':
-                unit.vx = 0;
-                unit.vy = 0;
-                let mechSpeed = unit.v;
-                if (unit.keyboard.capslock) {
-                    mechSpeed *= 1.2;
-                }
-                if (unit.keyboard.shift) {
-                    mechSpeed *= 1.2;
-                }
-                let mechIsMoving = false;
-                let mechVector = {x: 0, y: 0}; // special maths
-                if (unit.keyboard.w || unit.keyboard.arrowup) { 
-                    mechVector.y -= 1
-                    mechIsMoving = true;
-                }
-                if (unit.keyboard.s || unit.keyboard.arrowdown) {
-                    mechVector.y += 1
-                    mechIsMoving = true;
-                }
-                if (unit.keyboard.a || unit.keyboard.arrowleft) { 
-                    mechVector.x -= 1
-                    mechIsMoving = true;
-                }
-                if (unit.keyboard.d || unit.keyboard.arrowright) { 
-                    mechVector.x += 1
-                    mechIsMoving = true;
-                }
-                //console.log('before', unit.r);
-                if (mechIsMoving) {
-                    if (unit.lastMoved >= 20) {
-                        unit.r = aim({x:0, y: 0}, mechVector);
-                    } else {
-                        unit.r = rotateAngle(unit.r, aim({x:0, y: 0}, mechVector), unit.vr);
-                    }
-                    unit.r = correctAngle(unit.r);
-                    let mechVelocity = toComponent(mechSpeed, unit.r);
-                    unit.x += mechVelocity.x;
-                    unit.y += mechVelocity.y;
-                    unit.vx = mechVelocity.x;
-                    unit.vy = mechVelocity.y;
-                    unit.lastMoved = -1;
-                    /* // Old unrealistic collision (use if new version doesn't work)
-                    if (handleGroundCollisions(unit, obstacles)) {
-                        unit.x -= mechVelocity.x;
-                        unit.y -= mechVelocity.y;
-                        unit.vx = 0;
-                        unit.vy = 0;
-                    }*/
-                    let res = handleGroundCollisions(unit, obstacles, true, mechVelocity);
-                    if (res) {
-                        unit.x -= mechVelocity.x;
-                        unit.y -= mechVelocity.y;
-                        if (res != 'well, shit') {
-                            let mechWallVector = {x: res.end.x - res.start.x, y: res.end.y - res.start.y};
-                            let mechSlideVector = vMath(vMath(mechVelocity, mechWallVector, 'projection'), 0.75, 'multiply');
-                            unit.x += mechSlideVector.x;
-                            unit.y += mechSlideVector.y;
-                            unit.vx = mechSlideVector.x;
-                            unit.vy = mechSlideVector.y;
-                        }
-                    }
-                }
-                //console.log('after', unit.r);
-                return unit;
-            case 'tank':
-                let tankTopSpeed = unit.v;
-                unit.r = correctAngle(unit.r);
-                if (unit.keyboard.capslock) {
-                    tankTopSpeed *= 2;
-                }
-                if (unit.keyboard.shift) {
-                    tankTopSpeed *= 1.5;
-                }
-                let tankSpeed = Math.sqrt(unit.vx**2+unit.vy**2);
-                if (unit.reverse) {
-                    tankSpeed = -Math.abs(tankSpeed);
-                }
-                if (unit.keyboard.w || unit.keyboard.arrowup) { 
-                    tankSpeed += tankTopSpeed/10;
-                }
-                if (unit.keyboard.s || unit.keyboard.arrowdown) {
-                    tankSpeed -= tankTopSpeed/10;
-                }
-                if (unit.keyboard.a || unit.keyboard.arrowleft) { 
-                    unit.r = rotateAngle(unit.r, unit.r-unit.vr, unit.vr);
-                }
-                if (unit.keyboard.d || unit.keyboard.arrowright) { 
-                    unit.r = rotateAngle(unit.r, unit.r+unit.vr, unit.vr);
-                }
-                if (tankSpeed < 0) {
-                    unit.reverse = true;
+    switch (unit.type) {
+        case 'mech':
+            unit.vx = 0;
+            unit.vy = 0;
+            let mechSpeed = unit.v;
+            if (unit.keyboard.capslock) {
+                mechSpeed *= 1.2;
+            }
+            if (unit.keyboard.shift) {
+                mechSpeed *= 1.2;
+            }
+            let mechIsMoving = false;
+            let mechVector = {x: 0, y: 0}; // special maths
+            if (unit.keyboard.w || unit.keyboard.arrowup) { 
+                mechVector.y -= 1
+                mechIsMoving = true;
+            }
+            if (unit.keyboard.s || unit.keyboard.arrowdown) {
+                mechVector.y += 1
+                mechIsMoving = true;
+            }
+            if (unit.keyboard.a || unit.keyboard.arrowleft) { 
+                mechVector.x -= 1
+                mechIsMoving = true;
+            }
+            if (unit.keyboard.d || unit.keyboard.arrowright) { 
+                mechVector.x += 1
+                mechIsMoving = true;
+            }
+            //console.log('before', unit.r);
+            if (mechIsMoving) {
+                if (unit.lastMoved >= 20) {
+                    unit.r = aim({x:0, y: 0}, mechVector);
                 } else {
-                    unit.reverse = false;
+                    unit.r = rotateAngle(unit.r, aim({x:0, y: 0}, mechVector), unit.vr);
                 }
-                tankSpeed = Math.abs(tankSpeed);
-                if (tankSpeed > tankTopSpeed) {
-                    tankSpeed = Math.max(tankTopSpeed, tankSpeed-0.25*tankTopSpeed);
-                }
-                if (tankSpeed < -tankTopSpeed*0.75) {
-                    tankSpeed = Math.min(-tankTopSpeed*0.75, tankSpeed+0.25*tankTopSpeed);
-                }
-                let tankR = unit.r;
-                if (unit.reverse) {
-                    tankR = correctAngle(unit.r+Math.PI);
-                }
-                let tankVelocity = toComponent(Math.abs(tankSpeed), tankR);
-                unit.x += tankVelocity.x;
-                unit.y += tankVelocity.y;
-                unit.vx = tankVelocity.x;
-                unit.vy = tankVelocity.y;
-                let res = handleGroundCollisions(unit, obstacles, true, tankVelocity);
-                    if (res) {
-                        unit.x -= tankVelocity.x;
-                        unit.y -= tankVelocity.y;
-                        if (res != 'well, shit') {
-                            let tankWallVector = {x: res.end.x - res.start.x, y: res.end.y - res.start.y};
-                            let tankSlideVector = vMath(vMath(tankVelocity, tankWallVector, 'projection'), 0.9, 'multiply');
-                            unit.x += tankSlideVector.x;
-                            unit.y += tankSlideVector.y;
-                            unit.vx = tankSlideVector.x;
-                            unit.vy = tankSlideVector.y;
-                        }
-                    }
-                return unit;
-            case 'drone':
-                let droneTopSpeed = unit.v;
-                if (unit.keyboard.capslock) {
-                    droneTopSpeed *= 2;
-                }
-                if (unit.keyboard.shift) {
-                    droneTopSpeed *= 1.5;
-                }
-                unit.isMoving = false;
-                if (unit.directControl) {
-                    let droneVector = {x: 0, y: 0}; // special maths
-                    if (unit.keyboard.w || unit.keyboard.arrowup) { 
-                        droneVector.y -= 1
-                        unit.isMoving = true;
-                    }
-                    if (unit.keyboard.s || unit.keyboard.arrowdown) {
-                        droneVector.y += 1
-                        unit.isMoving = true;
-                    }
-                    if (unit.keyboard.a || unit.keyboard.arrowleft) { 
-                        droneVector.x -= 1
-                        unit.isMoving = true;
-                    }
-                    if (unit.keyboard.d || unit.keyboard.arrowright) { 
-                        droneVector.x += 1
-                        unit.isMoving = true;
-                    }
-                    if (unit.isMoving) {
-                        unit.r = aim({x:0, y: 0}, droneVector);
-                    }
-                }
-                if (unit.isMoving) {
-                    let droneAcceleration = toComponent(droneTopSpeed/60, unit.r);
-                    unit.vx += droneAcceleration.x;
-                    unit.vy += droneAcceleration.y;
-                    let droneVelocity = Math.sqrt(unit.vx**2+unit.vy**2);
-                    if (droneVelocity > unit.v) {
-                        let reduction = unit.v / droneVelocity;
-                        unit.vx *= reduction;
-                        unit.vy *= reduction;
-                    }
-                }
-                unit.x += unit.vx;
-                unit.y += unit.vy;
+                unit.r = correctAngle(unit.r);
+                let mechVelocity = toComponent(mechSpeed, unit.r);
+                unit.x += mechVelocity.x;
+                unit.y += mechVelocity.y;
+                unit.vx = mechVelocity.x;
+                unit.vy = mechVelocity.y;
+                unit.lastMoved = -1;
+                /* // Old unrealistic collision (use if new version doesn't work)
                 if (handleGroundCollisions(unit, obstacles)) {
-                    unit.x -= unit.vx;
-                    unit.y -= unit.vy;
+                    unit.x -= mechVelocity.x;
+                    unit.y -= mechVelocity.y;
                     unit.vx = 0;
                     unit.vy = 0;
+                }*/
+                let res = handleGroundCollisions(unit, obstacles, true, mechVelocity);
+                if (res) {
+                    unit.x -= mechVelocity.x;
+                    unit.y -= mechVelocity.y;
+                    if (res != 'well, shit') {
+                        let mechWallVector = {x: res.end.x - res.start.x, y: res.end.y - res.start.y};
+                        let mechSlideVector = vMath(vMath(mechVelocity, mechWallVector, 'projection'), 0.75, 'multiply');
+                        unit.x += mechSlideVector.x;
+                        unit.y += mechSlideVector.y;
+                        unit.vx = mechSlideVector.x;
+                        unit.vy = mechSlideVector.y;
+                    }
                 }
-                unit.vx *= 0.995;
-                unit.vy *= 0.995;
-                return unit;
-            case 'staticTurret':
-                return unit;
-            default:
-                throw 'ERROR: are you f**king retarded? Tf is that unit type?';
-    
-        };
-    } else {
-        switch (unit.type) {
-            case 'mech':
-                unit.vx = 0;
-                unit.vy = 0;
-                let mechSpeed = unit.v;
-                if (unit.keyboard.capslock) {
-                    mechSpeed *= 1.2;
+            }
+            //console.log('after', unit.r);
+            return unit;
+        case 'tank':
+            let tankTopSpeed = unit.v;
+            unit.r = correctAngle(unit.r);
+            if (unit.keyboard.capslock) {
+                tankTopSpeed *= 2;
+            }
+            if (unit.keyboard.shift) {
+                tankTopSpeed *= 1.5;
+            }
+            let tankSpeed = Math.sqrt(unit.vx**2+unit.vy**2);
+            if (unit.reverse) {
+                tankSpeed = -Math.abs(tankSpeed);
+            }
+            if (unit.keyboard.w || unit.keyboard.arrowup) { 
+                tankSpeed += tankTopSpeed/10;
+            }
+            if (unit.keyboard.s || unit.keyboard.arrowdown) {
+                tankSpeed -= tankTopSpeed/10;
+            }
+            if (unit.keyboard.a || unit.keyboard.arrowleft) { 
+                unit.r = rotateAngle(unit.r, unit.r-unit.vr, unit.vr);
+            }
+            if (unit.keyboard.d || unit.keyboard.arrowright) { 
+                unit.r = rotateAngle(unit.r, unit.r+unit.vr, unit.vr);
+            }
+            if (tankSpeed < 0) {
+                unit.reverse = true;
+            } else {
+                unit.reverse = false;
+            }
+            tankSpeed = Math.abs(tankSpeed);
+            if (tankSpeed > tankTopSpeed) {
+                tankSpeed = Math.max(tankTopSpeed, tankSpeed-0.25*tankTopSpeed);
+            }
+            if (tankSpeed < -tankTopSpeed*0.75) {
+                tankSpeed = Math.min(-tankTopSpeed*0.75, tankSpeed+0.25*tankTopSpeed);
+            }
+            let tankR = unit.r;
+            if (unit.reverse) {
+                tankR = correctAngle(unit.r+Math.PI);
+            }
+            let tankVelocity = toComponent(Math.abs(tankSpeed), tankR);
+            unit.x += tankVelocity.x;
+            unit.y += tankVelocity.y;
+            unit.vx = tankVelocity.x;
+            unit.vy = tankVelocity.y;
+            let res = handleGroundCollisions(unit, obstacles, true, tankVelocity);
+                if (res) {
+                    unit.x -= tankVelocity.x;
+                    unit.y -= tankVelocity.y;
+                    if (res != 'well, shit') {
+                        let tankWallVector = {x: res.end.x - res.start.x, y: res.end.y - res.start.y};
+                        let tankSlideVector = vMath(vMath(tankVelocity, tankWallVector, 'projection'), 0.9, 'multiply');
+                        unit.x += tankSlideVector.x;
+                        unit.y += tankSlideVector.y;
+                        unit.vx = tankSlideVector.x;
+                        unit.vy = tankSlideVector.y;
+                    }
                 }
-                if (unit.keyboard.shift) {
-                    mechSpeed *= 1.2;
-                }
-                let mechIsMoving = false;
-                let mechVector = {x: 0, y: 0}; // special maths
+            return unit;
+        case 'drone':
+            let droneTopSpeed = unit.v;
+            if (unit.keyboard.capslock) {
+                droneTopSpeed *= 2;
+            }
+            if (unit.keyboard.shift) {
+                droneTopSpeed *= 1.5;
+            }
+            unit.isMoving = false;
+            if (unit.directControl) {
+                let droneVector = {x: 0, y: 0}; // special maths
                 if (unit.keyboard.w || unit.keyboard.arrowup) { 
-                    mechVector.y -= 1
-                    mechIsMoving = true;
+                    droneVector.y -= 1
+                    unit.isMoving = true;
                 }
                 if (unit.keyboard.s || unit.keyboard.arrowdown) {
-                    mechVector.y += 1
-                    mechIsMoving = true;
+                    droneVector.y += 1
+                    unit.isMoving = true;
                 }
                 if (unit.keyboard.a || unit.keyboard.arrowleft) { 
-                    mechVector.x -= 1
-                    mechIsMoving = true;
+                    droneVector.x -= 1
+                    unit.isMoving = true;
                 }
                 if (unit.keyboard.d || unit.keyboard.arrowright) { 
-                    mechVector.x += 1
-                    mechIsMoving = true;
-                }
-                //console.log('before', unit.r);
-                if (mechIsMoving) {
-                    if (unit.lastMoved >= 20) {
-                        unit.r = aim({x:0, y: 0}, mechVector);
-                    } else {
-                        unit.r = rotateAngle(unit.r, aim({x:0, y: 0}, mechVector), unit.vr);
-                    }
-                    unit.r = correctAngle(unit.r);
-                    let mechVelocity = toComponent(mechSpeed, unit.r);
-                    unit.x += mechVelocity.x;
-                    unit.y += mechVelocity.y;
-                    unit.vx = mechVelocity.x;
-                    unit.vy = mechVelocity.y;
-                    unit.lastMoved = -1;
-                    /* // Old unrealistic collision (use if new version doesn't work)
-                    if (handleGroundCollisions(unit, obstacles)) {
-                        unit.x -= mechVelocity.x;
-                        unit.y -= mechVelocity.y;
-                        unit.vx = 0;
-                        unit.vy = 0;
-                    }*/
-                    let res = handleGroundCollisions(unit, obstacles, true, mechVelocity);
-                    if (res) {
-                        unit.x -= mechVelocity.x;
-                        unit.y -= mechVelocity.y;
-                        if (res != 'well, shit') {
-                            let mechWallVector = {x: res.end.x - res.start.x, y: res.end.y - res.start.y};
-                            let mechSlideVector = vMath(vMath(mechVelocity, mechWallVector, 'projection'), 0.75, 'multiply');
-                            unit.x += mechSlideVector.x;
-                            unit.y += mechSlideVector.y;
-                            unit.vx = mechSlideVector.x;
-                            unit.vy = mechSlideVector.y;
-                        }
-                    }
-                }
-                //console.log('after', unit.r);
-                return unit;
-            case 'tank':
-                let tankTopSpeed = unit.v;
-                unit.r = correctAngle(unit.r);
-                if (unit.keyboard.capslock) {
-                    tankTopSpeed *= 2;
-                }
-                if (unit.keyboard.shift) {
-                    tankTopSpeed *= 1.5;
-                }
-                let tankSpeed = Math.sqrt(unit.vx**2+unit.vy**2);
-                if (unit.reverse) {
-                    tankSpeed = -Math.abs(tankSpeed);
-                }
-                if (unit.keyboard.w || unit.keyboard.arrowup) { 
-                    tankSpeed += tankTopSpeed/10;
-                }
-                if (unit.keyboard.s || unit.keyboard.arrowdown) {
-                    tankSpeed -= tankTopSpeed/10;
-                }
-                if (unit.keyboard.a || unit.keyboard.arrowleft) { 
-                    unit.r = rotateAngle(unit.r, unit.r-unit.vr, unit.vr);
-                }
-                if (unit.keyboard.d || unit.keyboard.arrowright) { 
-                    unit.r = rotateAngle(unit.r, unit.r+unit.vr, unit.vr);
-                }
-                if (tankSpeed < 0) {
-                    unit.reverse = true;
-                } else {
-                    unit.reverse = false;
-                }
-                tankSpeed = Math.abs(tankSpeed);
-                if (tankSpeed > tankTopSpeed) {
-                    tankSpeed = Math.max(tankTopSpeed, tankSpeed-0.25*tankTopSpeed);
-                }
-                if (tankSpeed < -tankTopSpeed*0.75) {
-                    tankSpeed = Math.min(-tankTopSpeed*0.75, tankSpeed+0.25*tankTopSpeed);
-                }
-                let tankR = unit.r;
-                if (unit.reverse) {
-                    tankR = correctAngle(unit.r+Math.PI);
-                }
-                let tankVelocity = toComponent(Math.abs(tankSpeed), tankR);
-                unit.x += tankVelocity.x;
-                unit.y += tankVelocity.y;
-                unit.vx = tankVelocity.x;
-                unit.vy = tankVelocity.y;
-                let res = handleGroundCollisions(unit, obstacles, true, tankVelocity);
-                    if (res) {
-                        unit.x -= tankVelocity.x;
-                        unit.y -= tankVelocity.y;
-                        if (res != 'well, shit') {
-                            let tankWallVector = {x: res.end.x - res.start.x, y: res.end.y - res.start.y};
-                            let tankSlideVector = vMath(vMath(tankVelocity, tankWallVector, 'projection'), 0.9, 'multiply');
-                            unit.x += tankSlideVector.x;
-                            unit.y += tankSlideVector.y;
-                            unit.vx = tankSlideVector.x;
-                            unit.vy = tankSlideVector.y;
-                        }
-                    }
-                return unit;
-            case 'drone':
-                let droneTopSpeed = unit.v;
-                if (unit.keyboard.capslock) {
-                    droneTopSpeed *= 2;
-                }
-                if (unit.keyboard.shift) {
-                    droneTopSpeed *= 1.5;
-                }
-                unit.isMoving = false;
-                if (unit.directControl) {
-                    let droneVector = {x: 0, y: 0}; // special maths
-                    if (unit.keyboard.w || unit.keyboard.arrowup) { 
-                        droneVector.y -= 1
-                        unit.isMoving = true;
-                    }
-                    if (unit.keyboard.s || unit.keyboard.arrowdown) {
-                        droneVector.y += 1
-                        unit.isMoving = true;
-                    }
-                    if (unit.keyboard.a || unit.keyboard.arrowleft) { 
-                        droneVector.x -= 1
-                        unit.isMoving = true;
-                    }
-                    if (unit.keyboard.d || unit.keyboard.arrowright) { 
-                        droneVector.x += 1
-                        unit.isMoving = true;
-                    }
-                    if (unit.isMoving) {
-                        unit.r = aim({x:0, y: 0}, droneVector);
-                    }
+                    droneVector.x += 1
+                    unit.isMoving = true;
                 }
                 if (unit.isMoving) {
-                    let droneAcceleration = toComponent(droneTopSpeed/60, unit.r);
-                    unit.vx += droneAcceleration.x;
-                    unit.vy += droneAcceleration.y;
-                    let droneVelocity = Math.sqrt(unit.vx**2+unit.vy**2);
-                    if (droneVelocity > unit.v) {
-                        let reduction = unit.v / droneVelocity;
-                        unit.vx *= reduction;
-                        unit.vy *= reduction;
-                    }
+                    unit.r = aim({x:0, y: 0}, droneVector);
                 }
-                unit.x += unit.vx;
-                unit.y += unit.vy;
-                if (handleGroundCollisions(unit, obstacles)) {
-                    unit.x -= unit.vx;
-                    unit.y -= unit.vy;
-                    unit.vx = 0;
-                    unit.vy = 0;
+            }
+            if (unit.isMoving) {
+                let droneAcceleration = toComponent(droneTopSpeed/60, unit.r);
+                unit.vx += droneAcceleration.x;
+                unit.vy += droneAcceleration.y;
+                let droneVelocity = Math.sqrt(unit.vx**2+unit.vy**2);
+                if (droneVelocity > unit.v) {
+                    let reduction = unit.v / droneVelocity;
+                    unit.vx *= reduction;
+                    unit.vy *= reduction;
                 }
-                unit.vx *= 0.995;
-                unit.vy *= 0.995;
-                return unit;
-            case 'staticTurret':
-                return unit;
-            default:
-                throw 'ERROR: are you f**king retarded? Tf is that unit type?';
-    
-        };
-    }
+            }
+            unit.x += unit.vx;
+            unit.y += unit.vy;
+            if (handleGroundCollisions(unit, obstacles)) {
+                unit.x -= unit.vx;
+                unit.y -= unit.vy;
+                unit.vx = 0;
+                unit.vy = 0;
+            }
+            unit.vx *= 0.995;
+            unit.vy *= 0.995;
+            return unit;
+        case 'staticTurret':
+            return unit;
+        default:
+            throw 'ERROR: are you f**king retarded? Tf is that unit type?';
+
+    };
 };
 
 function polygonCollision(polygon1, polygon2) {
@@ -4405,8 +4796,6 @@ function polygonCollision(polygon1, polygon2) {
 };
 
 function lineCollision(l1, l2) { // dis do be broken tho...
-    console.log('START######################################################');
-    console.log(l1,l2);
     let l1Data = {min: {x: Math.min(l1.start.x, l1.end.x), y: Math.min(l1.start.y, l1.end.y)}, max: {x: Math.max(l1.start.x, l1.end.x), y: Math.max(l1.start.y, l1.end.y)}};
     let l2Data = {min: {x: Math.min(l2.start.x, l1.end.x), y: Math.min(l2.start.y, l2.end.y)}, max: {x: Math.max(l2.start.x, l2.end.x), y: Math.max(l2.start.y, l2.end.y)}};
     if (l1Data.max.x >= l2Data.min.x || l2Data.max.x >= l1Data.min.x) {
@@ -4695,7 +5084,6 @@ function shoot(unit, part) {
 };
 
 function handleShooting(unit) {
-    console.log(unit);
     unit.parts = recursiveParts(unit, unit.parts, shoot);
     return unit;
 };
@@ -5055,12 +5443,7 @@ function handleShields(unit, parts, projectiles, explosions) { // UNFINISHED, sh
     return [];
 };
 
-const testingScript = `(function() {
-    let data = {}
-    return data; 
-})()`;
-
-function runScript(unit, teams, obstacles, projectiles, explosions, particles, entities) {
+function runScript(unit, teams, obstacles, projectiles, explosions, particles, entities) { // return orders
     let player = undefined;
     let t = undefined;
     let script = '';
@@ -5070,16 +5453,24 @@ function runScript(unit, teams, obstacles, projectiles, explosions, particles, e
             return eval(script);
         }
     }
+    return eval(data.scripts.turretAI);
     throw 'ERROR: No script found';
 };
 
-function handleOrders(unit) {
+function handleOrdersKeyPressMode(unit) {
     for (let i = 0; i < unit.orders.length; i++) {
-        let order = unit.orders[i];
-        switch (order.id) {
-            case 'move':
-                unit.moveR = order.data;
+        if (unit.orders[i].id == 'aim') {
+            unit.keyboard.aimPos = unit.orders[i].value; // cordinate (absolute)
         }
+        unit.keyboard[unit.orders[i].id] = unit.orders[i].value;
+    }
+    return unit;
+};
+
+function handleScript(unit) {
+    if (unit.script) {
+        unit.orders = runScript(JSON.parse(JSON.stringify(unit)), JSON.parse(JSON.stringify(teams)), JSON.parse(JSON.stringify(obstacles)), JSON.parse(JSON.stringify(projectiles)), JSON.parse(JSON.stringify(explosions)), JSON.parse(JSON.stringify(particles)), JSON.parse(JSON.stringify(entities)));
+        unit = handleOrdersKeyPressMode(unit);
     }
     return unit;
 };
@@ -5098,18 +5489,12 @@ function main() {
         }
     }
 
-    // Execute Player Scripts
-
-
     // Process entities
     let newEntities = [];
     for (let i = 0; i < entities.length; i++) {
-        console.log(entities[i]);
+        //console.log(entities[i]);
         entities[i].parts = checkDeadParts(entities[i], entities[i].parts);
-        if (entities[i].script == 'turretAI') {
-            entities[i].orders = runScript(JSON.parse(JSON.stringify(entities[i])), JSON.parse(JSON.stringify(teams)), JSON.parse(JSON.stringify(obstacles)), JSON.parse(JSON.stringify(projectiles)), JSON.parse(JSON.stringify(explosions)), JSON.parse(JSON.stringify(particles)), JSON.parse(JSON.stringify(entities)));
-        }
-        entities[i] = handleOrders(entities[i]);
+        entities[i] = handleScript(entities[i]);
         entities[i] = handlePlayerMotion(entities[i], obstacles);
         entities[i] = handleShooting(entities[i]);
         if (entities[i].alive) {
@@ -5154,6 +5539,10 @@ function main() {
         }
     }
     explosions = newExpl;
+
+    if(entities.length <= 1) {
+        console.log('all enemies dead!');
+    }
 };
 
 var t=0;
@@ -5166,4 +5555,3 @@ async function game() {
 };
 
 // #1220DE
-
