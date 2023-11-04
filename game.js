@@ -596,6 +596,34 @@ orders.push({id: 'click', value: true});
 return orders;
 `;
 
+const basicTankAI = `
+let orders = [];
+let target = entities[0];
+orders.push({id: 'aim', value: {x: target.x, y: target.y}});
+orders.push({id: 'click', value: true});
+let nr = adjustAngle(correctAngle(aim(unit, target)-unit.r));
+if (Math.abs(nr) > Math.PI/48) {
+    if (nr > 0) {
+        orders.push({id: 'd', value: true});
+        orders.push({id: 'a', value: false});
+    } else {
+        orders.push({id: 'a', value: true});
+        orders.push({id: 'd', value: false});
+    }
+}
+let dist = getDist(unit, target);
+if (Math.abs(nr) < Math.PI/6 && dist > 750) {
+    orders.push({id: 'w', value: true});
+    orders.push({id: 's', value: false});
+}
+if (dist < 500) {
+    orders.push({id: 's', value: true});
+    orders.push({id: 'w', value: false});
+}
+console.log(orders);
+return orders;
+`;
+
 // The return of the excessively overcomplicated data storage system
 const data = {
     mech: {
@@ -2327,7 +2355,7 @@ const data = {
             orders: [], // orders to be executed by the team (spawn stuff)
         },
         weapons: {
-            debugWeapon: {
+            DebugWeapon: {
                 id: 'debugWeapon',
                 facing: 'turret',
                 type: 'polygon', 
@@ -3736,7 +3764,7 @@ const data = {
                     },
                 ],
             },
-            mainCannon: {
+            MainCannon: {
                 id: 'mainCannon',
                 facing: 'turret',
                 type: 'polygon', 
@@ -3816,7 +3844,7 @@ const data = {
                     }
                 ],
             },
-            dualCannon: {
+            DualCannon: {
                 id: 'dualCannonContainer',
                 facing: 'body',
                 type: 'circle', 
@@ -4134,6 +4162,7 @@ const data = {
     },
     scripts: {
         turretAI: `(function() {${code1}})()`,
+        tankAI: `(function() {${basicTankAI}})()`,
     }
 };
 
@@ -4402,34 +4431,42 @@ function testing(pos={x: 0, y: 0}, scale=1) {
     let enemyForce = JSON.parse(JSON.stringify(data.template.team));
     enemyForce.id = 'Enemy';
     enemyForce.scripts.turretAI = data.scripts.turretAI;
+    enemyForce.scripts.tankAI = data.scripts.tankAI;
     teams.push(enemyForce);
+
+    console.log(teams);
     placeObstacle(basicWall, Math.PI/2, vMath(vMath({x: 400, y: -200}, pos, '+'), scale, '*'));
     placeObstacle(basicWall, Math.PI/2*3, vMath(vMath({x: -400, y: -200}, pos, '+'), scale, '*'));
 
     player = JSON.parse(JSON.stringify(data.tank));
     let enemy1 = Object.assign({}, JSON.parse(JSON.stringify(data.turret)), JSON.parse(JSON.stringify(data.template.memory)));
     let enemy2 = Object.assign({}, JSON.parse(JSON.stringify(data.mech)), JSON.parse(JSON.stringify(data.template.memory)));
+    let enemy3 = Object.assign({}, JSON.parse(JSON.stringify(data.tank)), JSON.parse(JSON.stringify(data.template.memory)));
+    enemy1.team = 'Enemy';
+    enemy2.team = 'Enemy';
+    enemy3.team = 'Enemy';
     enemy1.script = 'turretAI';
     enemy2.script = 'turretAI';
+    enemy3.script = 'tankAI';
     player.directControl = true;
-    player = addWeapon(player, 'dualCannon', 'tank', 'main');
+    player = addWeapon(player, 'DualCannon', 'tank', 'main');
     player = addWeapon(player, 'Cannon', 'tank', 'rightSide');
     player = addWeapon(player, 'Cannon', 'tank', 'leftSide');
-    enemy1 = addWeapon(enemy1, 'dualCannon', 'staticTurret', 'mainGun');
+    enemy1 = addWeapon(enemy1, 'DualCannon', 'staticTurret', 'mainGun');
     entities.push(player);
     console.log(enemy1);
     enemy1.x = -750;
     enemy1.y = 750;
-    entities.push(JSON.parse(JSON.stringify(enemy1)));
+    //entities.push(JSON.parse(JSON.stringify(enemy1)));
     enemy1.x = 750;
     enemy1.y = 750;
-    entities.push(JSON.parse(JSON.stringify(enemy1)));
+    //entities.push(JSON.parse(JSON.stringify(enemy1)));
     enemy1.x = 750;
     enemy1.y = -750;
-    entities.push(JSON.parse(JSON.stringify(enemy1)));
+    //entities.push(JSON.parse(JSON.stringify(enemy1)));
     enemy1.x = -750;
     enemy1.y = -750
-    entities.push(JSON.parse(JSON.stringify(enemy1)));
+    //entities.push(JSON.parse(JSON.stringify(enemy1)));
     enemy2.x = 0;
     enemy2.y = -1250
     enemy2 = addWeapon(enemy2, 'MediumMachineGun', 'mech', 'leftArmMain');
@@ -4438,7 +4475,15 @@ function testing(pos={x: 0, y: 0}, scale=1) {
     enemy2 = addWeapon(enemy2, 'Cannon', 'mech', 'rightArmSide');
     enemy2 = addWeapon(enemy2, 'GunTurret', 'mech', 'headTurret');
     enemy2 = addWeapon(enemy2, 'DualRPG', 'mech', 'back');
-    entities.push(JSON.parse(JSON.stringify(enemy2)));
+    //entities.push(JSON.parse(JSON.stringify(enemy2)));
+    console.log(enemy3);
+    enemy3 = addWeapon(enemy3, 'MainCannon', 'tank', 'main');
+    enemy3.x = -1000;
+    enemy3.y = 1000
+    entities.push(JSON.parse(JSON.stringify(enemy3)));
+    enemy3.x = 1000;
+    enemy3.y = 1000
+    entities.push(JSON.parse(JSON.stringify(enemy3)));
     console.log('Loaded testing area');
 };
 
@@ -5449,11 +5494,10 @@ function runScript(unit, teams, obstacles, projectiles, explosions, particles, e
     let script = '';
     for (let i = 0; i < teams.length; i++) {
         if (teams[i].id == unit.team) {
-            script = teams.scripts[unit.script];
+            script = teams[i].scripts[unit.script];
             return eval(script);
         }
     }
-    return eval(data.scripts.turretAI);
     throw 'ERROR: No script found';
 };
 
