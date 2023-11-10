@@ -542,7 +542,7 @@ function pointInPolygon(point, polygon) {
     return inside;
 };
 
-function vMath(v1, v2, mode) { // Does not have dot product lmao, doesn't even have projection
+function vMath(v1, v2, mode) { 
     switch (mode) {
         case '||':
         case 'magnitude':
