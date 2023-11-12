@@ -502,13 +502,13 @@ function grid(spacing) { // TODO: update colours
 
 function handleExplosion(explosion) {
     //console.log(explosion);
-    drawCircle(explosion.x-r, explosion.y-r, explosion.r, '#fccbb1', '#f7b28d', 0.1, 0.2*explosion.transparancy, false);
-    drawCircle(explosion.x-r, explosion.y-r, explosion.r, false, '#f7b28d', 5, 0.2);
-    drawCircle(explosion.x-r, explosion.y-r, Math.max(explosion.r-20, 0), false, '#fcd8d2', 20, 0.1*explosion.transparancy, false);
-    drawCircle(explosion.x-r, explosion.y-r, Math.max(explosion.r-15, 0), false, '#fcd8d2', 15, 0.1*explosion.transparancy, false);
-    drawCircle(explosion.x-r, explosion.y-r, Math.max(explosion.r-10, 0), false, '#fcd8d2', 10, 0.1*explosion.transparancy, false);
-    drawCircle(explosion.x-r, explosion.y-r, Math.max(explosion.r-5, 0), false, '#fcd8d2', 5, 0.1*explosion.transparancy, false);
-    drawLight(explosion.x-r, explosion.y-r, explosion.r*1.1);
+    drawCircle(explosion.x-explosion.r, explosion.y-explosion.r, explosion.r, '#fccbb1', '#f7b28d', 0.1, 0.2*explosion.transparancy, false);
+    drawCircle(explosion.x-explosion.r, explosion.y-explosion.r, explosion.r, false, '#f7b28d', 5, 0.2);
+    drawCircle(explosion.x-explosion.r, explosion.y-explosion.r, Math.max(explosion.r-20, 0), false, '#fcd8d2', 20, 0.1*explosion.transparancy, false);
+    drawCircle(explosion.x-explosion.r, explosion.y-explosion.r, Math.max(explosion.r-15, 0), false, '#fcd8d2', 15, 0.1*explosion.transparancy, false);
+    drawCircle(explosion.x-explosion.r, explosion.y-explosion.r, Math.max(explosion.r-10, 0), false, '#fcd8d2', 10, 0.1*explosion.transparancy, false);
+    drawCircle(explosion.x-explosion.r, explosion.y-explosion.r, Math.max(explosion.r-5, 0), false, '#fcd8d2', 5, 0.1*explosion.transparancy, false);
+    drawLight(explosion.x-explosion.r, explosion.y-explosion.r, explosion.r*1.1);
     if (explosion.r >= explosion.maxR) {
         explosion.transparancy *= 0.75;
         explosion.r *= 1.2;
@@ -5064,7 +5064,7 @@ function level6(pos={x: 0, y: 0}, scale=1) {
     console.log('Loaded level 6');
 };
 
-function level7(pos={x: 0, y: 0}, scale=1) {
+function level8(pos={x: 0, y: 0}, scale=1) {
     const basicWall = 'basicWall';
     const basicFiller = 'basicFiller';
 
@@ -5143,10 +5143,10 @@ function level7(pos={x: 0, y: 0}, scale=1) {
     enemy2.x = 2000;
     enemy2.y = -2500;
     entities.push(JSON.parse(JSON.stringify(enemy2)));
-    console.log('Loaded level 7');
+    console.log('Loaded level 8');
 };
 
-function level8(pos={x: 0, y: 0}, scale=1) {
+function level7(pos={x: 0, y: 0}, scale=1) {
     const basicWall = 'basicWall';
     const basicFiller = 'basicFiller';
 
@@ -5347,7 +5347,7 @@ function recursiveModify(parts, facing=undefined, keybind=undefined) {
         parts[i].connected = recursiveModify(parts[i].connected);
     }
     return parts;
-}
+};
 
 function addWeapon(unit, weaponID, unitType, slot, keybind='click') {
     let weapon = JSON.parse(JSON.stringify(data.template.weapons[weaponID]));
