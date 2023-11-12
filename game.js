@@ -121,16 +121,16 @@ function drawLine(pos, r, length, style, absolute) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     if (style) {
         ctx.strokeStyle = style.colour;
-        ctx.lineWidth = style.width;
+        ctx.lineWidth = style.width*data.constants.zoom;
         ctx.globalAlpha = style.opacity;
     }
     ctx.beginPath();
     if (absolute) {
-        ctx.moveTo(pos.x, pos.y);
-        ctx.lineTo(pos.x + length * Math.cos(r), pos.y + length * Math.sin(r));
+        ctx.moveTo(pos.x*data.constants.zoom, pos.y*data.constants.zoom);
+        ctx.lineTo((pos.x + length * Math.cos(r))*data.constants.zoom, (pos.y + length * Math.sin(r))*data.constants.zoom);
     } else {
-        ctx.moveTo(pos.x-player.x+display.x/2, pos.y-player.y+display.y/2);
-        ctx.lineTo(pos.x-player.x+display.x/2 + length * Math.cos(r), pos.y-player.y+display.y/2 + length * Math.sin(r));
+        ctx.moveTo((pos.x-player.x)*data.constants.zoom+display.x/2, (pos.y-player.y)*data.constants.zoom+display.y/2);
+        ctx.lineTo((pos.x-player.x + length * Math.cos(r))*data.constants.zoom+display.x/2, (pos.y-player.y + length * Math.sin(r))*data.constants.zoom+display.y/2);
     }
     ctx.stroke();
     ctx.restore();
@@ -290,19 +290,23 @@ function toColour(colour) {
     return `rgba(${colour.r}, ${colour.g}, ${colour.b}, ${colour.a})`;
 };
 
-function drawCircle(x, y, radius, fill, stroke, strokeWidth, opacity=1) { // draw a circle
+function drawCircle(x, y, radius, fill, stroke, strokeWidth, opacity, absolute) { // draw a circle
     var canvas = document.getElementById('main');
     var ctx = canvas.getContext("2d");
     ctx.resetTransform();
-    ctx.globalAlpha = opacity;
     ctx.beginPath();
-    ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+    ctx.globalAlpha = opacity;
+    if (absolute) {
+        ctx.arc(x*data.constants.zoom, y*data.constants.zoom, radius*data.constants.zoom, 0, 2 * Math.PI, false);
+    } else {
+        ctx.arc((-player.x+x)*data.constants.zoom+display.x/2, (-player.y+y)*data.constants.zoom+display.y/2, radius*data.constants.zoom, 0, 2 * Math.PI, false);
+    }
     if (fill) {
         ctx.fillStyle = fill;
         ctx.fill();
     }
     if (stroke) {
-        ctx.lineWidth = strokeWidth;
+        ctx.lineWidth = strokeWidth*data.constants.zoom;
         ctx.strokeStyle = stroke;
         ctx.stroke();
     }
@@ -318,7 +322,7 @@ function displaytxt(txt, pos) {
     ctx.font = "20px Verdana";
     ctx.fillStyle = "rgba(0, 0, 0, 0.9)";
     // Display the points on the canvas
-    ctx.fillText(txt, pos.x, pos.y);
+    ctx.fillText(txt, pos.x*data.constants.zoom, pos.y*data.constants.zoom);
     ctx.stroke();
     ctx.restore();
 };
@@ -343,20 +347,20 @@ function drawPolygon(point, offset, r, fill, stroke, absolute, debug=false) {
     ctx.resetTransform();
     ctx.beginPath();
     if (absolute) {
-        ctx.moveTo(points[0].x + offset.x, points[0].y + offset.y);
-        if (debug) {displaytxt(`(${Math.round(points[0].x + offset.x)}, ${Math.round(points[0].y + offset.y)})`, {x: points[0].x + offset.x, y: points[0].y + offset.y});}
+        ctx.moveTo((points[0].x + offset.x)*data.constants.zoom, (points[0].y + offset.y)*data.constants.zoom);
+        if (debug) {displaytxt(`(${Math.round((points[0].x + offset.x)*data.constants.zoom)}, ${Math.round((points[0].y + offset.y)*data.constants.zoom)})`, {x: (points[0].x + offset.x)*data.constants.zoom, y: (points[0].y + offset.y)*data.constants.zoom});}
     } else {
-        ctx.moveTo(points[0].x-player.x+display.x/2 + offset.x, points[0].y-player.y+display.y/2 + offset.y);
-        if (debug) {displaytxt(`(${Math.round(points[0].x + offset.x)}, ${Math.round(points[0].y + offset.y)})`, {x: points[0].x-player.x+display.x/2 + offset.x, y: points[0].y-player.y+display.y/2 + offset.y});}
+        ctx.moveTo((points[0].x-player.x + offset.x)*data.constants.zoom+display.x/2, (points[0].y-player.y + offset.y)*data.constants.zoom+display.y/2);
+        if (debug) {displaytxt(`(${Math.round((points[0].x-player.x + offset.x)*data.constants.zoom+display.x/2)}, ${Math.round((points[0].y-player.y + offset.y)*data.constants.zoom+display.y/2)})`, {x: (points[0].x-player.x + offset.x)*data.constants.zoom+display.x/2, y: (points[0].y-player.y + offset.y)*data.constants.zoom+display.y/2});}
         //if (debug) {displaytxt(`(${Math.round(points[0].x-player.x+display.x/2 + offset.x)}, ${Math.round(points[0].y-player.y+display.y/2 + offset.y)})`, {x: points[0].x-player.x+display.x/2 + offset.x, y: points[0].y-player.y+display.y/2 + offset.y});}
     }
     for (let i = 1; i < points.length; i++) {
         if (absolute) {
-            ctx.lineTo(points[i].x + offset.x, points[i].y + offset.y);
-            if (debug) {displaytxt(`(${Math.round(points[i].x + offset.x)}, ${Math.round(points[i].y + offset.y)})`, {x: points[i].x + offset.x, y: points[i].y + offset.y});}
+            ctx.lineTo((points[i].x + offset.x)*data.constants.zoom, (points[i].y + offset.y)*data.constants.zoom);
+            if (debug) {displaytxt(`(${Math.round((points[i].x + offset.x)*data.constants.zoom)}, ${Math.round((points[i].y + offset.y)*data.constants.zoom)})`, {x: (points[i].x + offset.x)*data.constants.zoom, y: (points[i].y + offset.y)*data.constants.zoom});}
         } else {
-            ctx.lineTo(points[i].x-player.x+display.x/2 + offset.x, points[i].y-player.y+display.y/2 + offset.y);
-            if (debug) {displaytxt(`(${Math.round(points[i].x + offset.x)}, ${Math.round(points[i].y + offset.y)})`, {x: points[i].x-player.x+display.x/2 + offset.x, y: points[i].y-player.y+display.y/2 + offset.y});}
+            ctx.lineTo((points[i].x-player.x + offset.x)*data.constants.zoom+display.x/2, (points[i].y-player.y + offset.y)*data.constants.zoom+display.y/2);
+            if (debug) {displaytxt(`(${Math.round((points[i].x-player.x + offset.x)*data.constants.zoom+display.x/2)}, ${Math.round((points[i].y-player.y + offset.y)*data.constants.zoom+display.y/2)})`, {x: (points[i].x-player.x + offset.x)*data.constants.zoom+display.x/2, y: (points[i].y-player.y + offset.y)*data.constants.zoom+display.y/2});}
             //if (debug) {displaytxt(`(${Math.round(points[i].x-player.x+display.x/2 + offset.x)}, ${Math.round(points[i].y-player.y+display.y/2 + offset.y)})`, {x: points[i].x-player.x+display.x/2 + offset.x, y: points[i].y-player.y+display.y/2 + offset.y});}
         }
     }
@@ -366,7 +370,7 @@ function drawPolygon(point, offset, r, fill, stroke, absolute, debug=false) {
         ctx.fill();
     }
     if (stroke) {
-        ctx.lineWidth = stroke.width;
+        ctx.lineWidth = stroke.width*data.constants.zoom;
         ctx.strokeStyle = stroke.colour;
         ctx.stroke();
     }
@@ -376,8 +380,11 @@ function drawLight(x, y, radius) {
     var canvas = document.getElementById('main');
     var ctx = canvas.getContext("2d");
     ctx.beginPath();
-    ctx.arc(x, y, radius, 0, 2 * Math.PI);
-
+    if (false) {
+        ctx.arc(x*data.constants.zoom, y*data.constants.zoom, radius*data.constants.zoom, 0, 2 * Math.PI, false);
+    } else {
+        ctx.arc((player.x+x)*data.constants.zoom+display.x/2, (player.y+y)*data.constants.zoom+display.y/2, radius*data.constants.zoom, 0, 2 * Math.PI, false);
+    }
     const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
     gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
     gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
@@ -468,27 +475,40 @@ function PlayerUiBar(level, max, pos, dim, fillColour, border) {
 };
 
 function grid(spacing) { // TODO: update colours
+    /*
     var start = (player.y - display.y / 2) < 0 ? Math.ceil((player.y - display.y / 2) / spacing) * spacing : Math.floor((player.y - display.y / 2) / spacing) * spacing - spacing * 2;
     var end = (player.y + display.y / 2) < 0 ? Math.ceil((player.y + display.y / 2) / spacing) * spacing : Math.floor((player.y + display.y / 2) / spacing) * spacing + spacing * 2;
-    for (let i = start; i <= end; i += spacing) {
-        drawLine({x:(player.x - display.x / 2) - spacing,y:i}, r=0, display.x+spacing*2, {colour:'#000000',width:10,opacity:0.05});
+    for (let i = -display.x/data.constants.zoom; i <= end/data.constants.zoom; i += spacing) {
+        drawLine({x: spacing ,y: i}, r=0, display.x/data.constants.zoom+spacing*2, {colour:'#000000',width:10,opacity:0.05}, false);
     }
     start = (player.x - display.x / 2) < 0 ? Math.ceil((player.x - display.x / 2) / spacing) * spacing : Math.floor((player.x - display.x / 2) / spacing) * spacing - spacing * 2;
     end = (player.x + display.x / 2) < 0 ? Math.ceil((player.x + display.x / 2) / spacing) * spacing : Math.floor((player.x + display.x / 2) / spacing) * spacing + spacing * 2;
-    for (var i = start; i < end; i += spacing) {
-        drawLine({x:i,y:(player.y - display.y / 2) -spacing}, r=Math.PI/2, display.y+spacing*2, {colour:'#000000',width:10,opacity:0.05});
+    for (var i = start/data.constants.zoom; i < end/data.constants.zoom; i += spacing) {
+        drawLine({x: i, y: -spacing}, r=Math.PI/2, display.y/data.constants.zoom+spacing*2, {colour:'#000000',width:10,opacity:0.05}, false);
+    }*/
+    for (let i = 0; i >= (player.x - display.x/2 - spacing)/data.constants.zoom; i -= spacing) {
+        drawLine({x: i, y: player.y + (display.y/2 + spacing)/data.constants.zoom}, 3*Math.PI/2, (display.y + spacing*2)/data.constants.zoom, {colour:'#000000',width:10,opacity:0.05}, false);
+    }
+    for (let i = 0; i <= (player.x + display.x/2 + spacing)/data.constants.zoom; i += spacing) {
+        drawLine({x: i, y: player.y + (display.y/2 + spacing)/data.constants.zoom}, 3*Math.PI/2, (display.y + spacing*2)/data.constants.zoom, {colour:'#000000',width:10,opacity:0.05}, false);
+    }
+    for (let i = 0; i >= (player.y - display.y/2 - spacing)/data.constants.zoom; i -= spacing) {
+        drawLine({x: player.x + (display.x/2 + spacing)/data.constants.zoom, y: i}, Math.PI, (display.x + spacing*2)/data.constants.zoom, {colour:'#000000',width:10,opacity:0.05}, false);
+    }
+    for (let i = 0; i <= (player.y + display.y/2 + spacing)/data.constants.zoom; i += spacing) {
+        drawLine({x: player.x + (display.x/2 + spacing)/data.constants.zoom, y: i}, Math.PI, (display.x + spacing*2)/data.constants.zoom, {colour:'#000000',width:10,opacity:0.05}, false);
     }
 };
 
 function handleExplosion(explosion) {
     //console.log(explosion);
-    drawCircle(explosion.x-r-player.x+display.x/2, explosion.y-r-player.y+display.y/2, explosion.r, '#fccbb1', '#f7b28d', 0.1, 0.2*explosion.transparancy);
-    drawCircle(explosion.x-r-player.x+display.x/2, explosion.y-r-player.y+display.y/2, explosion.r, false, '#f7b28d', 5, 0.2);
-    drawCircle(explosion.x-r-player.x+display.x/2, explosion.y-r-player.y+display.y/2, Math.max(explosion.r-20, 0), false, '#fcd8d2', 20, 0.1*explosion.transparancy);
-    drawCircle(explosion.x-r-player.x+display.x/2, explosion.y-r-player.y+display.y/2, Math.max(explosion.r-15, 0), false, '#fcd8d2', 15, 0.1*explosion.transparancy);
-    drawCircle(explosion.x-r-player.x+display.x/2, explosion.y-r-player.y+display.y/2, Math.max(explosion.r-10, 0), false, '#fcd8d2', 10, 0.1*explosion.transparancy);
-    drawCircle(explosion.x-r-player.x+display.x/2, explosion.y-r-player.y+display.y/2, Math.max(explosion.r-5, 0), false, '#fcd8d2', 5, 0.1*explosion.transparancy);
-    drawLight(explosion.x-r-player.x+display.x/2, explosion.y-r-player.y+display.y/2, explosion.r*1.1);
+    drawCircle(explosion.x-r, explosion.y-r, explosion.r, '#fccbb1', '#f7b28d', 0.1, 0.2*explosion.transparancy, false);
+    drawCircle(explosion.x-r, explosion.y-r, explosion.r, false, '#f7b28d', 5, 0.2);
+    drawCircle(explosion.x-r, explosion.y-r, Math.max(explosion.r-20, 0), false, '#fcd8d2', 20, 0.1*explosion.transparancy, false);
+    drawCircle(explosion.x-r, explosion.y-r, Math.max(explosion.r-15, 0), false, '#fcd8d2', 15, 0.1*explosion.transparancy, false);
+    drawCircle(explosion.x-r, explosion.y-r, Math.max(explosion.r-10, 0), false, '#fcd8d2', 10, 0.1*explosion.transparancy, false);
+    drawCircle(explosion.x-r, explosion.y-r, Math.max(explosion.r-5, 0), false, '#fcd8d2', 5, 0.1*explosion.transparancy, false);
+    drawLight(explosion.x-r, explosion.y-r, explosion.r*1.1);
     if (explosion.r >= explosion.maxR) {
         explosion.transparancy *= 0.75;
         explosion.r *= 1.2;
@@ -625,6 +645,9 @@ return orders;
 
 // The return of the excessively overcomplicated data storage system
 const data = {
+    constants: {
+        zoom: 0.5,
+    },
     mech: {
         x: 0,
         y: 0,
@@ -5793,7 +5816,7 @@ function renderParticles(particles) {
     for (let i = 0; i < particles.length; i++) {
         let obj = particles[i];
         if (obj.type == 'circle') {
-            drawCircle(obj.x-player.x+display.x/2, obj.y-player.y+display.y/2, obj.size, toColour(obj.style.fill), toColour(obj.style.stroke.colour), obj.style.stroke.width, opacity=1);
+            drawCircle(obj.x, obj.y, obj.size, toColour(obj.style.fill), toColour(obj.style.stroke.colour), obj.style.stroke.width, 1, false);
         } else if (obj.type == 'polygon') {
             drawPolygon(obj.size, {x: obj.x, y: obj.y}, obj.r, toColour(obj.style.fill), {colour: toColour(obj.style.stroke.colour), width: obj.style.stroke.width}, false);
         } else {
@@ -5853,11 +5876,11 @@ function renderPart(unit, part) {
             }
         }
         let offset = rotatePolygon([part.offset], facing)[0];
-        drawCircle(display.x/2 - player.x + unit.x + offset.x, display.y/2 - player.y + unit.y + offset.y, part.size, part.style.fill, stroke.colour, stroke.width, 1);
+        drawCircle(unit.x + offset.x, unit.y + offset.y, part.size, part.style.fill, stroke.colour, stroke.width, 1, false);
         if (part.hp > part.maxHp) {
             stroke.width += 10;
             stroke.colour = 'rgba(0,255,255,0.3)';
-            drawCircle(display.x/2 - player.x + unit.x + offset.x, display.y/2 - player.y + unit.y + offset.y, part.size, 'rgba(0,255,255,0.3)', stroke.colour, stroke.width, 1);
+            drawCircle(unit.x + offset.x, unit.y + offset.y, part.size, 'rgba(0,255,255,0.3)', stroke.colour, stroke.width, 1, false);
         }
     }
     return part;
@@ -5869,10 +5892,10 @@ function renderUnit(unit) {
         drawCircle(display.x/2 - player.x + unit.x, display.y/2 - player.y + unit.y, unit.collisionR, 'rgba(255, 255, 255, 0.1)', 'rgba(255, 0, 0, 0.9)', 5, 1);
     }
     if (unit.groundCollisionR > 0) {
-        drawCircle(display.x/2 - player.x + unit.x, display.y/2 - player.y + unit.y, unit.groundCollisionR, 'rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.1)', 5, 1);
+        drawCircle(unit.x, unit.y, unit.groundCollisionR, 'rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.1)', 5, 1, false);
     }
     if (unit.tallCollisionR > 0) {
-        drawCircle(display.x/2 - player.x + unit.x, display.y/2 - player.y + unit.y, unit.tallCollisionR, 'rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.1)', 5, 1);
+        drawCircle(unit.x, unit.y, unit.tallCollisionR, 'rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.1)', 5, 1, false);
     }
 };
 
