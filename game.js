@@ -1467,6 +1467,481 @@ const data = {
         ],
         effects: [],
     },
+    truck: {
+        x: 0,
+        y: 0,
+        r: 0, // direction of motion
+        vx: 0,
+        vy: 0,
+        mouseR: 0, // current Aim
+        v: 6, // top speed
+        vr: 30 / 60 / 180 * Math.PI, 
+        tr: 45 / 60 / 180 * Math.PI, 
+        keyboard: [],
+        aimPos: {x: 69, y: 69},
+        collisionR: 500,
+        groundCollisionR: 120,
+        tallCollisionR: 180,
+        reverse: false,
+        directControl: false,
+        type: 'tank',
+        alive: true,
+        parts: [
+            {
+                id: 'mainBodyContainer',
+                facing: 'body',
+                type: 'polygon', 
+                rOffset: 0,
+                size: [
+                    {x: -90, y: -100},
+                    {x: 90, y: -100},
+                    {x: 90, y: 100},
+                    {x: -90, y: 100},
+                ],
+                offset: {x: 0, y: 0},
+                style: {
+                    fill: 'rgba(210, 210, 210, 1)',
+                    stroke: {colour: '#696969', width: 10},
+                },
+                collision: true,
+                core: true,
+                hp: 5000,
+                maxHp: 5000,
+                isHit: 0,
+                connected: [
+                    {
+                        id: 'frontArmour',
+                        facing: 'body',
+                        type: 'polygon', 
+                        rOffset: 0,
+                        size: [
+                            {x: -90, y: -10},
+                            {x: 0, y: -25},
+                            {x: 90, y: -10},
+                            {x: 90, y: 0},
+                            {x: -90, y: 0},
+                        ],
+                        offset: {x: 0, y: -100},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 10},
+                        },
+                        collision: true,
+                        hp: 25000,
+                        maxHp: 25000,
+                        isHit: 0,
+                        connected: [],
+                    },
+                    {
+                        id: 'tracks1',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -15, y: 130},
+                            {x: 15, y: 130},
+                            {x: 25, y: 120},
+                            {x: 25, y: -120},
+                            {x: 15, y: -130},
+                            {x: -15, y: -130},
+                            {x: -25, y: -120},
+                            {x: -25, y: 120},
+                        ],
+                        offset: {x: -90, y: 0},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 10},
+                        },
+                        collision: false,
+                        hp: 1,
+                        maxHp: 1,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: true,
+                    },
+                    {
+                        id: 'tracks2',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -15, y: 130},
+                            {x: 15, y: 130},
+                            {x: 25, y: 120},
+                            {x: 25, y: -120},
+                            {x: 15, y: -130},
+                            {x: -15, y: -130},
+                            {x: -25, y: -120},
+                            {x: -25, y: 120},
+                        ],
+                        offset: {x: 90, y: 0},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 10},
+                        },
+                        collision: false,
+                        hp: 1,
+                        maxHp: 1,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: true,
+                    },
+                    {
+                        id: 'armour1.5',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: 130},
+                            {x: 5, y: 130},
+                            {x: 15, y: 125},
+                            {x: 15, y: 85},
+                            {x: 5, y: 80},
+                            {x: -5, y: 80},
+                            {x: -15, y: 85},
+                            {x: -15, y: 125},
+                        ],
+                        offset: {x: -100, y: 0},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 2500,
+                        maxHp: 2500,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'armour1.4',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: 30},
+                            {x: 5, y: 30},
+                            {x: 15, y: 35},
+                            {x: 15, y: 85},
+                            {x: 5, y: 80},
+                            {x: -5, y: 80},
+                            {x: -15, y: 85},
+                            {x: -15, y: 35},
+                        ],
+                        offset: {x: -100, y: -2},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 2500,
+                        maxHp: 2500,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'armour1.3',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: 30},
+                            {x: 5, y: 30},
+                            {x: 15, y: 35},
+                            {x: 15, y: -15},
+                            {x: 5, y: -20},
+                            {x: -5, y: -20},
+                            {x: -15, y: -15},
+                            {x: -15, y: 35},
+                        ],
+                        offset: {x: -100, y: -4},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 2500,
+                        maxHp: 2500,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'armour1.2',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: -70},
+                            {x: 5, y: -70},
+                            {x: 15, y: -65},
+                            {x: 15, y: -15},
+                            {x: 5, y: -20},
+                            {x: -5, y: -20},
+                            {x: -15, y: -15},
+                            {x: -15, y: -65},
+                        ],
+                        offset: {x: -100, y: -6},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 2500,
+                        maxHp: 2500,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'armour1.1',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: -70},
+                            {x: 5, y: -70},
+                            {x: 15, y: -65},
+                            {x: 15, y: -115},
+                            {x: 5, y: -120},
+                            {x: -5, y: -120},
+                            {x: -15, y: -115},
+                            {x: -15, y: -65},
+                        ],
+                        offset: {x: -100, y: -8},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 2500,
+                        maxHp: 2500,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'armour2.5',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: 130},
+                            {x: 5, y: 130},
+                            {x: 15, y: 125},
+                            {x: 15, y: 85},
+                            {x: 5, y: 80},
+                            {x: -5, y: 80},
+                            {x: -15, y: 85},
+                            {x: -15, y: 125},
+                        ],
+                        offset: {x: 100, y: 0},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 2500,
+                        maxHp: 2500,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'armour2.4',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: 30},
+                            {x: 5, y: 30},
+                            {x: 15, y: 35},
+                            {x: 15, y: 85},
+                            {x: 5, y: 80},
+                            {x: -5, y: 80},
+                            {x: -15, y: 85},
+                            {x: -15, y: 35},
+                        ],
+                        offset: {x: 100, y: -2},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 2500,
+                        maxHp: 2500,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'armour2.3',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: 30},
+                            {x: 5, y: 30},
+                            {x: 15, y: 35},
+                            {x: 15, y: -15},
+                            {x: 5, y: -20},
+                            {x: -5, y: -20},
+                            {x: -15, y: -15},
+                            {x: -15, y: 35},
+                        ],
+                        offset: {x: 100, y: -4},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 2500,
+                        maxHp: 2500,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'armour2.2',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: -70},
+                            {x: 5, y: -70},
+                            {x: 15, y: -65},
+                            {x: 15, y: -15},
+                            {x: 5, y: -20},
+                            {x: -5, y: -20},
+                            {x: -15, y: -15},
+                            {x: -15, y: -65},
+                        ],
+                        offset: {x: 100, y: -6},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 2500,
+                        maxHp: 2500,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'armour2.1',
+                        type: 'polygon', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: [
+                            {x: -5, y: -70},
+                            {x: 5, y: -70},
+                            {x: 15, y: -65},
+                            {x: 15, y: -115},
+                            {x: 5, y: -120},
+                            {x: -5, y: -120},
+                            {x: -15, y: -115},
+                            {x: -15, y: -65},
+                        ],
+                        offset: {x: 100, y: -8},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 5},
+                        },
+                        collision: true,
+                        hp: 2500,
+                        maxHp: 2500,
+                        isHit: 0,
+                        connected: [],
+                        groundCollision: false,
+                    },
+                    {
+                        id: 'rightSide',
+                        type: 'circle', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: 0,
+                        offset: {x: 0, y: 0},
+                        style: {
+                            fill: 'rgba(0, 0, 0, 0)',
+                            stroke: {colour: 'rgba(0, 0, 0, 0)', width: 1},
+                        },
+                        collision: false,
+                        hp: 1,
+                        maxHp: 1,
+                        isHit: 0,
+                        connected: [],
+                    },
+                    {
+                        id: 'leftSide',
+                        type: 'circle', 
+                        facing: 'body',
+                        rOffset: 0,
+                        size: 0,
+                        offset: {x: 0, y: 0},
+                        style: {
+                            fill: 'rgba(0, 0, 0, 0)',
+                            stroke: {colour: 'rgba(0, 0, 0, 0)', width: 1},
+                        },
+                        collision: false,
+                        hp: 1,
+                        maxHp: 1,
+                        isHit: 0,
+                        connected: [],
+                    },
+                ],
+            },
+            {
+                id: 'turretBody',
+                facing: 'turret',
+                type: 'polygon', 
+                rOffset: 0,
+                size: [
+                    {x: -50, y: 60},
+                    {x: 50, y: 60},
+                    {x: 50, y: -45},
+                    {x: 25, y: -70},
+                    {x: -25, y: -70},
+                    {x: -50, y: -45},
+                ],
+                offset: {x: 0, y: 0},
+                style: {
+                    fill: 'rgba(210, 210, 210, 1)',
+                    stroke: {colour: '#696969', width: 10},
+                },
+                collision: false,
+                hp: 1,
+                maxHp: 1,
+                isHit: 0,
+                connected: [
+                    {
+                        id: 'main',
+                        facing: 'turret',
+                        type: 'polygon', 
+                        rOffset: 0,
+                        size: [
+                            {x: -12, y: 100},
+                            {x: -12, y: 0},
+                            {x: 12, y: 0},
+                            {x: 12, y: 100},
+                        ],
+                        offset: {x: 0, y: -170},
+                        style: {
+                            fill: 'rgba(210, 210, 210, 1)',
+                            stroke: {colour: '#696969', width: 10},
+                        },
+                        collision: false,
+                        hp: 1,
+                        maxHp: 1,
+                        isHit: 0,
+                        connected: [],
+                    },
+                ],
+            }
+        ],
+        effects: [],
+    },
     tonk: {
         x: 0,
         y: 0,
@@ -3594,7 +4069,7 @@ const data = {
                     {x: 20, y: 0},
                     {x: -20, y: 0},
                 ],
-                offset: {x: 100, y: -70},
+                offset: {x: 0, y: -70},
                 style: {
                     fill: 'rgba(150, 150, 150, 1)',
                     stroke: {colour: '#696969', width: 5},
@@ -3625,12 +4100,12 @@ const data = {
                             stroke: {colour: {r: 50, g: 200, b: 255, a: 0.7}, width: 5},
                         },
                         decay: {
-                            life: 2, 
+                            life: 5, 
                             fillStyle: {r: 0, g: 0, b: 0, a: -0.05}, 
                             strokeStyle: {r: 0, g: 0, b: 0, a: -0.05}, 
                             size: 1
                         },
-                        dmg: 1000,
+                        dmg: 100,
                         v: -1,
                         vDrag: 1,
                         vr: 0,
@@ -4580,6 +5055,28 @@ const data = {
     scripts: {
         turretAI: `(function() {${code1}})()`,
         tankAI: `(function() {${basicTankAI}})()`,
+    },
+    checkpoint: {
+        x: 0,
+        y: 0,
+        collisionR: 100,
+        type: 'checkpoint',
+        triggered: false,
+        parts: [
+            {
+                id: 'Checkpoint',
+                facing: 'body',
+                type: 'circle', 
+                rOffset: 0,
+                size: 100,
+                offset: {x: 10, y: 10},
+                style: {
+                    fill: 'rgba(100, 255, 100, 1)',
+                    stroke: {colour: 'rgba(50, 200, 50, 1)', width: 5},
+                },
+                connected: [],
+            },
+        ],
     }
 };
 
@@ -4589,6 +5086,7 @@ var particles = [];
 var entities = [];
 var obstacles = [];
 var explosions = [];
+var checkpoint = JSON.parse(JSON.stringify(data.checkpoint));
 
 obstacles.push(data.template.obstacles.obstacle1);
 obstacles.push(data.template.obstacles.obstacle2);
@@ -4755,6 +5253,7 @@ function placeObstacle(objId, r, coords) {
 };
 
 function level1(pos={x: 0, y: 0}, scale=1) {
+    overlay.style.display = 'none';
     const basicWall = 'basicWall';
     const basicFiller = 'basicFiller';
 
@@ -4763,6 +5262,8 @@ function level1(pos={x: 0, y: 0}, scale=1) {
     projectiles = [];
     explosions = [];
     particles = [];
+    checkpoint = JSON.parse(JSON.stringify(data.checkpoint));
+    checkpoint.y = -900;
     
     placeObstacle(basicWall, 0, vMath(vMath({x: 0, y: -600}, pos, '+'), scale, '*'));
     placeObstacle(basicWall, Math.PI/2, vMath(vMath({x: 400, y: -200}, pos, '+'), scale, '*'));
@@ -4780,6 +5281,7 @@ function level1(pos={x: 0, y: 0}, scale=1) {
 };
 
 function level2(pos={x: 0, y: 0}, scale=1) {
+    overlay.style.display = 'none';
     const basicWall = 'basicWall';
     const basicFiller = 'basicFiller';
 
@@ -4788,7 +5290,9 @@ function level2(pos={x: 0, y: 0}, scale=1) {
     projectiles = [];
     explosions = [];
     particles = [];
-    
+    checkpoint = JSON.parse(JSON.stringify(data.checkpoint));
+    checkpoint.y = 0;
+
     placeObstacle('level2Lake', 0, vMath(vMath({x: 0, y: 0}, pos, '+'), scale, '*'));
     placeObstacle(basicWall, 0, vMath(vMath({x: 0, y: -600}, pos, '+'), scale, '*'));
     placeObstacle(basicWall, Math.PI/2, vMath(vMath({x: 400, y: -200}, pos, '+'), scale, '*'));
@@ -4814,6 +5318,7 @@ function level2(pos={x: 0, y: 0}, scale=1) {
 };
 
 function level3(pos={x: 0, y: 0}, scale=1) {
+    overlay.style.display = 'none';
     const basicWall = 'basicWall';
     const basicFiller = 'basicFiller';
 
@@ -4822,6 +5327,8 @@ function level3(pos={x: 0, y: 0}, scale=1) {
     explosions = [];
     particles = [];
     entities = [];
+    checkpoint = JSON.parse(JSON.stringify(data.checkpoint));
+    checkpoint.y = 0;
 
     placeObstacle(basicWall, Math.PI, vMath(vMath({x: 0, y: 0}, pos, '+'), scale, '*'));
     placeObstacle(basicWall, Math.PI, vMath(vMath({x: 0, y: 1200}, pos, '+'), scale, '*'));
@@ -4868,6 +5375,7 @@ function level3(pos={x: 0, y: 0}, scale=1) {
 }
 
 function level4(pos={x: 0, y: 0}, scale=1) {
+    overlay.style.display = 'none';
     const basicWall = 'basicWall';
     const basicFiller = 'basicFiller';
 
@@ -4876,6 +5384,8 @@ function level4(pos={x: 0, y: 0}, scale=1) {
     explosions = [];
     particles = [];
     entities = [];
+    checkpoint = JSON.parse(JSON.stringify(data.checkpoint));
+    checkpoint.y = -2000;
 
     placeObstacle(basicWall, 0, vMath(vMath({x: 0, y: -1600}, pos, '+'), scale, '*')); //top
     placeObstacle(basicWall, Math.PI/2, vMath(vMath({x: 400, y: -1200}, pos, '+'), scale, '*')); //topRight
@@ -4923,6 +5433,7 @@ function level4(pos={x: 0, y: 0}, scale=1) {
 };
 
 function level5(pos={x: 0, y: 0}, scale=1) {
+    overlay.style.display = 'none';
     const basicWall = 'basicWall';
     const basicFiller = 'basicFiller';
 
@@ -4931,6 +5442,8 @@ function level5(pos={x: 0, y: 0}, scale=1) {
     explosions = [];
     particles = [];
     entities = [];
+    checkpoint = JSON.parse(JSON.stringify(data.checkpoint));
+    checkpoint.y = 0;
 
     placeObstacle(basicWall, Math.PI, vMath(vMath({x: 0, y: 1200}, pos, '+'), scale, '*'));
     placeObstacle(basicWall, Math.PI, vMath(vMath({x: 1000, y: 1200}, pos, '+'), scale, '*'));
@@ -4994,6 +5507,7 @@ function level5(pos={x: 0, y: 0}, scale=1) {
 };
 
 function level6(pos={x: 0, y: 0}, scale=1) {
+    overlay.style.display = 'none';
     const basicWall = 'basicWall';
     const basicFiller = 'basicFiller';
 
@@ -5002,6 +5516,8 @@ function level6(pos={x: 0, y: 0}, scale=1) {
     explosions = [];
     particles = [];
     entities = [];
+    checkpoint = JSON.parse(JSON.stringify(data.checkpoint));
+    checkpoint.y = 0;
 
     placeObstacle(basicWall, Math.PI, vMath(vMath({x: 0, y: 1200}, pos, '+'), scale, '*'));
     placeObstacle(basicWall, Math.PI, vMath(vMath({x: 1000, y: 1200}, pos, '+'), scale, '*'));
@@ -5065,6 +5581,7 @@ function level6(pos={x: 0, y: 0}, scale=1) {
 };
 
 function level8(pos={x: 0, y: 0}, scale=1) {
+    overlay.style.display = 'none';
     const basicWall = 'basicWall';
     const basicFiller = 'basicFiller';
 
@@ -5073,6 +5590,8 @@ function level8(pos={x: 0, y: 0}, scale=1) {
     explosions = [];
     particles = [];
     entities = [];
+    checkpoint = JSON.parse(JSON.stringify(data.checkpoint));
+    checkpoint.y = 0;
 
     placeObstacle(basicWall, Math.PI, vMath(vMath({x: 0, y: 1200}, pos, '+'), scale, '*'));
     placeObstacle(basicWall, Math.PI, vMath(vMath({x: 1000, y: 1200}, pos, '+'), scale, '*'));
@@ -5147,6 +5666,7 @@ function level8(pos={x: 0, y: 0}, scale=1) {
 };
 
 function level7(pos={x: 0, y: 0}, scale=1) {
+    overlay.style.display = 'none';
     const basicWall = 'basicWall';
     const basicFiller = 'basicFiller';
 
@@ -5155,6 +5675,8 @@ function level7(pos={x: 0, y: 0}, scale=1) {
     explosions = [];
     particles = [];
     entities = [];
+    checkpoint = JSON.parse(JSON.stringify(data.checkpoint));
+    checkpoint.y = 0;
 
     placeObstacle(basicWall, Math.PI, vMath(vMath({x: 0, y: 1200}, pos, '+'), scale, '*'));
     placeObstacle(basicWall, Math.PI, vMath(vMath({x: 1000, y: 1200}, pos, '+'), scale, '*'));
@@ -5222,6 +5744,89 @@ function level7(pos={x: 0, y: 0}, scale=1) {
     enemy2.y = -500;
     entities.push(JSON.parse(JSON.stringify(enemy2)));
     console.log('Loaded level 7');
+};
+
+function level9(pos={x: 0, y: 0}, scale=1) {
+    overlay.style.display = 'none';
+    const basicWall = 'basicWall';
+    const basicFiller = 'basicFiller';
+
+    obstacles = [];
+    projectiles = [];
+    explosions = [];
+    particles = [];
+    entities = [];
+    checkpoint = JSON.parse(JSON.stringify(data.checkpoint));
+    checkpoint.y = 0;
+
+    placeObstacle(basicWall, Math.PI, vMath(vMath({x: 0, y: 1200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI, vMath(vMath({x: 1000, y: 1200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI, vMath(vMath({x: -1000, y: 1200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI, vMath(vMath({x: 2000, y: 1200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI, vMath(vMath({x: -2000, y: 1200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, 3*Math.PI/2, vMath(vMath({x: -2400, y: 800}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI/2, vMath(vMath({x: 2400, y: 800}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, 3*Math.PI/2, vMath(vMath({x: -2400, y: -200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI/2, vMath(vMath({x: 2400, y: -200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, 3*Math.PI/2, vMath(vMath({x: -2400, y: -1200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI/2, vMath(vMath({x: 2400, y: -1200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, 3*Math.PI/2, vMath(vMath({x: -2400, y: -2200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI/2, vMath(vMath({x: 2400, y: -2200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, 3*Math.PI/2, vMath(vMath({x: -2400, y: -3200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, Math.PI/2, vMath(vMath({x: 2400, y: -3200}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, 0, vMath(vMath({x: 0, y: -3600}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, 0, vMath(vMath({x: 1000, y: -3600}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, 0, vMath(vMath({x: -1000, y: -3600}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, 0, vMath(vMath({x: 2000, y: -3600}, pos, '+'), scale, '*'));
+    placeObstacle(basicWall, 0, vMath(vMath({x: -2000, y: -3600}, pos, '+'), scale, '*'));
+
+    placeObstacle(basicFiller, 0, vMath(vMath({x: 500, y: 1200}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, 0, vMath(vMath({x: -500, y: 1200}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, 0, vMath(vMath({x: 1500, y: 1200}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, 0, vMath(vMath({x: -1500, y: 1200}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, 3*Math.PI/2, vMath(vMath({x: 2400, y: 300}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, Math.PI/2, vMath(vMath({x: -2400, y: 300}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, 3*Math.PI/2, vMath(vMath({x: 2400, y: -700}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, Math.PI/2, vMath(vMath({x: -2400, y: -700}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, 3*Math.PI/2, vMath(vMath({x: 2400, y: -1700}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, Math.PI/2, vMath(vMath({x: -2400, y: -1700}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, 3*Math.PI/2, vMath(vMath({x: 2400, y: -2700}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, Math.PI/2, vMath(vMath({x: -2400, y: -2700}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, Math.PI, vMath(vMath({x: 500, y: -3600}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, Math.PI, vMath(vMath({x: -500, y: -3600}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, Math.PI, vMath(vMath({x: 1500, y: -3600}, pos, '+'), scale, '*'));
+    placeObstacle(basicFiller, Math.PI, vMath(vMath({x: -1500, y: -3600}, pos, '+'), scale, '*'));
+
+    let enemyForce = JSON.parse(JSON.stringify(data.template.team));
+    enemyForce.id = 'Enemy';
+    enemyForce.scripts.turretAI = data.scripts.turretAI;
+    enemyForce.scripts.tankAI = data.scripts.tankAI;
+    teams.push(enemyForce);
+
+    player = JSON.parse(JSON.stringify(data.mech));
+    player.directControl = true;
+    player = addWeapon(player, 'Shield', 'mech', 'rightArmMain');
+    player = addWeapon(player, 'EnergySword', 'mech', 'leftArmMain');
+    player = addWeapon(player, 'Cannon', 'mech', 'leftArmSide');
+    entities.push(player);
+    let enemy1 = Object.assign({}, JSON.parse(JSON.stringify(data.tank)), JSON.parse(JSON.stringify(data.template.memory)));
+    enemy1.team = 'Enemy';
+    enemy1.script = 'tankAI';
+    enemy1 = addWeapon(enemy1, 'MainCannon', 'tank', 'main');
+    enemy1.x = 0;
+    enemy1.y = -3500;
+    entities.push(JSON.parse(JSON.stringify(enemy1)));
+    let enemy2 = Object.assign({}, JSON.parse(JSON.stringify(data.turret)), JSON.parse(JSON.stringify(data.template.memory)));
+    enemy2.team = 'Enemy';
+    enemy2.script = 'turretAI';
+    enemy2 = addWeapon(enemy2, 'DualCannon', 'staticTurret', 'mainGun');
+    enemy2.x = -2000;
+    enemy2.y = -2500;
+    entities.push(JSON.parse(JSON.stringify(enemy2)));
+    enemy2.x = 2000;
+    enemy2.y = -2500;
+    entities.push(JSON.parse(JSON.stringify(enemy2)));
+    console.log('Loaded level 9');
 };
 
 function testing(pos={x: 0, y: 0}, scale=1) {
@@ -6334,6 +6939,31 @@ function handleScript(unit) {
     return unit;
 };
 
+function handleCheckpoint() {
+    drawCircle(checkpoint.x + checkpoint.parts[0].offset.x, checkpoint.y + checkpoint.parts[0].offset.y, checkpoint.parts[0].size, checkpoint.parts[0].style.fill, checkpoint.parts[0].style.stroke.colour, checkpoint.parts[0].style.stroke.width, 1, false);
+    if (getDist(player, checkpoint) < player.tallCollisionR + checkpoint.collisionR && entities.length == 1) {
+        console.log('game over');
+        var overlay = document.getElementById('overlay');
+        if (overlay.style.display != 'block') {
+            overlay.innerHTML = `
+            <h1>Level Complete</h1>
+            <button onclick="loadLevel(1)"><h3>Level 1</h3></button>
+            <button onclick="loadLevel(2)"><h3>Level 2</h3></button>
+            <button onclick="loadLevel(3)"><h3>Level 3</h3></button>
+            <button onclick="loadLevel(4)"><h3>Level 4</h3></button>
+            <button onclick="loadLevel(5)"><h3>Level 5</h3></button>
+            <button onclick="loadLevel(6)"><h3>Level 6</h3></button>
+            <button onclick="loadLevel(7)"><h3>Level 7</h3></button>
+            <button onclick="loadLevel(8)"><h3>Level 8</h3></button>
+            <button onclick="loadLevel(9)"><h3>Level 9</h3></button>
+            `;
+            overlay.style.display = 'block';
+            return true;
+        }
+    }
+    return false;
+};
+
 function main() {
     // draw the background
     clearCanvas('main');
@@ -6347,6 +6977,8 @@ function main() {
             drawPolygon(obstacles[i].size, {x: 0, y: 0}, 0, obstacles[i].style.fill, obstacles[i].style.stroke, false);
         }
     }
+
+    let gameState = handleCheckpoint();
 
     // Process entities
     let newEntities = [];
@@ -6402,13 +7034,16 @@ function main() {
     if(entities.length <= 1) {
         console.log('all enemies dead!');
     }
+    return gameState;
 };
 
 var t=0;
 async function game() {
     while (1) {
-        main();
-        await sleep(1000/60);
+        if (main()) {
+            break;
+        }
+        await sleep(1000/120);
         t++;
     }
 };

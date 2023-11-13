@@ -66,22 +66,23 @@ body {
 }
 
 #overlay {
-    font-size: 40px; 
-    display: flex;
-    justify-content: space-between;
-    zoom: 100%;
-}
-
-#overlay img {
-    height: 25px;
-}
-
-#overlay #leftText {
+    z-index: 1;
+    position: fixed;
+    display: none;
+    top: 50%;
+    left: 50%;
+    font-family: 'Courier New', monospace;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    border-radius: 10px;
+    color: white;
+    font-size: 16px;
+    width: 50%;
+    height: 75%;
     text-align: left;
-}
-
-#overlay #rightText {
-    text-align: right;
+    zoom: 100%;
 }
 
 .button {
@@ -94,13 +95,4 @@ body {
     border: none;
     border-radius: 5px;
     white-space: pre-line;
-}
-
-.button img {
-    max-width: 15px;
-    max-height: 15px;
-}
-
-#big {
-    zoom: 200%;
 }
