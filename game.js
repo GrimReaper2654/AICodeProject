@@ -1068,7 +1068,7 @@ const data = {
         mouseR: 0, // current Aim
         lastMoved: 69,
         v: 5, // normal walking speed
-        vr: 180 / 60 / 180 * Math.PI, // rotation of tracks (feet)
+        vr: 360 / 60 / 180 * Math.PI, // rotation of tracks (feet)
         tr: 360 / 60 / 180 * Math.PI, // rotation of turret (main body)
         keyboard: [],
         aimPos: {x: 69, y: 69},
@@ -9214,11 +9214,11 @@ function levelAimingII() {
     player.directControl = true;
     player.team = 'Player';
     player.script = 'script1';
+    player = addWeapon(player, 'MediumMachineGun', 'mech', 'leftArmMain');
     player = addWeapon(player, 'MediumMachineGun', 'mech', 'rightArmMain');
-    player = addWeapon(player, 'none', 'mech', 'rightArmSide');
-    player = addWeapon(player, 'none', 'mech', 'headTurret');
-    player = addWeapon(player, 'none', 'mech', 'leftArmMain');
-    player = addWeapon(player, 'none', 'mech', 'leftArmSide');
+    player = addWeapon(player, 'Cannon', 'mech', 'leftArmSide');
+    player = addWeapon(player, 'Cannon', 'mech', 'rightArmSide');
+    player = addWeapon(player, 'GunTurret', 'mech', 'headTurret');
     player = addWeapon(player, 'none', 'mech', 'back');
     entities.push(player);
 
