@@ -12396,7 +12396,7 @@ function handleCollisions(units, projectiles, accurate) {
     if (projectiles.length && units.length) {
         for (let i = 0; i < projectiles.length; i++) {
             if (accurate) {
-                let calcs = Math.abs(projectiles[i].v)/25;
+                let calcs = Math.abs(projectiles[i].v)/50;
                 for (let k=0; k < calcs; k++) {
                     for (let j = 0; j < units.length; j++) {
                         if (units[j].noClip) {
@@ -12710,8 +12710,7 @@ function handleCheckpoint() {
             <button onclick="loadLevel('AimingI')"><h3>Aiming I</h3></button><button onclick="loadLevel('AimingII')"><h3>Aiming II</h3></button><button onclick="loadLevel('AimingIII')"><h3>Aiming III</h3></button><button onclick="loadLevel('AimingIV')"><h3>Aiming IV</h3></button><button onclick="loadLevel('AimingV')"><h3>Aiming V</h3></button><br>
             <button onclick="loadLevel('TacticsI')"><h3>Tactics I</h3></button><button onclick="loadLevel('TacticsII')"><h3>Tactics II</h3></button><button onclick="loadLevel('TacticsIII')"><h3>Tactics III</h3></button><button onclick="loadLevel('TacticsIV')"><h3>Tactics IV</h3></button><br>
             <button onclick="loadLevel('CombatI')"><h3>Combat I</h3></button><button onclick="loadLevel('CombatII')"><h3>Combat II</h3></button><button onclick="loadLevel('CombatIII')"><h3>Combat III</h3></button><button onclick="loadLevel('CombatIV')"><h3>Combat IV</h3></button><button onclick="loadLevel('CombatV')"><h3>Combat V</h3></button><button onclick="loadLevel('CombatVI')"><h3>Combat VI</h3></button><button onclick="loadLevel('CombatVII')"><h3>Combat VII</h3></button><br>
-            <button onclick="loadLevel('MeleeI')"><h3>Melee I</h3></button><button onclick="loadLevel('MeleeII')"><h3>Melee II</h3></button><button onclick="loadLevel('MeleeIII')"><h3>Melee III</h3></button><br>
-            `;
+            <button onclick="loadLevel('MeleeI')"><h3>Melee I</h3></button><button onclick="loadLevel('MeleeII')"><h3>Melee II</h3></button><button onclick="loadLevel('MeleeIII')"><h3>Melee III</h3></button><br>`;
             overlay.style.display = 'block';
             return true;
         }
@@ -12719,7 +12718,90 @@ function handleCheckpoint() {
     return false;
 };
 
+function physics() {
+    shields = [];
+
+    let newEntities = [];
+    for (let i = 0; i < entities.length; i++) {
+        //console.log(entities[i]);
+        entities[i].parts = checkDeadParts(entities[i], entities[i].parts);
+        entities[i] = handleScript(entities[i]);
+        entities[i] = handlePlayerMotion(entities[i], obstacles);
+        entities[i] = handleShooting(entities[i]);
+        entities[i].parts = handleShields(entities[i], entities[i].parts);
+        if (entities[i].alive) {
+            newEntities.push(entities[i]);
+        }
+    }
+    entities = newEntities;
+
+    projectiles = simulatePhysics(projectiles);
+    projectiles = handleDecay(projectiles);
+
+    let newExpl = [];
+    for (let i = 0; i < explosions.length; i++) {
+        let res = handleExplosion(explosions[i]);
+        if (res) {
+            newExpl.push(res);
+        }
+    }
+    explosions = newExpl;
+
+    let res = shieldCollisions(shields, projectiles, true);
+    shields = res[0];
+    projectiles = res[1];
+
+    res = shieldCollisions(shields, explosions, true);
+    shields = res[0];
+    res = handleCollisions(entities, projectiles, true);
+    entities = res[0];
+    projectiles = res[1];
+
+    res = handleCollisions(entities, explosions, false);
+    entities = res[0];
+    projectiles = handleBulletWallCollisions(obstacles, projectiles);
+
+    const endTime = performance.now();
+    if(entities.length <= 1) {
+        console.warn('all enemies dead!');
+    }
+
+    let gameState = handleCheckpoint();
+    return gameState;
+};
+
+function graphics() {
+    clearCanvas('main');
+    clearCanvas('canvasOverlay');
+    grid(400);
+
+    for (let i = 0; i < obstacles.length; i++) {
+        if (obstacles[i].cType == 'ground') {
+            //console.log(obstacles[i]);
+            drawPolygon(obstacles[i].size, {x: 0, y: 0}, 0, obstacles[i].style.fill, obstacles[i].style.stroke, false);
+        }
+    }
+
+    for (let i = 0; i < entities.length; i++) {
+        renderUnit(entities[i]);
+    }
+    renderParticles(projectiles);
+
+    for (let i = 0; i < obstacles.length; i++) {
+        if (obstacles[i].cType == 'tall') {
+            //console.log(obstacles[i]);
+            drawPolygon(obstacles[i].size, {x: 0, y: 0}, 0, obstacles[i].style.fill, obstacles[i].style.stroke, false);
+        }
+    }
+
+    for (let i = 0; i < shields.length; i++) {
+        renderShield(shields[i]);
+    }
+};
+
+/*
 function main() {
+    const startRendering1Time = performance.now();
     // draw the background
     clearCanvas('main');
     clearCanvas('canvasOverlay');
@@ -12735,7 +12817,7 @@ function main() {
     }
 
     let gameState = handleCheckpoint();
-
+    const startEntityProcessingTime = performance.now();
     // Process entities
     let newEntities = [];
     for (let i = 0; i < entities.length; i++) {
@@ -12750,9 +12832,13 @@ function main() {
         }
     }
     entities = newEntities;
+
+    const startProjectileProcessingTime = performance.now();
     // Process Projectiles
     projectiles = simulatePhysics(projectiles);
     projectiles = handleDecay(projectiles);
+
+    const startRendering2Time = performance.now();
     // Render Entities
     for (let i = 0; i < entities.length; i++) {
         renderUnit(entities[i]);
@@ -12771,6 +12857,7 @@ function main() {
         renderShield(shields[i]);
     }
 
+    const startExplosionProcessingTime = performance.now();
     // Handle explosions
     let newExpl = [];
     for (let i = 0; i < explosions.length; i++) {
@@ -12781,32 +12868,53 @@ function main() {
     }
     explosions = newExpl;
 
+    const startCollisionProcessingTime = performance.now();
     // Handle Collisions
+    const sc = performance.now();
     let res = shieldCollisions(shields, projectiles, true);
     shields = res[0];
     projectiles = res[1];
 
     res = shieldCollisions(shields, explosions, true);
     shields = res[0];
-
+    const ec = performance.now();
     res = handleCollisions(entities, projectiles, true);
     entities = res[0];
     projectiles = res[1];
 
     res = handleCollisions(entities, explosions, false);
     entities = res[0];
-
+    const end = performance.now();
     projectiles = handleBulletWallCollisions(obstacles, projectiles);
 
+    const endTime = performance.now();
     if(entities.length <= 1) {
         //console.warn('all enemies dead!');
     }
-
+    console.log(`Total Shield Processing: ${ec-sc}`);
+    console.log(`Total Entity Processing: ${end-ec}`);
+    
+    console.log(`Total Rendering: ${startEntityProcessingTime-startRendering1Time + startExplosionProcessingTime-startRendering2Time}`);
+    console.log(`Total Entity Processing: ${startProjectileProcessingTime-startEntityProcessingTime}`);
+    console.log(`Total Projectile Processing: ${startRendering2Time-startProjectileProcessingTime}`);
+    console.log(`Total Explosion Processing: ${startCollisionProcessingTime-startExplosionProcessingTime}`);
+    console.log(`Total Collision Processing: ${endTime-startCollisionProcessingTime}`);
+    console.log(`Total ms/tick: ${endTime-startRendering1Time}, max: ${1000/TPS}ms`);
     return gameState;
-};
+};*/
+
+function main() {
+    if (t%FPT == 0) {
+        physics();
+    }
+    graphics(t%FPT);
+}
 
 var t=0
 var paused = false;
+const TPS = 20;
+const FPS = 60;
+const FPT = FPS/TPS;
 async function game() {
     while (1) {
         if (paused == false) {
@@ -12814,7 +12922,7 @@ async function game() {
                 break;
             }
             t++;
-            await sleep(1000/120);
+            await sleep(1000/TPS);
         } else {
             await sleep(1000/30);
         }
