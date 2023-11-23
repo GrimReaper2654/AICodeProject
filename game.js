@@ -1,5 +1,5 @@
 /*
------------------------------------------Changelog-----------------------------------------
+------------------------------------------------------Changelog------------------------------------------------------
 27/08/2023
  • commenced work
 - Tom Qiu
@@ -45,7 +45,23 @@
  • fixed obstacle collision (5/4)
 - Tom Qiu
 
--------------------------------------------------------------------------------------------
+23/11/2023
+ • resumed updating changelog
+ • energy shields implemented
+ • speed buff implemented
+ • lowered TPS but increased FPS
+ • reworked level system
+ • added player script support
+ • added checkpoints
+ • improved enemy AI
+ • created over 10 new levels for a total of 23 levels
+ • created even more weapons
+ • Bug where your own bullets collide with your shield is now a feature
+ • Discovered bug where if you die on a checkpoint and there is one enemy remaining, you win the game
+ • performance optimisations (the game runs smoother now)
+- Tom Qiu
+
+---------------------------------------------------------------------------------------------------------------------
 */
 
 // The support functions that might not be necessary
@@ -493,7 +509,7 @@ function PlayerUiBar(level, max, pos, dim, fillColour, border) {
     ctx.restore();
 };
 
-function grid(spacing) { // TODO: update colours
+function grid(spacing, reference) { // TODO: update colours
     /*
     var start = (player.y - display.y / 2) < 0 ? Math.ceil((player.y - display.y / 2) / spacing) * spacing : Math.floor((player.y - display.y / 2) / spacing) * spacing - spacing * 2;
     var end = (player.y + display.y / 2) < 0 ? Math.ceil((player.y + display.y / 2) / spacing) * spacing : Math.floor((player.y + display.y / 2) / spacing) * spacing + spacing * 2;
@@ -505,22 +521,21 @@ function grid(spacing) { // TODO: update colours
     for (var i = start/data.constants.zoom; i < end/data.constants.zoom; i += spacing) {
         drawLine({x: i, y: -spacing}, r=Math.PI/2, display.y/data.constants.zoom+spacing*2, {colour:'#000000',width:10,opacity:0.05}, false);
     }*/
-    for (let i = 0; i >= player.x - (display.x/2 + spacing*5)/data.constants.zoom; i -= spacing) {
-        drawLine({x: i, y: player.y + (display.y/2 + spacing)/data.constants.zoom}, 3*Math.PI/2, (display.y + spacing*2)/data.constants.zoom, {colour:'#000000',width:10,opacity:0.05}, false);
+    for (let i = 0; i >= reference.x - (display.x/2 + spacing*5)/data.constants.zoom; i -= spacing) {
+        drawLine({x: i, y: reference.y + (display.y/2 + spacing)/data.constants.zoom}, 3*Math.PI/2, (display.y + spacing*2)/data.constants.zoom, {colour:'#000000',width:10,opacity:0.05}, false);
     }
-    for (let i = 0; i <= player.x + (display.x/2 + spacing*5)/data.constants.zoom; i += spacing) {
-        drawLine({x: i, y: player.y + (display.y/2 + spacing)/data.constants.zoom}, 3*Math.PI/2, (display.y + spacing*2)/data.constants.zoom, {colour:'#000000',width:10,opacity:0.05}, false);
+    for (let i = 0; i <= reference.x + (display.x/2 + spacing*5)/data.constants.zoom; i += spacing) {
+        drawLine({x: i, y: reference.y + (display.y/2 + spacing)/data.constants.zoom}, 3*Math.PI/2, (display.y + spacing*2)/data.constants.zoom, {colour:'#000000',width:10,opacity:0.05}, false);
     }
-    for (let i = 0; i >= player.y - (display.y/2 + spacing*5)/data.constants.zoom; i -= spacing) {
-        drawLine({x: player.x + (display.x/2 + spacing)/data.constants.zoom, y: i}, Math.PI, (display.x + spacing*2)/data.constants.zoom, {colour:'#000000',width:10,opacity:0.05}, false);
+    for (let i = 0; i >= reference.y - (display.y/2 + spacing*5)/data.constants.zoom; i -= spacing) {
+        drawLine({x: reference.x + (display.x/2 + spacing)/data.constants.zoom, y: i}, Math.PI, (display.x + spacing*2)/data.constants.zoom, {colour:'#000000',width:10,opacity:0.05}, false);
     }
-    for (let i = 0; i <= player.y + (display.y/2 + spacing*5)/data.constants.zoom; i += spacing) {
-        drawLine({x: player.x + (display.x/2 + spacing)/data.constants.zoom, y: i}, Math.PI, (display.x + spacing*2)/data.constants.zoom, {colour:'#000000',width:10,opacity:0.05}, false);
+    for (let i = 0; i <= reference.y + (display.y/2 + spacing*5)/data.constants.zoom; i += spacing) {
+        drawLine({x: reference.x + (display.x/2 + spacing)/data.constants.zoom, y: i}, Math.PI, (display.x + spacing*2)/data.constants.zoom, {colour:'#000000',width:10,opacity:0.05}, false);
     }
 };
 
-function handleExplosion(explosion) {
-    //console.log(explosion);
+function renderExplosion(explosion) {
     drawCircle(explosion.x-explosion.r, explosion.y-explosion.r, explosion.r, '#fccbb1', '#f7b28d', 0.1, 0.2*explosion.transparancy, false);
     drawCircle(explosion.x-explosion.r, explosion.y-explosion.r, explosion.r, false, '#f7b28d', 5, 0.2);
     drawCircle(explosion.x-explosion.r, explosion.y-explosion.r, Math.max(explosion.r-20, 0), false, '#fcd8d2', 20, 0.1*explosion.transparancy, false);
@@ -528,6 +543,10 @@ function handleExplosion(explosion) {
     drawCircle(explosion.x-explosion.r, explosion.y-explosion.r, Math.max(explosion.r-10, 0), false, '#fcd8d2', 10, 0.1*explosion.transparancy, false);
     drawCircle(explosion.x-explosion.r, explosion.y-explosion.r, Math.max(explosion.r-5, 0), false, '#fcd8d2', 5, 0.1*explosion.transparancy, false);
     drawLight(explosion.x-explosion.r, explosion.y-explosion.r, explosion.r*1.1);
+};
+
+function handleExplosion(explosion) {
+    //console.log(explosion);
     if (explosion.r >= explosion.maxR) {
         explosion.transparancy *= 0.75;
         explosion.r *= 1.2;
@@ -1057,7 +1076,9 @@ return orders;
 // The return of the excessively overcomplicated data storage system
 const data = {
     constants: {
-        zoom: 0.33,
+        zoom: 0.5,
+        TPS: 20,
+        FPS: 60,
     },
     mech: {
         x: 0,
@@ -1068,7 +1089,7 @@ const data = {
         mouseR: 0, // current Aim
         lastMoved: 69,
         v: 5, // normal walking speed
-        vr: 360 / 60 / 180 * Math.PI, // rotation of tracks (feet)
+        vr: 540 / 60 / 180 * Math.PI, // rotation of tracks (feet)
         tr: 360 / 60 / 180 * Math.PI, // rotation of turret (main body)
         keyboard: [],
         aimPos: {x: 69, y: 69},
@@ -8511,7 +8532,11 @@ const data = {
                 offset: {x: 10, y: 10},
                 style: {
                     fill: 'rgba(100, 255, 100, 1)',
-                    stroke: {colour: 'rgba(50, 200, 50, 1)', width: 5},
+                    stroke: {colour: 'rgba(50, 200, 50, 1)', width: 10},
+                },
+                style2: {
+                    fill: 'rgba(80, 204, 80, 1)',
+                    stroke: {colour: 'rgba(40, 160, 40, 1)', width: 10},
                 },
                 connected: [],
             },
@@ -12698,8 +12723,15 @@ function handleScript(unit) {
     return unit;
 };
 
+function renderCheckpoint() {
+    if (entities.length <= 1) {
+        drawCircle(checkpoint.x + checkpoint.parts[0].offset.x, checkpoint.y + checkpoint.parts[0].offset.y, checkpoint.parts[0].size, checkpoint.parts[0].style.fill, checkpoint.parts[0].style.stroke.colour, checkpoint.parts[0].style.stroke.width, 1, false);
+    } else {
+        drawCircle(checkpoint.x + checkpoint.parts[0].offset.x, checkpoint.y + checkpoint.parts[0].offset.y, checkpoint.parts[0].size, checkpoint.parts[0].style2.fill, checkpoint.parts[0].style2.stroke.colour, checkpoint.parts[0].style2.stroke.width, 1, false);
+    }
+};
+
 function handleCheckpoint() {
-    drawCircle(checkpoint.x + checkpoint.parts[0].offset.x, checkpoint.y + checkpoint.parts[0].offset.y, checkpoint.parts[0].size, checkpoint.parts[0].style.fill, checkpoint.parts[0].style.stroke.colour, checkpoint.parts[0].style.stroke.width, 1, false);
     if (getDist(player, checkpoint) < player.tallCollisionR + checkpoint.collisionR && entities.length == 1) {
         console.log('game over');
         var overlay = document.getElementById('overlay');
@@ -12762,30 +12794,39 @@ function physics() {
     projectiles = handleBulletWallCollisions(obstacles, projectiles);
 
     const endTime = performance.now();
-    if(entities.length <= 1) {
-        console.warn('all enemies dead!');
-    }
 
     let gameState = handleCheckpoint();
     return gameState;
 };
 
-function graphics() {
+function graphics(step) {
+    player.x -= player.vx*(1-step/FPT);
+    player.y -= player.vy*(1-step/FPT);
     clearCanvas('main');
     clearCanvas('canvasOverlay');
-    grid(400);
-
+    grid(400, player);
+    renderCheckpoint();
     for (let i = 0; i < obstacles.length; i++) {
         if (obstacles[i].cType == 'ground') {
             //console.log(obstacles[i]);
             drawPolygon(obstacles[i].size, {x: 0, y: 0}, 0, obstacles[i].style.fill, obstacles[i].style.stroke, false);
         }
     }
-
     for (let i = 0; i < entities.length; i++) {
-        renderUnit(entities[i]);
+        let newEntity = JSON.parse(JSON.stringify(entities[i]));
+        if (i != 0) {
+            newEntity.x -= newEntity.vx*(1-step/FPT);
+            newEntity.y -= newEntity.vy*(1-step/FPT);
+        }
+        renderUnit(newEntity);
     }
-    renderParticles(projectiles);
+
+    let newProj = JSON.parse(JSON.stringify(projectiles));
+    for (let i = 0; i < newProj.length; i++) {
+        newProj[i].x -= newProj[i].vx*(1-step/FPT);
+        newProj[i].y -= newProj[i].vy*(1-step/FPT);
+    }
+    renderParticles(newProj);
 
     for (let i = 0; i < obstacles.length; i++) {
         if (obstacles[i].cType == 'tall') {
@@ -12797,6 +12838,11 @@ function graphics() {
     for (let i = 0; i < shields.length; i++) {
         renderShield(shields[i]);
     }
+    for (let i = 0; i < explosions.length; i++) {
+        renderExplosion(explosions[i]);
+    }
+    player.x += player.vx*(1-step/FPT);
+    player.y += player.vy*(1-step/FPT);
 };
 
 /*
@@ -12908,12 +12954,13 @@ function main() {
         physics();
     }
     graphics(t%FPT);
+    t++;
 }
 
 var t=0
 var paused = false;
-const TPS = 20;
-const FPS = 60;
+const TPS = data.constants.TPS;
+const FPS = data.constants.FPS;
 const FPT = FPS/TPS;
 async function game() {
     while (1) {
@@ -12921,8 +12968,7 @@ async function game() {
             if (main()) {
                 break;
             }
-            t++;
-            await sleep(1000/TPS);
+            await sleep(1000/FPS);
         } else {
             await sleep(1000/30);
         }
@@ -12948,9 +12994,3 @@ async function game() {
         }
     }
 };
-
-
-// #1220DE
-
-
-
