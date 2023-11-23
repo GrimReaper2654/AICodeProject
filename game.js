@@ -12950,12 +12950,18 @@ function main() {
 };*/
 
 function main() {
+    const start = performance.now();
     if (t%FPT == 0) {
+        const start2 = performance.now();
         physics();
+        const end2 = performance.now();
+        console.log(`Physics Processing Time: ${end2-start2}ms`);
     }
     graphics(t%FPT);
     t++;
-}
+    const end = performance.now();
+    console.log(`Processing Time: ${end-start}ms, max: ${1000/FPS}ms for ${FPS}fps. Max Possible FPS: ${1000/(end-start)}`);
+};
 
 var t=0
 var paused = false;
@@ -12984,6 +12990,32 @@ async function game() {
 <label for="script1">Script 1</label><br>
 <textarea id="script1" rows="50" cols="90" maxlength="100000">
 // insert javascript code here
+// here is a sample script for automating walking forward and shooting
+// you may need to look at the game's source code to see what variables you have access to
+// the function for handling user inputed scripts is at line 12684
+let range = 1000;
+let orders = [];
+let target = undefined;
+for (let i = 0; i < entities.length; i++) {
+    if (entities[i].team != unit.team) {
+        if (target == undefined || getDist(unit, entities[i]) < getDist(unit, target)) {
+            target = entities[i];
+        }
+    }
+}
+if (target) {
+    orders.push({id: 'aim', value: {x: target.x, y: target.y}}); // face the enemy's position
+    if (getDist(unit, target) < range) {
+        orders.push({id: 'click', value: true}); // shoot (hold down left mouse button)
+    } else {
+        orders.push({id: 'click', value: false}); // don't shoot (release left mouse button)
+    }
+} else {
+    orders.push({id: 'aim', value: {x: 0, y: 0}}); // face (0,0)
+    orders.push({id: 'click', value: false}); // don't shoot (release left mouse button)
+}
+orders.push({id: 'w', value: true}); // walk forward (hold down 'w' key)
+return orders;
 </textarea>
 </form>
 <button onclick="loadScript('Player', 1)"><h3>Load Script</h3></button>
