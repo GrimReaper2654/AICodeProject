@@ -12951,13 +12951,13 @@ function main() {
 
 function main() {
     const start = performance.now();
+    graphics(t%FPT);
     if (t%FPT == 0) {
         const start2 = performance.now();
         physics();
         const end2 = performance.now();
         console.log(`Physics Processing Time: ${end2-start2}ms`);
     }
-    graphics(t%FPT);
     t++;
     const end = performance.now();
     console.log(`Processing Time: ${end-start}ms, max: ${1000/FPS}ms for ${FPS}fps. Max Possible FPS: ${1000/(end-start)}`);
