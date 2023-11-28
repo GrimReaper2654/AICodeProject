@@ -749,6 +749,7 @@ if (target) {
 return orders;
 `;
 
+
 // Aim assist program
 const advancedTurretAI = `
 let orders = [];
@@ -957,20 +958,13 @@ if (target) {
 return orders;
 `;
 
+
 const scriptAimingII = `
 let orders = [];
 let target = entities[1];
 
 if (target) {
-    let dist = getDist(unit, target);
-
-    let offset = toPol(100, 0);
-    offset.r += aim(unit, {x: target.x, y: target.y});
-    offset = toComponent(offset.m, offset.r);
-    let newpos = vMath(unit, offset, '+');
-    let aimr = aim(newpos, {x: target.x, y: target.y});
-
-    orders.push({id: 'aim', value: vMath(unit, toComponent(dist, aimr), '+')});
+    orders.push({id: 'aim', value: target});
     orders.push({id: 'click', value: true});
     orders.push({id: 'w', value: true});
 } else {
@@ -1077,7 +1071,7 @@ return orders;
 const data = {
     constants: {
         zoom: 0.5,
-        TPS: 20,
+        TPS: 60,
         FPS: 60,
     },
     mech: {
@@ -5639,7 +5633,7 @@ const data = {
                                     strokeStyle: {r: 0, g: 0, b: 0, a: -0.05}, 
                                     size: 1
                                 },
-                                dmg: 0,
+                                dmg: 1,
                                 v: 0,
                                 vDrag: 1,
                                 vr: 0,
@@ -8632,8 +8626,8 @@ if (savedPlayer !== null) {
 // Steal Data (get inputs)
 var mousepos = {x:0,y:0};
 var display = {x:window.innerWidth, y:window.innerHeight};
-console.log(display);
-console.log(entities);
+//console.log(display);
+//console.log(entities);
 window.onkeyup = function(e) {
     for (var i = 0; i < entities.length; i++) {
         if (entities[i].directControl) {
@@ -8689,13 +8683,6 @@ function load() {
 };
 
 function loadLevel(level) {
-    // catagories
-    // 0: campaign
-    // 1: tutorial(movement)
-    // 2: tutorial(aiming)
-    // 3: tutorial(combat)
-    // 4: tutorial(strategy)
-    // 5: tutorial(weapons)
     console.log('Startin the game...');
     replacehtml(`<canvas id="main" width="${display.x}" height="${display.y}" style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas><canvas id="canvasOverlay" width="${display.x}" height="${display.y}" style="position: absolute; top: 0; left: 0; z-index: 2;"></canvas>`);
     /*
@@ -8734,6 +8721,9 @@ function loadLevel(level) {
             throw `ERROR: Unknown level ${n}`;
     }*/
     eval(`level${level}();`);
+    preGame = true;
+    t = 0;
+    winTime = -1;
     game();
 };
 
@@ -11663,8 +11653,8 @@ function addWeapon(unit, weaponID, unitType, slot, keybind='click') {
                 case 'rightArmSide':
                     invert = true;
                 case 'leftArmSide':
-                    console.log(weaponID+'SideMounted');
-                    console.log(data.template.weapons[weaponID+'SideMounted']);
+                    //console.log(weaponID+'SideMounted');
+                    //console.log(data.template.weapons[weaponID+'SideMounted']);
                     weapon = JSON.parse(JSON.stringify(data.template.weapons[weaponID+'SideMounted']));
                     offset = vMath(offset, {x: -150, y: 0}, '+');
                     break;
@@ -12392,7 +12382,7 @@ function recursiveCollision(unit, parts, object) {
             }
             if (collide) {
                 pts[i].hp -= obj.dmg;
-                console.log(pts[i].id, pts[i].hp);
+                //console.log(pts[i].id, pts[i].hp);
                 pts[i].isHit=5;
                 if (obj.explosion) {
                     obj.explosion.x = obj.x;
@@ -12733,9 +12723,12 @@ function renderCheckpoint() {
 
 function handleCheckpoint() {
     if (getDist(player, checkpoint) < player.tallCollisionR + checkpoint.collisionR && entities.length == 1) {
-        console.log('game over');
+        if (winTime < 0) {
+            winTime = t;
+        }
         var overlay = document.getElementById('overlay');
         if (overlay.style.display != 'block') {
+            console.log(`game over in ${winTime} ticks (lower is better)`);
             overlay.innerHTML = `
             <h1>Level Complete</h1>
             <button onclick="loadLevel('MovementI')"><h3>Movement I</h3></button><button onclick="loadLevel('MovementII')"><h3>Movement II</h3></button><button onclick="loadLevel('MovementIII')"><h3>Movement III</h3></button><button onclick="loadLevel('MovementIV')"><h3>Movement IV</h3></button><br>
@@ -12950,21 +12943,25 @@ function main() {
 };*/
 
 function main() {
+    let gameState = undefined;
     const start = performance.now();
     graphics(t%FPT);
     if (t%FPT == 0) {
         const start2 = performance.now();
-        physics();
+        gameState = physics();
         const end2 = performance.now();
-        console.log(`Physics Processing Time: ${end2-start2}ms`);
+        //console.log(`Physics Processing Time: ${end2-start2}ms`);
     }
     t++;
     const end = performance.now();
-    console.log(`Processing Time: ${end-start}ms, max: ${1000/FPS}ms for ${FPS}fps. Max Possible FPS: ${1000/(end-start)}`);
+    //console.log(`Processing Time: ${end-start}ms, max: ${1000/FPS}ms for ${FPS}fps. Max Possible FPS: ${1000/(end-start)}`);
+    return gameState;
 };
 
 var t=0
+var winTime = -1;
 var paused = false;
+var preGame = false;
 const TPS = data.constants.TPS;
 const FPS = data.constants.FPS;
 const FPT = FPS/TPS;
@@ -12978,43 +12975,32 @@ async function game() {
         } else {
             await sleep(1000/30);
         }
-        if (player.keyboard.p) {
+        if (player.keyboard.p || preGame) {
             player.keyboard.p = false;
             paused = !paused;
             if (paused) {
                 var overlay = document.getElementById('overlay');
                 overlay.style.display = 'block';
-                overlay.innerHTML = `
-<h1>Paused</h1>
+                if (preGame) {
+                    overlay.innerHTML = `<h1>Pre Game</h1>`;
+                    preGame = false;
+                } else {
+                    overlay.innerHTML = `<h1>Paused</h1>`;
+                }
+                overlay.innerHTML += `
 <form>
 <label for="script1">Script 1</label><br>
 <textarea id="script1" rows="50" cols="90" maxlength="100000">
-// insert javascript code here
-// here is a sample script for automating walking forward and shooting
-// you may need to look at the game's source code to see what variables you have access to
-// the function for handling user inputed scripts is at line 12684
-let range = 1000;
 let orders = [];
-let target = undefined;
-for (let i = 0; i < entities.length; i++) {
-    if (entities[i].team != unit.team) {
-        if (target == undefined || getDist(unit, entities[i]) < getDist(unit, target)) {
-            target = entities[i];
-        }
-    }
-}
-if (target) {
-    orders.push({id: 'aim', value: {x: target.x, y: target.y}}); // face the enemy's position
-    if (getDist(unit, target) < range) {
-        orders.push({id: 'click', value: true}); // shoot (hold down left mouse button)
-    } else {
-        orders.push({id: 'click', value: false}); // don't shoot (release left mouse button)
-    }
-} else {
-    orders.push({id: 'aim', value: {x: 0, y: 0}}); // face (0,0)
-    orders.push({id: 'click', value: false}); // don't shoot (release left mouse button)
-}
-orders.push({id: 'w', value: true}); // walk forward (hold down 'w' key)
+
+// Insert javascript code here
+// You may need to look at the game's source code to see what variables you have access to
+// I strongly recommend writing code in an external editor, 
+// code written here will not be saved, and can not be editted once submitted
+// changing your code will require rewriting it or copying it in from an external editor
+// Don't alter this if you do not wish to control your unit with a script
+// Also, press P to unpause or the Load Script button to actuvate your program
+
 return orders;
 </textarea>
 </form>
@@ -13026,3 +13012,5 @@ return orders;
         }
     }
 };
+
+
