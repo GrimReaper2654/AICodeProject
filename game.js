@@ -654,6 +654,14 @@ function circleToPolygon(pos, r, sides) {
     return polygon;
 };
 
+function pressKey(key) {
+    orders.push({id: key, value: true});
+}
+
+function releaseKey(key) {
+    orders.push({id: key, value: false});
+}
+
 const noAI = `
 let orders = [];
 return orders;
@@ -748,7 +756,6 @@ if (target) {
 
 return orders;
 `;
-
 
 // Aim assist program
 const advancedTurretAI = `
@@ -939,6 +946,85 @@ if (unit.y > -2000) {
 return orders;
 `;
 
+const scriptMovementIV = `
+let orders = [];
+
+let aDist = 200;
+let target = undefined;
+let minDist = 9999999;
+let minR = 9999999;
+for (let i = 1; i < entities.length; i++) {
+    let dist = getDist(unit, entities[i]);
+    let r = aim(unit, entities[i]);
+    if (dist < minDist || (dist < 475 && Math.abs(r - unit.r) < minR)) {
+        target = entities[i];
+        minDist = dist;
+        minR = r;
+    }
+}
+
+if (!target) {
+    target = checkpoint;
+    aDist = 50;
+}
+let xdist = target.x - unit.x;
+let ydist = target.y - unit.y;
+
+let dist = getDist(unit, target);
+if (Math.abs(dist) > aDist) {
+    if (xdist > aDist) {
+        orders.push({id: 'd', value: true});
+        orders.push({id: 'a', value: false});
+    } else if (xdist < -aDist) {
+        orders.push({id: 'a', value: true});
+        orders.push({id: 'd', value: false});
+    } else {
+        orders.push({id: 'a', value: false});
+        orders.push({id: 'd', value: false});
+    }
+    if (ydist > aDist) {
+        orders.push({id: 's', value: true});
+        orders.push({id: 'w', value: false});
+    } else if (ydist < -aDist) {
+        orders.push({id: 'w', value: true});
+        orders.push({id: 's', value: false});
+    } else {
+        orders.push({id: 'w', value: false});
+        orders.push({id: 's', value: false});
+    }
+} else if (Math.abs(dist) < 125) {
+    console
+    if (xdist > 0) {
+        orders.push({id: 'a', value: true});
+        orders.push({id: 'd', value: false});
+    } else {
+        orders.push({id: 'd', value: true});
+        orders.push({id: 'a', value: false});
+    }
+    if (ydist > 0) {
+        orders.push({id: 'w', value: true});
+        orders.push({id: 's', value: false});
+    } else {
+        orders.push({id: 's', value: true});
+        orders.push({id: 'w', value: false});
+    }
+}
+
+let offset = toPol(100, 0);
+offset.r += aim(unit, {x: target.x, y: target.y});
+offset = toComponent(offset.m, offset.r);
+let newpos = vMath(unit, offset, '+');
+let aimr = aim(newpos, {x: target.x, y: target.y});
+
+orders.push({id: 'aim', value: vMath(vMath(unit, toComponent(dist, aimr), '+'), {x: randint(0,20)-10, y: randint(0,20)-10}, '+')});
+if (dist < 600) {
+    orders.push({id: 'click', value: true});
+} else {
+    orders.push({id: 'click', value: false});
+}
+return orders;
+`;
+
 const scriptAimingI = `
 let orders = [];
 let target = entities[1];
@@ -957,7 +1043,6 @@ if (target) {
 }
 return orders;
 `;
-
 
 const scriptAimingII = `
 let orders = [];
@@ -1050,7 +1135,8 @@ return orders;
 const scriptCombatII = `
 let orders = [];
 let target = entities[1];
-if (target) {let dist = getDist(unit, target);
+if (target) {
+    let dist = getDist(unit, target);
     let offset = toPol(-100, 0);
     offset.r += aim(unit, {x: target.x, y: target.y});
     offset = toComponent(offset.m, offset.r);
@@ -5485,6 +5571,8 @@ const data = {
                     spread: 0,
                     bullet: {
                         type: 'polygon', 
+                        cType: 'line', 
+                        cSize: {start: {x: 0, y: 0}, end: {x: 0, y: 250}}, 
                         size: [
                             {x: -25, y: 0},
                             {x: -15, y: 15},
@@ -11772,7 +11860,7 @@ function handlePlayerMotion(unit, obstacles) {
             }
             //console.log('before', unit.r);
             if (mechIsMoving) {
-                if (unit.lastMoved >= 20) {
+                if (unit.lastMoved >= 10) {
                     unit.r = aim({x:0, y: 0}, mechVector);
                 } else {
                     unit.r = rotateAngle(unit.r, aim({x:0, y: 0}, mechVector), unit.vr);
@@ -12671,9 +12759,9 @@ function shieldCollisions(shields, projectiles) {
     return [shields, projectiles];
 };
 
-function runScript(unit, teams, obstacles, projectiles, explosions, particles, entities, checkpoint) { // return orders
-    unit = JSON.parse(JSON.stringify(unit));
-    teams = JSON.parse(JSON.stringify(teams));
+function runScript(checkpoint, unit, teams, obstacles, projectiles, explosions, particles, entities) { // return orders
+    //unit = JSON.parse(JSON.stringify(unit));
+    //teams = JSON.parse(JSON.stringify(teams));
     let player = undefined;
     let t = undefined;
     for (let i = 0; i < teams.length; i++) {
@@ -12707,7 +12795,7 @@ function handleOrdersKeyPressMode(unit) {
 
 function handleScript(unit) {
     if (unit.script) {
-        unit.orders = runScript(JSON.parse(JSON.stringify(unit)), JSON.parse(JSON.stringify(teams)), JSON.parse(JSON.stringify(obstacles)), JSON.parse(JSON.stringify(projectiles)), JSON.parse(JSON.stringify(explosions)), JSON.parse(JSON.stringify(particles)), JSON.parse(JSON.stringify(entities), JSON.parse(JSON.stringify(checkpoint))));
+        unit.orders = runScript(JSON.parse(JSON.stringify(checkpoint)), JSON.parse(JSON.stringify(unit)), JSON.parse(JSON.stringify(teams)), JSON.parse(JSON.stringify(obstacles)), JSON.parse(JSON.stringify(projectiles)), JSON.parse(JSON.stringify(explosions)), JSON.parse(JSON.stringify(particles)), JSON.parse(JSON.stringify(entities)));
         unit = handleOrdersKeyPressMode(unit);
     }
     return unit;
@@ -12745,7 +12833,6 @@ function handleCheckpoint() {
 
 function physics() {
     shields = [];
-
     let newEntities = [];
     for (let i = 0; i < entities.length; i++) {
         //console.log(entities[i]);
@@ -12975,8 +13062,8 @@ async function game() {
         } else {
             await sleep(1000/30);
         }
-        if (player.keyboard.p || preGame) {
-            player.keyboard.p = false;
+        if (player.keyboard['`'] || preGame) {
+            player.keyboard['`'] = false;
             paused = !paused;
             if (paused) {
                 var overlay = document.getElementById('overlay');
@@ -12999,7 +13086,7 @@ let orders = [];
 // code written here will not be saved, and can not be editted once submitted
 // changing your code will require rewriting it or copying it in from an external editor
 // Don't alter this if you do not wish to control your unit with a script
-// Also, press P to unpause or the Load Script button to actuvate your program
+// Also, press \'\`\' to unpause or the Load Script button to activate your program
 
 return orders;
 </textarea>
@@ -13012,5 +13099,7 @@ return orders;
         }
     }
 };
+
+
 
 
