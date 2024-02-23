@@ -11835,10 +11835,10 @@ function handlePlayerMotion(unit, obstacles) {
             unit.vy = 0;
             let mechSpeed = unit.v;
             if (unit.keyboard.capslock) {
-                mechSpeed *= 1.2;
+                mechSpeed *= 1.25;
             }
             if (unit.keyboard.shift) {
-                mechSpeed *= 1.2;
+                mechSpeed *= 1.25;
             }
             let mechIsMoving = false;
             let mechVector = {x: 0, y: 0}; // special maths
@@ -12872,8 +12872,6 @@ function physics() {
     res = handleCollisions(entities, explosions, false);
     entities = res[0];
     projectiles = handleBulletWallCollisions(obstacles, projectiles);
-
-    const endTime = performance.now();
 
     let gameState = handleCheckpoint();
     return gameState;
